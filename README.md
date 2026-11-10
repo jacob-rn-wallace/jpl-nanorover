@@ -1,6 +1,8 @@
 # jpl-nanorover
 
-Research toward an open, **looks-like replica** of the JPL nanorover, the small four-wheeled asteroid rover designed for the Japanese MUSES-C (Hayabusa) sample-return mission and cancelled by NASA in November 2000. "Looks-like" means visual and dimensional fidelity; it is not required to function.
+Research toward an open replica of the JPL nanorover, the small four-wheeled asteroid rover designed for the Japanese MUSES-C (Hayabusa) sample-return mission and cancelled by NASA in November 2000.
+
+The replica aims to match the original's appearance and dimensions and to perform most, if not all, of its non-science functions: driving on four wheels, posing its four struts independently, self-righting, solar power, and the like. Spaceflight readiness is not a goal, and neither is the science payload (camera, IR spectrometer and so on) beyond what is needed to look right.
 
 > **Status: research only.** No CAD yet. Scale, materials, manufacturing method, CAD tool, articulation and the rover iteration to copy are all undecided.
 
