@@ -27,9 +27,9 @@ modelled as a stationary hollow pivot stud on each 140 x 60 face (x = +-70, y = 
 on, with no rotating shaft through the wall: the seals are static (a face O-ring under the stud flange) and the
 wires go through the stud bore and are potted.  A double-D shank keeps the stud from turning.
 
-Viewing window: the second JPL photo shows a round window and a connector panel on one 140 x 60 end face.  Rectifying that
+Viewing window: the second JPL photo shows a round window and a sealed-beam headlamp on one 140 x 60 end face.  Rectifying that
 face puts the window axis 29 mm from one edge and 37 mm above the base, 26 mm across.  It is modelled on the y = +70 face as a 26 mm aperture
-with a 31 mm counterbore and a bonded pane.  The connector panel (about 22 x 14.5 mm) and the small screws are not modelled.
+with a 31 mm counterbore and a bonded pane.  The headlamp (bezel about 22 x 14.5 mm, tilted toward the window's field of view) and the small screws are not modelled.
 
 Cover-screw threads: each boss is only 5 mm tall (z 50 to the rim at 55) and its bore is open at the bottom
 into the cavity.  A 1D (6 mm) M6 x 1.0 helical insert is fitted flush with the top (recessed 0.4 mm); it

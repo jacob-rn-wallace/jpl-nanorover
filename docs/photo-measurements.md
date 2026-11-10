@@ -35,7 +35,7 @@ the collar plane about 51 mm outboard of the body's side face. If the true body 
 
 ## Second photograph: `NanoRover-hires.original.jpg` (997 x 750 px)
 
-A silver-bodied unit (bare aluminium, a round window and a connector on one end face, an antenna loop and a raised block on the top, cells in a different layout
+A silver-bodied unit (bare aluminium, a round window and a small sealed-beam light on one end face, an antenna loop and a raised block on the top, cells in a different layout
 from the first photo). Same method: about 440 line segments along the cell edges, vanishing points, focal length about 1920 px (a 29 degree field of view), the camera looking at the top face from about 38 degrees above it.
 
 - **Top face:** rectified, it measures about 518 x 465 px, **1.11:1, not square**. This is a different unit from the first photo's square body, and not 14 x 14 cm.
@@ -47,7 +47,7 @@ from the first photo). Same method: about 440 line segments along the cell edges
 |---|---|---|
 | Face | about 140 x 62 mm | a base band about 12.5 mm tall under a green seam line, then the main face |
 | Round window | 26 mm across; axis 29.2 mm from the left edge, 36.8 mm above the base | centred in the main face; the window looks black and glassy |
-| Connector panel | about 22.3 x 14.5 mm, rounded rectangle, centred 59.8 mm from the left edge at the window's height | a circular connector on a two-screw flange; two screws about 12.5 mm above and below its centre |
+| Sealed-beam light (headlamp) | in a rounded-rectangle bezel about 22.3 x 14.5 mm, centred 59.8 mm from the left edge at the window's height, so about 30 mm to the viewer's right of the window axis | mounted at an angle, aimed across toward the window's field of view; two small screws about 12.5 mm above and below its centre. The tilt angle cannot be measured at this resolution (the lamp is about 25 x 15 px in the photo) |
 | Corner screws | four small ones about 2.6 mm from the face's side edges, at about 21.7 and 50.6 mm above the base | about 2 mm heads |
 
  The top face of this unit is then about 156 x 140 mm (the long axis being the one the end face's normal points along), not square.

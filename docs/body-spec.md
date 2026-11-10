@@ -90,14 +90,14 @@ screw bores are open to the cavity, and the screws are sealed with O-rings under
     different design and is not modelled.
   - **Open:** potted wires crossing a rotating strut joint (a hollow axle allows limited twist, not continuous rotation), the strut torque
     reaction on the stud, the anti-rotation fit, and the strut bearings and seals. The struts and wheels are not modelled.
-- **Viewing window (modelled).** The second JPL photo shows a round window and a small connector panel on one 140 x 60 end face. Rectified face-on (see
+- **Viewing window (modelled).** The second JPL photo shows a round window and a small sealed-beam light (the rover's headlamp, for lighting close-range subjects in front of the aperture) on one 140 x 60 end face. Rectified face-on (see
   `photo-measurements.md`), the window is **26 mm across, its axis 29 mm from one edge of the face and 36.8 mm above the base**, and the face measures about 140 x 62 mm.
   On the +y face, seen from outside, the window is on the left: x = +40.8, z = 36.8. The model cuts a 26 mm aperture and a 31 mm counterbore 2.4 mm deep (2.14 mm of wall left
   under the pane) and adds a 30.6 x 2.0 mm glass or acrylic pane (`window_pane.step`), bonded with RTV and recessed 0.44 mm. The wall there is plain (4.6 mm, drafted): the
   aperture's outer edge reaches the thickened corner fillet at x = 50 to 54, which adds about 90 mm3 of cutting and leaves the wall whole. Nothing behind the window is
   modelled: the camera and IR optics sit between the optical-bench panels in the papers. The photo's window looks black and glassy; its glazing, any seal beyond the adhesive, and the
-  optics are open. The connector panel (about 22 x 14.5 mm, centred 59.8 mm from the same edge at the same height, with two small screws) is not modelled.
-- **Not modelled yet:** the connector panel, the antenna and cell wiring feedthroughs, finish, the lid screws and O-ring washers, the wheel and strut motors.
+  optics are open. The headlamp is not modelled yet: a sealed-beam lamp in a bezel about 22 x 14.5 mm, tilted toward the window's field of view, centred 59.8 mm from the same edge (about 30 mm to the viewer's right of the window axis) at the same height, held by two small screws. The papers list a "fold mirror/headlamp" among the parts between the optical-bench panels, and the camera has close-up lenses that focus down to 70 mm, which is what a lamp aimed at the subject in front of the aperture would serve.
+- **Not modelled yet:** the headlamp, the antenna and cell wiring feedthroughs, finish, the lid screws and O-ring washers, the wheel and strut motors.
   The plate holes are 6.6 mm with a 12.4 mm countersink for M6 flat-head screws (ISO 10642), M6 x 12.
 - **Draft:** the casting is drafted (outer faces 138.4 mm wide at z = 10, 140.0 at the rim). The model keeps Hammond's geometry, so the
   60 mm height is exact and the footprint is 140 mm only at the rim.
