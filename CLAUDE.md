@@ -13,7 +13,7 @@ by NASA in November 2000. A hobby build in the spirit of the sibling project `ma
 
 ## Repo layout
 - `docs/`: `jpl-nanorover-literature.md` is the annotated bibliography and the table of sourced dimensions with a verification level for each. `body-spec.md`,
-  `strut-spec.md`, `wheel-spec.md` record the CAD design decisions and checks. `photo-measurements.md` records what was measured from the JPL photograph.
+  `strut-spec.md`, `wheel-spec.md` record the CAD design decisions and checks. `photo-measurements.md` records what was measured from the two JPL photographs.
 - `hardware/`: CAD, parametric (build123d, `hardware/requirements.txt`). Each part has a script and a `out/` folder of STEP files:
   `body/body.py` (Hammond 1590Z090 box cut down, lid plate with O-ring groove and rib, thread inserts, hub studs), `strut/strut.py`, `wheel/wheel.py`,
   and `assembly/rover.py` (full assembly and mass summary), `assembly/preview.py` (rough render to `docs/images/rover-preview.png`).
@@ -44,6 +44,6 @@ by NASA in November 2000. A hobby build in the spirit of the sibling project `ma
 - `hardware/` scripts print their own checks (fits, overlaps, masses). Read them rather than assuming.
 
 ## Design status
-- Body 140 x 140 x 60 mm; total modelled mass about 1.5 kg before motors and electronics (target 1.3 kg: the cast box is the heavy part).
-- Struts: 70 mm pivot to axle, two per side on a stationary hub stud. Wheels: 65 mm over the teeth, a smooth disk over eight saw-tooth discs, fitted to the photo.
+- Body 140 x 140 x 60 mm; total modelled mass about 1.5 kg (1508 g) before motors and electronics (target 1.3 kg: the cast box is the heavy part).
+- Struts: 70 mm pivot to axle, two per side on a stationary hub stud. Wheels: 65 mm over the teeth, a conical outer disk on a hollow drum with 16 diagonal saw-tooth grousers, fitted to the second JPL photo (`docs/wheel-spec.md`).
 - Not yet modelled: camera window, antenna, wiring feedthroughs, the strut and wheel motors, the lid screws and O-ring washers, finish.

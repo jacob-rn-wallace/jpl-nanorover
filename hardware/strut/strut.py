@@ -28,8 +28,8 @@ BODY_OUT = HERE.parent / "body" / "out"
 # ---------------- PARAMETERS ----------------
 STRUT_L = 70.0                 # pivot axis to wheel axle (Wilcox & Jones)
 WHEEL_D = 65.0                 # Wilcox & Jones
-WHEEL_W = 34.6                 # stack width from the photo (see wheel.py); the papers do not publish it
-COLLAR_L = 11.0                # shaft collar on the outside of each wheel (wheel.py)
+WHEEL_W = 44.6                 # inner face to cone apex, from the photos (see wheel.py); the papers do not publish it
+COLLAR_L = 8.0                 # collar standing on the cone apex (wheel.py)
 POSE_DEG = 25.0                # strut angle below horizontal for the default stance (a choice, not sourced)
 BOSS_D, BOSS_T = 30.0, 7.0     # pivot boss
 TIP_D = 18.0                   # wheel-axle boss

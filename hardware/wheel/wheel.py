@@ -1,21 +1,23 @@
 #!/usr/bin/env python3
-"""Wheels for the rover: a flat outer disk over a stack of eight saw-tooth discs, on a hub core.
+"""Wheels for the rover: a conical outer disk on a hollow drum with diagonal saw-tooth grousers.
 
 Run after hardware/body/body.py and hardware/strut/strut.py:
     .venv/bin/python hardware/wheel/wheel.py        writes hardware/wheel/out/wheels.step
 
-Where the numbers come from (img840-340-hires.original.jpg, the early JPL prototype photographed beside a quarter)
-  * The camera was solved from the vanishing points of the solar-cell edges (focal length about 3900 px) and the
-    top face was taken as 140 mm square.  Projecting a circle on the wheel axis onto the photo fits the smooth
-    outer disk at a radius of 27 mm, the saw-tooth rims at about 29.5 mm (the teeth stand about 2.5 mm proud of
-    the disk), a collar centre 5 mm outboard of the disk, and a stack that reaches about 33 to 36 mm inboard of the
-    disk.  The same fit puts the saw-tooth discs at 17 teeth (about 21 degrees apart at the disk rim) and eight
-    stacked rims along each ridge.
-  * The photographed wheel is about 59 mm across the teeth (the sources say "about 6 cm" for the prototype);
-    the MUSES-CN papers give 65 mm.  All measured proportions are scaled by 65 / 59 so the tooth diameter is the
-    published 65 mm.  K_SCALE is that factor.
-  * Disk thickness, tooth shape, disc spacing, the hub core, the collar and the twist per disc are estimates read
-    off the photos, not measurements.
+Where the numbers come from (docs/wheel-spec.md has the full record)
+  * NanoRover-hires.original.jpg (JPL, a silver-bodied prototype photographed from a three-quarter view).  The camera was solved from the
+    vanishing points of the solar-cell edges (focal length about 1920 px).  Two wheels there are seen almost edge-on (the wheel axis is 78 to 80
+    degrees from the viewing ray), so the cone profile reads directly off the image:
+      - the outer disk is a real **cone**: the collar sits on the apex (about 10 mm proud of the rim, the collar centre about 14 mm) for a rim of 59.5 mm across;
+      - behind it is a drum whose rim is the same size as the cone's, with **diagonal saw-tooth grousers**: the cross-section is a ratchet profile
+        (a long ramp and a short step) twisted along the drum, with fine serrations along each crest.  The grousers lean 43.5 degrees from the
+        axis, right-handed, and there are about 16 of them (spacing 19 to 25 degrees on the visible arc);
+      - the drum is about 34 mm long and the teeth stand about 2.75 mm proud of the cone rim.
+  * img840-340-hires.original.jpg (the earlier prototype) gives the same cone rim to tooth-tip ratio (27.0 / 29.5 = 0.915) and about 17 teeth;
+    its disk looks nearly flat, so that wheel differs from the one in the second photo.  The second photo is the better guide to the MUSES-CN wheel.
+  * Both photographed wheels are about 59 mm across the teeth (the sources say "about 6 cm" for the prototype); the MUSES-CN papers give
+    65 mm.  All measured proportions are scaled by 65 / 59 so the tooth diameter is the published 65 mm (K_SCALE).
+  * Wall thicknesses, the hollow interior, the hub tube, the collar size, the ramp direction and the serration shape are estimates, not measurements.
 """
 import math
 import sys
@@ -34,50 +36,67 @@ STRUT_OUT = HERE.parent / "strut" / "out"
 
 # ---------------- PARAMETERS (photo values x K_SCALE) ----------------
 K_SCALE = 65.0 / 59.0
-R_TIP = 29.5 * K_SCALE          # tooth tips = 32.5 mm
-R_DISK = 27.0 * K_SCALE         # smooth outer disk
-TOOTH_DEPTH = 2.5 * K_SCALE
-N_TEETH = 17
-N_DISCS = 8
-DISC_T = 0.9 * K_SCALE
-DISC_PITCH = 3.9 * K_SCALE      # axial pitch of the saw-tooth discs
-FIRST_DISC = 3.2 * K_SCALE      # inboard distance from the outer face of the smooth disk to the first saw-tooth disc
-TWIST_PER_DISC = 8.0            # degrees per disc going inboard, counterclockwise seen from outside (about 63 degrees over the stack)
-R_CORE = 11.0                   # hub core under the discs (the wheel holds a gearmotor)
-DISK_T = 1.0 * K_SCALE
+R_TIP = 29.5 * K_SCALE            # saw-tooth crests = 32.5 mm
+R_ROOT = 27.0 * K_SCALE           # ratchet root = rim of the cone = 29.75 mm
+N_TEETH = 16                      # grousers around the drum
+HELIX_DEG = 43.5                  # grouser angle from the axle, right-handed (seen from outside it turns counterclockwise going outward)
+L_DRUM = 31.3 * K_SCALE           # drum length (about 34.5 mm after scaling)
+H_CONE = 9.2 * K_SCALE            # cone apex above the rim (about 10 mm): the collar centre is about 14 mm above the rim, the collar being 8 mm long
+CONE_T = 1.5                      # cone shell thickness (an estimate)
+R_INNER = R_ROOT - 2.5            # inner radius of the drum shell (an estimate: the wheel holds a gearmotor)
+END_T = 2.0                       # inboard end plate
+HUB_D = 12.0                      # hub tube around the axle
+SERR_PITCH = 3.0                  # axial pitch of the serrations along each crest
+SERR_DEPTH = 1.4
+SERR_WIDTH = 2.4                  # tangential width of each notch
 AXLE_D = S.AXLE_D
-COLLAR_D = 11.0 * K_SCALE * 0.95
+COLLAR_D = 8.0                    # collar on the cone apex (about 8 mm across and 8 mm long in the second photo)
 COLLAR_L = S.COLLAR_L
 # --------------------------------------------------------------------
 
-W = FIRST_DISC + DISC_PITCH * (N_DISCS - 1) + DISC_T         # width from the outer face of the smooth disk to the inner face of the last disc
-SAWTOOTH = None
+TWIST = math.degrees(L_DRUM * math.tan(math.radians(HELIX_DEG)) / R_TIP)   # azimuth turned over the drum length, from the helix angle at the crests
+W = L_DRUM + H_CONE                                                      # inner face to the cone apex
 
 
-def sawtooth_disc():
+def ratchet_face():
     pts = []
     for i in range(N_TEETH):
         a = 2 * math.pi * i / N_TEETH
-        for r in (R_TIP - TOOTH_DEPTH, R_TIP):
+        for r in (R_ROOT, R_TIP):
             pts.append((r * math.cos(a), r * math.sin(a)))
-    with BuildSketch() as sk:
-        Polygon(*pts, align=None)
-    return sk.sketch
+    return Face(Wire.make_polygon([Vector(x, y, 0) for x, y in pts], close=True))
+
+
+def drum():
+    """Ratchet cross-section twisted along the drum, then hollowed and fitted with serrations, an end plate and a hub tube."""
+    sec = ratchet_face()
+    solid = Solid.extrude_linear_with_rotation(sec, Vector(0, 0, 0), Vector(0, 0, L_DRUM), TWIST)
+    solid = solid - Cylinder(R_INNER, L_DRUM - END_T, align=(Align.CENTER, Align.CENTER, Align.MIN)).moved(Location((0, 0, END_T)))
+    # serrations: small right-triangle notches in each crest, every SERR_PITCH along the drum, following the twist
+    prof = Wire.make_polygon([Vector(R_TIP + 0.6, 0, 0), Vector(R_TIP + 0.6, 0, SERR_PITCH),
+                              Vector(R_TIP - SERR_DEPTH, 0, 0)], close=True)
+    tmpl = Solid.extrude(Face(prof), Vector(0, SERR_WIDTH / 2, 0)) + Solid.extrude(Face(prof), Vector(0, -SERR_WIDTH / 2, 0))
+    cutters = []
+    n_st = int((L_DRUM - SERR_PITCH) // SERR_PITCH)
+    for k in range(n_st):
+        z = 1.2 + SERR_PITCH * k
+        for j in range(N_TEETH):
+            ang = 360.0 * j / N_TEETH + TWIST * z / L_DRUM
+            cutters.append(tmpl.moved(Location((0, 0, z))).rotate(Axis.Z, ang))
+    solid = solid - Compound(cutters)
+    return solid
 
 
 def wheel_local():
-    """Wheel with its axis along +z: inner face at z = 0, outer face of the smooth disk at z = W, collar beyond."""
-    core = Cylinder(R_CORE, W, align=(Align.CENTER, Align.CENTER, Align.MIN))
-    solid = core
-    face = sawtooth_disc()
-    for i in range(N_DISCS):
-        d = FIRST_DISC + DISC_PITCH * i                      # inboard distance of this disc's outer face
-        z0 = W - d - DISC_T
-        disc = extrude(face, amount=DISC_T).moved(Location((0, 0, z0)))
-        disc = disc.rotate(Axis.Z, TWIST_PER_DISC * i)
-        solid = solid + disc
-    solid = solid + Cylinder(R_DISK, DISK_T, align=(Align.CENTER, Align.CENTER, Align.MIN)).moved(Location((0, 0, W - DISK_T)))
-    solid = solid + Cylinder(COLLAR_D / 2, COLLAR_L, align=(Align.CENTER, Align.CENTER, Align.MIN)).moved(Location((0, 0, W)))
+    """Wheel with its axis along +z: inner face at z = 0, cone rim at z = L_DRUM, cone apex at z = W, collar beyond."""
+    d = drum()
+    # cone shell, revolved: outer line from the rim (R_ROOT, L_DRUM) up to the apex, thickness CONE_T measured normal-ish (kept vertical here)
+    with BuildSketch(Plane.XZ) as sk:
+        Polygon((R_ROOT, L_DRUM), (R_ROOT, L_DRUM - CONE_T), (0, L_DRUM + H_CONE - CONE_T), (0, L_DRUM + H_CONE), align=None)
+    cone = revolve(sk.sketch, Axis.Z)
+    hub = Cylinder(HUB_D / 2, W, align=(Align.CENTER, Align.CENTER, Align.MIN))
+    collar = Cylinder(COLLAR_D / 2, COLLAR_L, align=(Align.CENTER, Align.CENTER, Align.MIN)).moved(Location((0, 0, W)))
+    solid = d + cone + hub + collar
     solid = solid - Cylinder(AXLE_D / 2, W + COLLAR_L + 2, align=(Align.CENTER, Align.CENTER, Align.MIN)).moved(Location((0, 0, -1)))
     return solid
 
@@ -90,7 +109,7 @@ def place(w, direction, deg, side):
         w = w.rotate(Axis((0, 0, E.HUB_Z), (1, 0, 0)), 180)
     w = S.posed(w, direction, deg)
     if side < 0:
-        w = w.rotate(Axis.Z, 180)         # same wheel on the other side (a rotated copy, not a mirror), so the helix keeps its handedness
+        w = w.rotate(Axis.Z, 180)         # the same wheel on the other side (a rotated copy, not a mirror), so the helix keeps its handedness
     return w
 
 
@@ -98,11 +117,11 @@ def main():
     OUT.mkdir(exist_ok=True)
     w0 = wheel_local()
     bb = w0.bounding_box()
-    print(f"wheel               tooth diameter {2 * R_TIP:.1f} mm, smooth disk {2 * R_DISK:.1f} mm, width {W:.1f} mm to the disk face plus a {COLLAR_L:.0f} mm collar "
-          f"(bounding box {bb.size.X:.1f} x {bb.size.Y:.1f} x {bb.size.Z:.1f})")
-    print(f"                    {N_DISCS} saw-tooth discs of {N_TEETH} teeth, {DISC_T:.2f} mm thick on a {DISC_PITCH:.2f} mm pitch, "
-          f"each turned {TWIST_PER_DISC:.0f} degrees from the last ({TWIST_PER_DISC * (N_DISCS - 1):.0f} degrees over the stack; a tooth is {360 / N_TEETH:.1f} degrees)")
-    print(f"                    mass about {w0.volume * 2.70e-3:.0f} g each in aluminium, solid core, no motor; scale from the photo {K_SCALE:.3f}")
+    print(f"wheel               tooth diameter {2 * R_TIP:.1f} mm, cone rim {2 * R_ROOT:.1f} mm, drum {L_DRUM:.1f} mm long, cone apex {H_CONE:.1f} mm above the rim, "
+          f"{W:.1f} mm inner face to apex plus a {COLLAR_L:.0f} mm collar (bounding box {bb.size.X:.1f} x {bb.size.Y:.1f} x {bb.size.Z:.1f})")
+    print(f"                    {N_TEETH} diagonal saw-tooth grousers ({360 / N_TEETH:.1f} degrees apart), {HELIX_DEG} degrees from the axle, right-handed: "
+          f"{TWIST:.0f} degrees of turn over the drum; serrations {SERR_PITCH} mm pitch, {SERR_DEPTH} mm deep")
+    print(f"                    valid {w0.is_valid}, solids {len(w0.solids())}, mass about {w0.volume * 2.70e-3:.0f} g each in aluminium (hollow drum, no motor); photo scale {K_SCALE:.3f}")
     wheels = []
     for side in (1, -1):
         for d in (+1, -1):
@@ -113,6 +132,7 @@ def main():
     parts = {"body": import_step(BODY_OUT / "body_hammond.step"), "hub studs": import_step(BODY_OUT / "hub_studs.step"),
              "struts": import_step(STRUT_OUT / "struts.step"), "lid plate": import_step(BODY_OUT / "lid_plate.step")}
     for nm, shp in parts.items():
+        assert shp.volume > 0, f"{nm} imported with zero volume; re-run its script"
         hit = WH & shp
         print(f"wheels vs {nm:<10} overlap {hit.volume if hit else 0.0:.2f} mm3")
     for i, w in enumerate(wheels):
@@ -121,7 +141,10 @@ def main():
     bball = WH.bounding_box()
     print(f"overall (default pose) {bball.size.X:.1f} wide x {bball.size.Y:.1f} long; wheel bottoms at z = {bball.min.Z:.1f}")
     export_step(WH, str(OUT / "wheels.step"))
+    chk = import_step(OUT / "wheels.step")
+    print(f"re-imported wheels.step: {len(chk.solids())} solids, volume {chk.volume / 1000:.1f} cm3 (live {WH.volume / 1000:.1f})")
     print("wrote", OUT / "wheels.step")
+
 
 if __name__ == "__main__":
     main()
