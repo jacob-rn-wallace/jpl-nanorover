@@ -1,9 +1,15 @@
 # Rovers smaller than the nanorover
 
 A side question: in JPL's 1998 "Nanorover Technology Task" video (about 5:19 to 5:42) an animation shows Sojourner, the nanorover and a third rover about as much smaller than the nanorover as the nanorover is than Sojourner, followed by a shot labelled "Widget Board".
-This page records what could be found about that idea. Nothing found uses a name like "picorover", and nothing found describes that animation.
+This page records what could be found about that idea. Nothing found uses a name like "picorover"; JPL's own wording, from the narration, is "an even smaller Nanorover".
 
-## What the video shows (frames, not narration; the audio was not transcribed)
+## The narration (transcribed by the owner; I did not hear it)
+
+> "The Nanorover technology task is also leading the way to the development of an even smaller Nanorover with a mass under 100 grams. The key development is JPL's Widget Board, which will enable these small, flight-qualifiable rovers."
+
+So the third rover in the animation is the under-100 g goal vehicle of the nanorover task, and the Widget Board, shown in the next shot, is named as the enabling development.
+
+## What the video shows (frames)
 
 - **About 5:19 to 5:31:** a computer animation on an asteroid-like surface. Large, in front: a Sojourner-like rover with a gold-foil body, a solar panel and an antenna. Middle right: the nanorover, a flat box with a round cream window and a rectangular panel on its end face and banded cylindrical wheels. Front right: a much smaller rover, a box with a gold top and two round lenses or lights on the front, on a tiny leg and wheel assembly.
 - **About 5:36 to 5:42:** a photograph of two small printed boards beside a ruler (about 3 inches of it visible; each board a little over 2 inches long), captioned "Widget Board".
@@ -23,7 +29,8 @@ Also found: Stern et al., "Extreme temperature (-170 C to +125 C) electronics fo
 
 ## What this suggests, and what is missing
 
-- A rover in the 10 to 100 g class was a stated goal of the nanorover task from 1997 or earlier, and Wilcox spoke publicly about "a few ounces" in 1999. The animation is probably that goal vehicle, not a separate project.
-- No document found describes the animated vehicle, its mass, or what "widget boards" it was to use. A few-hundred-gram prototype is mentioned only in an abstract.
+- A rover in the 10 to 100 g class was a stated goal of the nanorover task from 1997 or earlier, and Wilcox spoke publicly about "a few ounces" in 1999. The narration confirms that the animated third rover is that goal vehicle ("an even smaller Nanorover", under 100 g), not a separate project, and that the Widget Board was the key enabling technology.
+- No document found describes the animated vehicle or its design, or ties the Widget Board to the nanorover in writing. A few-hundred-gram prototype is mentioned only in an abstract.
+- Two JPL pages on the widget-board family, "Distributed motor controller for flight" and its hardware gallery page (both at www-robotics.jpl.nasa.gov), were found but not read. A search snippet also points to a paper on the embedded control of a miniature science rover by Tunstel, Welch and Wilcox using an 80C51 microcontroller; that is unverified.
 - Leads not yet followed: the full text of Wilcox & Welch (1998); Wilcox et al., "Nanorover Technology and the MUSES-CN Mission", i-SAIRAS '97 (NTRS 20060035115); Wilcox et al., "Nanorovers for Planetary Exploration", AIAA 1996; Wilcox, Nasif & Welch, "A Nanorover for Mars", Space Technology 17; the Wilcox oral history on ETHW (the page refused automatic fetching).
 - A transcript of the video's narration would show exactly what was claimed at 5:19.
