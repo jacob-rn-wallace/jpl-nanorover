@@ -1,0 +1,8 @@
+.DS_Store
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# any folder with "do-not-track" in its name stays local
+*do-not-track*/
