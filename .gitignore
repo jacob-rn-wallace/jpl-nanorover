@@ -6,3 +6,8 @@ venv/
 
 # any folder with "do-not-track" in its name stays local
 *do-not-track*/
+
+# generated CAD meshes and anything containing Hammond's casting geometry (its terms are unchecked; STEP of our own parts is tracked)
+hardware/**/out/*.stl
+hardware/body/out/body_hammond.step
+hardware/assembly/out/

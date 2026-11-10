@@ -1,0 +1,5 @@
+build123d
+# only for hardware/assembly/preview.py
+numpy
+matplotlib
+trimesh
