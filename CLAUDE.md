@@ -9,7 +9,7 @@ by NASA in November 2000. A hobby build in the spirit of the sibling project `ma
 - **Target iteration:** the MUSES-CN flight design (14 x 14 x 6 cm body, four 6.5 cm wheels, four 7 cm struts, about 1.3 kg). It is the only one with a coherent
   set of published dimensions. The photographed JPL prototype (c. 1997) is an earlier iteration; its photos supply proportions and detail only.
 - **Out of scope:** spaceflight readiness, the science instruments beyond what is needed to look right (IR spectrometer, alpha X-ray spectrometer).
-- **Wheel (open):** the CAD wheel copies the 1997-98 prototype's aluminium cleated wheel, which is what the photographs show. The MUSES-CN papers describe the flight wheels as an assembly of thin conductors and insulator that also senses ground contact, and JPL's 1998 video shows plain banded cylinders. See `docs/wheel-spec.md`, "Which wheel?".
+- **Wheel (decided 2026-11-10: stay with the cleated wheel):** the CAD wheel copies the 1997-98 prototype's aluminium cleated wheel, which is what the photographs show. The MUSES-CN papers describe the flight wheels as an assembly of thin conductors and insulator that also senses ground contact, and JPL's 1998 video shows plain banded cylinders. See `docs/wheel-spec.md`, "Which wheel?".
 - **Still open:** scale (the CAD is 1:1), materials and manufacturing method, how the struts are actuated, the end use.
 
 ## Repo layout
