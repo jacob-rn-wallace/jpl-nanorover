@@ -29,7 +29,7 @@ Total on the flat top face: 14 cells (plus the cells on the central block). Unce
 
 ## Wheel (see `wheel-spec.md`)
 
-First photo: projecting circles on the wheel axis onto the photo gives a smooth outer disk of radius 27 mm, saw-tooth tips at radius about 29.5 mm (about 59 mm across the
+First photo: projecting circles on the wheel axis onto the photo gives a smooth outer disk of radius 27 mm, grouser tips at radius about 29.5 mm (about 59 mm across the
 teeth), a collar centre 5 mm outboard of the disk, and a stack reaching about 33 to 36 mm inboard. The strut angles solve to about 7 and 9 degrees below horizontal and
 the collar plane about 51 mm outboard of the body's side face. If the true body is smaller than 140 mm these lengths scale with it.
 
@@ -40,7 +40,7 @@ from the first photo). Same method: about 440 line segments along the cell edges
 
 - **Top face:** rectified, it measures about 518 x 465 px, **1.11:1, not square**. This is a different unit from the first photo's square body, and not 14 x 14 cm.
 - **Wheels:** two wheels are seen almost edge-on (the axle 78 to 80 degrees from the viewing ray), which shows the cone profile directly. The collar sits on a cone apex about 10 mm
-  above the rim; the drum behind it has diagonal saw-tooth grousers, 16 of them, leaning about 43.5 degrees from the axle, right-handed. See `wheel-spec.md` for the table.
+  above the rim; the smooth cylinder behind it carries helical grousers (thin blades standing radially, serrated along their edges), 16 of them, leaning about 43.5 degrees from the axle, right-handed. See `wheel-spec.md` for the table.
 - **Not yet measured from this photo:** the body's height and length (the window face and the raised block on top are the first things worth measuring, for the camera window).
 
 ## What this does not give
