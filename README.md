@@ -11,7 +11,10 @@ The replica aims to match the original's appearance and dimensions and to perfor
 ![preview](docs/images/rover-preview.png)
 
 ## Target
-The best-documented configuration is the MUSES-CN flight design: a 14 x 14 x 6 cm body, four 6.5 cm wheels on four posable 7 cm struts, solar cells on four of six faces, about 1 to 1.3 kg, and about 20 cm overall length. Wheel width, tread, strut cross-section, hub detail and finish are not published and must be scaled from photographs. Every figure is marked with how well it is sourced, and conflicting figures are listed.
+The primary reference is the silver-bodied JPL unit in the prototype photograph (a round imaging window and a sealed-beam headlamp on one end face, four wheels on posable struts, solar cells on top). Scaled
+from its wheels, its hub faces are about 14 x 6 cm, as the MUSES-CN papers give, but it is about 15.4 cm long and its struts are about 8.6 cm, against the papers' 14 x 14 x 6 cm body and 7 cm struts. The papers'
+other figures (four 6.5 cm wheels, solar cells on four of six faces, about 1.3 kg) stay as published reference. Wheel tread, strut cross-section, hub detail and finish are not published and are scaled from photographs.
+Every figure is marked with how well it is sourced, and conflicting figures are listed.
 
 ## What's here
 | Path | Contents |

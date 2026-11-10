@@ -54,6 +54,27 @@ from the first photo). Same method: about 440 line segments along the cell edges
 - **Top face.** A raised block close to the centre (offset about 8 mm and 4 mm from the face centre), footprint about 50 x 45 mm, with a cyan sensor-like panel on one sloping side, and a loop antenna made of two wires rising from it
   with a white bone-shaped piece lying beside it. The block's height was not measured (roughly 15 to 20 mm by eye). These are not the MUSES-CN features in the papers (a square patch antenna on the top face).
 
+## The silver unit as the primary reference: size from its wheels
+
+The silver unit is now the primary model (owner's decision), so its absolute size matters. Its top face is 518 x 465 px in the plan view (1.11:1) and its end face is 0.44 high to wide, but the photo has no ruler, so the scale comes from the wheels:
+1. Each cone rim is fitted as an ellipse (apparent base diameter 169 px for the near wheel, 145 px for the left one) and taken as 59.5 mm across, the same normalisation as in `wheel-spec.md` (65 mm over the grousers). With the camera solved, that fixes both wheel centres in space.
+2. The two wheel centres turn out to lie in the same plane perpendicular to the hub axis (1.6 mm apart along it), as two wheels on one hub should. That checks the camera and the scale together.
+3. Putting the hub axis on the ray through the hub cap and asking for equal strut lengths to both wheels gives one answer, whichever point on the cap is used (hub pixel varied over four choices): **strut length about 86 mm** (85.8 to 88.8).
+4. The hub is at mid-height, so the top plane is half a body height above it, which gives the plane's distance and the body size.
+
+| Quantity (wheel tips = 65 mm) | Silver unit | Papers (MUSES-CN) |
+|---|---|---|
+| Width between the hub faces | about 138 mm | 140 mm |
+| Height | about 61 mm | 60 mm |
+| Length (across the hub axis) | about 154 mm | 140 mm |
+| Strut length, pivot to wheel centre | about 86 mm | 70 mm |
+
+The hub faces match the papers' 14 x 6 cm almost exactly, which supports the wheel scale. The length (154 mm) and the strut (86 mm) do not. The strut to wheel-diameter ratio, about 1.3, also appears in the first (black) photo, where the same fit gave 75.9 mm struts for 59 mm wheels. So the photographed prototypes have relatively longer struts than the published flight design. If instead the papers' 70 mm strut were true, the whole silver unit would be 0.81 times these sizes (113 x 125 x 50 mm, wheels 53 mm across). The uncertainty on these sizes is several percent: it rests on the wheel normalisation and on picking the hub axis point.
+
+## The black unit's camera aperture
+
+In the first photo the black unit's end face has a rounded-square window, about 25 mm wide and 22 mm tall (clear), inside a lighter bonded border about 35 x 30 mm (an adhesive fillet), near one end of the face. This is the camera aperture on the end face opposite the silver unit's round window (owner's reading). At the 140 mm scale of that photo; rough, because the face is seen at a steep angle.
+
 ## What this does not give
 
 Absolute accuracy better than a few percent, any dimension of the two faces not visible, the hub details (only partly visible), or the finish.
