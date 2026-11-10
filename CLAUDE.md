@@ -6,9 +6,11 @@ by NASA in November 2000. A hobby build in the spirit of the sibling project `ma
 ## Scope (owner's decisions)
 - **Goal:** a replica that matches the original's appearance and dimensions and performs most, if not all, of its non-science functions: driving on
   four wheels, posing its four struts independently, self-righting, solar power, and the camera (the owner counts the camera as a function, not as science).
-- **Primary reference (owner, 2026-11-10): the silver-bodied JPL unit** in `NanoRover-hires.original.jpg`. It is the more complete of the two photographed units (the other is the black-bodied unit in
-  `img840-340-hires.original.jpg`), so where the two photographs or the papers disagree, the silver unit wins unless the owner says otherwise. The MUSES-CN papers (14 x 14 x 6 cm body, 6.5 cm wheels, 7 cm struts, about 1.3 kg)
-  stay as published reference. Measured against the 65 mm wheel scale, the silver unit's hub faces come out 138 x 61 mm (the papers' 14 x 6 cm), but its length is about 154 mm and its struts about 86 mm (see `docs/photo-measurements.md`).
+- **Reference unit: undecided (owner, 2026-11-10: "not really sure").** Two JPL units are photographed: the silver-bodied unit (`NanoRover-hires.original.jpg`) and the black-bodied unit
+  (`img840-340-hires.original.jpg`). The owner's account: the struts and wheels are identical on both; the black unit is a running mock-up with no instruments, used for publicity (both videos, a 1997 KTLA
+  news segment); the silver unit is the internal test unit that carries the optics and was used for demonstrations of the instruments and teleoperation. Earlier the owner leaned to the silver unit as the more
+  complete. Until it is settled, do not change the body or strut dimensions: the CAD keeps the papers' figures (a 140 x 140 x 60 mm body, 70 mm struts, 65 mm wheels), which the silver unit's hub faces
+  (about 138 x 61 mm) match. Measured against the 65 mm wheels, the silver unit is about 138 x 154 x 61 mm with about 86 mm struts, and the black unit about 155 x 155 x 45 mm (see `docs/photo-measurements.md`).
 - **Directions (owner, 2026-11-10): left and right are the viewer's.** Looking at a face or part from outside, left is the viewer's left. Say so when a drawing or description could be read the other way.
 - **Out of scope:** spaceflight readiness, the science instruments beyond what is needed to look right (IR spectrometer, alpha X-ray spectrometer).
 - **Wheel (decided 2026-11-10: stay with the cleated wheel):** the CAD wheel copies the 1997-98 prototype's aluminium cleated wheel, which is what the photographs show. The MUSES-CN papers describe the flight wheels as an assembly of thin conductors and insulator that also senses ground contact, and JPL's 1998 video shows plain banded cylinders. See `docs/wheel-spec.md`, "Which wheel?".
