@@ -18,7 +18,7 @@ by NASA in November 2000. A hobby build in the spirit of the sibling project `ma
 - **Still open:** scale (the CAD is 1:1), materials and manufacturing method, how the struts are actuated, the end use.
 
 ## Repo layout
-- `docs/`: `jpl-nanorover-literature.md` is the annotated bibliography and the table of sourced dimensions with a verification level for each. `body-spec.md`,
+- `docs/`: `design-comparison.md` sets the published design and the two photographed units side by side (read it first when the question is what to replicate). `jpl-nanorover-literature.md` is the annotated bibliography and the table of sourced dimensions with a verification level for each. `body-spec.md`,
   `strut-spec.md`, `wheel-spec.md` record the CAD design decisions and checks. `photo-measurements.md` records what was measured from the two JPL photographs.
 - `hardware/`: CAD, parametric (build123d, `hardware/requirements.txt`). Each part has a script and a `out/` folder of STEP files:
   `body/body.py` (Hammond 1590Z090 box cut down, lid plate with O-ring groove and rib, thread inserts, hub studs), `strut/strut.py`, `wheel/wheel.py`,
