@@ -46,4 +46,4 @@ by NASA in November 2000. A hobby build in the spirit of the sibling project `ma
 ## Design status
 - Body 140 x 140 x 60 mm; total modelled mass about 1.5 kg (1459 g) before motors and electronics (target 1.3 kg: the cast box is the heavy part).
 - Struts: 70 mm pivot to axle, two per side on a stationary hub stud. Wheels: 65 mm over the teeth, a conical outer disk on a smooth hollow cylinder with 16 helical grousers (thin radial blades with serrated edges), fitted to the second JPL photo (`docs/wheel-spec.md`).
-- Not yet modelled: camera window, antenna, wiring feedthroughs, the strut and wheel motors, the lid screws and O-ring washers, finish.
+- Not yet modelled: the connector panel, antenna, wiring feedthroughs, the camera and optics behind the window (the 26 mm window itself is modelled), the strut and wheel motors, the lid screws and O-ring washers, finish.

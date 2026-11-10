@@ -41,7 +41,18 @@ from the first photo). Same method: about 440 line segments along the cell edges
 - **Top face:** rectified, it measures about 518 x 465 px, **1.11:1, not square**. This is a different unit from the first photo's square body, and not 14 x 14 cm.
 - **Wheels:** two wheels are seen almost edge-on (the axle 78 to 80 degrees from the viewing ray), which shows the cone profile directly. The collar sits on a cone apex about 10 mm
   above the rim; the smooth cylinder behind it carries helical grousers (thin blades standing radially, serrated along their edges), 16 of them, leaning about 43.5 degrees from the axle, right-handed. See `wheel-spec.md` for the table.
-- **Not yet measured from this photo:** the body's height and length (the window face and the raised block on top are the first things worth measuring, for the camera window).
+- **End face with the window.** Rectified face-on (plane normal along the body's long axis, using the same camera), the face is 1065 px wide and 470 px tall including a base band and a seam line near the top: 0.44 high to wide, against 6/14 = 0.43. Taking the face width as 140 mm (3% uncertain, since a 60 mm body height would make it 136 mm) gives:
+
+| Feature | Value | Notes |
+|---|---|---|
+| Face | about 140 x 62 mm | a base band about 12.5 mm tall under a green seam line, then the main face |
+| Round window | 26 mm across; axis 29.2 mm from the left edge, 36.8 mm above the base | centred in the main face; the window looks black and glassy |
+| Connector panel | about 22.3 x 14.5 mm, rounded rectangle, centred 59.8 mm from the left edge at the window's height | a circular connector on a two-screw flange; two screws about 12.5 mm above and below its centre |
+| Corner screws | four small ones about 2.6 mm from the face's side edges, at about 21.7 and 50.6 mm above the base | about 2 mm heads |
+
+ The top face of this unit is then about 156 x 140 mm (the long axis being the one the end face's normal points along), not square.
+- **Top face.** A raised block close to the centre (offset about 8 mm and 4 mm from the face centre), footprint about 50 x 45 mm, with a cyan sensor-like panel on one sloping side, and a loop antenna made of two wires rising from it
+  with a white bone-shaped piece lying beside it. The block's height was not measured (roughly 15 to 20 mm by eye). These are not the MUSES-CN features in the papers (a square patch antenna on the top face).
 
 ## What this does not give
 

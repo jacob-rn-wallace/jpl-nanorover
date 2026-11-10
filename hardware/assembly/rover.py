@@ -20,6 +20,7 @@ PARTS = [  # (label, file, material density g/cm3 as used by the individual scri
     ("box (die-cast, cut)", HW / "body/out/body_hammond.step", 2.70),
     ("lid plate with rib", HW / "body/out/lid_plate.step", 2.70),
     ("lid O-ring", HW / "body/out/oring.step", 1.2),
+    ("window pane", HW / "body/out/window_pane.step", 2.5),
     ("cover-screw inserts", HW / "body/out/inserts.step", 7.9),
     ("hub studs", HW / "body/out/hub_studs.step", 7.9),
     ("hub O-rings and nuts", HW / "body/out/hub_orings_and_nuts.step", 7.9),

@@ -25,9 +25,9 @@ IMG = HW.parent / "docs" / "images" / "rover-preview.png"
 # (file, colour, explode multiplier)
 PARTS = [(HW / "body/out/body_hammond.step", "#8d97a3", 0), (HW / "body/out/oring.step", "#1a1a1a", 1),
          (HW / "body/out/lid_plate.step", "#b4bdc7", 2), (HW / "body/out/hub_studs.step", "#d6a84a", 0),
-         (HW / "body/out/hub_orings_and_nuts.step", "#3a3a3a", 0), (HW / "strut/out/struts.step", "#c9a46a", 0),
+         (HW / "body/out/hub_orings_and_nuts.step", "#3a3a3a", 0), (HW / "body/out/window_pane.step", "#101820", 0), (HW / "strut/out/struts.step", "#c9a46a", 0),
          (HW / "wheel/out/wheels.step", "#cfd3d8", 0)]
-BASE = {"body_hammond", "oring", "lid_plate", "hub_studs", "hub_orings_and_nuts"}
+BASE = {"body_hammond", "oring", "lid_plate", "hub_studs", "hub_orings_and_nuts", "window_pane"}
 
 
 def mesh_of(path, tmp):
@@ -78,7 +78,7 @@ def main():
         meshes = [mesh_of(p, tmp) for p, _, _ in PARTS]
     everything = {p.stem for p, _, _ in PARTS}
     fig, axs = plt.subplots(2, 2, figsize=(13, 10.5))
-    render(axs[0, 0], meshes, 28, -55, BASE, title="box, lid plate, hub studs: 140 x 140 x 60")
+    render(axs[0, 0], meshes, 26, 125, BASE, title="box, lid plate, hub stud and the window face (+y): 140 x 140 x 60")
     render(axs[0, 1], meshes, 28, -55, BASE, explode=28, title="exploded: box, O-ring, lid plate (hubs stay on the box)")
     render(axs[1, 0], meshes, 24, -38, everything, title="struts and wheels, default stance (25 deg below horizontal)")
     render(axs[1, 1], meshes, 0, 0, everything, title="side view from +x: 65 mm wheels, 25 deg stance")

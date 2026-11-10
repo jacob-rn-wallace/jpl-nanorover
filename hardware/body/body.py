@@ -27,6 +27,10 @@ modelled as a stationary hollow pivot stud on each 140 x 60 face (x = +-70, y = 
 on, with no rotating shaft through the wall: the seals are static (a face O-ring under the stud flange) and the
 wires go through the stud bore and are potted.  A double-D shank keeps the stud from turning.
 
+Viewing window: the second JPL photo shows a round window and a connector panel on one 140 x 60 end face.  Rectifying that
+face puts the window axis 29 mm from one edge and 37 mm above the base, 26 mm across.  It is modelled on the y = +70 face as a 26 mm aperture
+with a 31 mm counterbore and a bonded pane.  The connector panel (about 22 x 14.5 mm) and the small screws are not modelled.
+
 Cover-screw threads: each boss is only 5 mm tall (z 50 to the rim at 55) and its bore is open at the bottom
 into the cavity.  A 1D (6 mm) M6 x 1.0 helical insert is fitted flush with the top (recessed 0.4 mm); it
 stands 1.4 mm out of the bottom of the boss.  The bore is modelled at the tapped major diameter (7.2 mm).
@@ -87,6 +91,13 @@ HUB_AXLE_L = 20.0    # axle stub outside the flange (placeholder for the strut b
 HUB_OR_ID, HUB_OR_CS = 16.0, 1.5         # face O-ring 16 x 1.5
 HUB_GROOVE_W, HUB_GROOVE_D = 2.0, 1.1
 NUT_AF, NUT_H = 19.0, 6.0                # M12 thin jam nut (check the standard for your nut)
+WINDOW = True        # round viewing window on the +y end face (the camera / IR spectrometer window)
+WIN_X = 40.8         # window axis: |x| offset along the face. Seen from outside (standing at +y, looking at the face) the window is on the LEFT, i.e. x = +40.8
+WIN_Z = 36.8         # height above the floor of the window axis (from the second JPL photo)
+WIN_D = 26.0         # aperture diameter
+WIN_CB_D = 31.0      # counterbore for the pane
+WIN_FLOOR_Y = 67.2   # counterbore floor plane (the outer wall face is 69.64 at z = 36.8 and leans about 1 degree)
+PANE_D, PANE_T = 30.6, 2.0   # glass or acrylic pane, bonded in with RTV
 # --------------------------------------------
 
 RIM_R = 10.0         # outer corner radius of the casting (measured from the STEP)
@@ -181,6 +192,21 @@ def main():
             hub_parts.append(at_hub(stud, side))
             hub_orings.append(at_hub(oring_h, side))
             hub_nuts.append(at_hub(nut, side))
+
+    # 2d. Viewing window on the +y end face
+    pane = None
+    if WINDOW:
+        def on_y(shape, y0):
+            """Shape built along +z, placed with its base at (WIN_X, y0, WIN_Z) pointing along +y."""
+            return shape.moved(Location(Plane(origin=(WIN_X, y0, WIN_Z), x_dir=(1, 0, 0), z_dir=(0, 1, 0))))
+        before = body.volume
+        aperture = Cylinder(WIN_D / 2, 12, align=(Align.CENTER, Align.CENTER, Align.MIN))
+        cbore = Cylinder(WIN_CB_D / 2, 8, align=(Align.CENTER, Align.CENTER, Align.MIN))
+        body = body - on_y(aperture, 62.0) - on_y(cbore, WIN_FLOOR_Y)
+        removed = before - body.volume
+        expect = math.pi * (WIN_D / 2) ** 2 * (WIN_FLOOR_Y - 65.06) + math.pi * (WIN_CB_D / 2) ** 2 * (69.64 - WIN_FLOOR_Y)
+        pane = on_y(Cylinder(PANE_D / 2, PANE_T, align=(Align.CENTER, Align.CENTER, Align.MIN)), WIN_FLOOR_Y)
+        win_info = (removed, expect)
 
     # 3. Lid plate: 140 x 140, R10 corners (matches the box at the rim), groove on its underside
     plate = extrude(RectangleRounded(140, 140, 10), PLATE_T).moved(Location((0, 0, Z_CUT)))
@@ -292,12 +318,22 @@ def main():
         print(f"                    stud mass {sum(p.volume for p in hub_parts) * 7.9e-3 / 2:.0f} g each (stainless), nut {nuts.volume * 7.9e-3 / 2:.0f} g each")
         print(f"                    nut across corners {NUT_AF / math.cos(math.radians(30)):.1f} mm in a {SPOT_IN_D} mm inner spot-face")
 
+    if WINDOW:
+        removed, expect = win_info
+        hit = pane & body
+        print(f"window              {WIN_D} mm aperture, axis x = {WIN_X}, z = {WIN_Z} on the +y face; {WIN_CB_D} mm counterbore, pane {PANE_D} x {PANE_T} mm; "
+              f"material removed {removed:.0f} mm3 against {expect:.0f} mm3 expected for the plain wall (they agree if the hole meets no corner feature)")
+        print(f"                    pane/body overlap {hit.volume if hit else 0.0:.2f} mm3; wall left under the pane {WIN_FLOOR_Y - 65.06:.2f} mm; "
+              f"pane recessed {69.64 - (WIN_FLOOR_Y + PANE_T):.2f} mm")
+
     export_step(body, str(OUT / "body_hammond.step"))   # contains Hammond geometry: git-ignored
     plate = nurbs(plate)
     export_step(plate, str(OUT / "lid_plate.step"))
     export_step(oring, str(OUT / "oring.step"))
     if INSERT:
         export_step(Compound(insert_parts), str(OUT / "inserts.step"))
+    if WINDOW:
+        export_step(pane, str(OUT / "window_pane.step"))
     if HUBS:
         export_step(Compound(hub_parts), str(OUT / "hub_studs.step"))
         export_step(Compound(hub_orings + hub_nuts), str(OUT / "hub_orings_and_nuts.step"))
