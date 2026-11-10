@@ -13,9 +13,9 @@ The working scripts are in the private companion repository (`analysis/photo-mea
 | Focal length | about 3900 px on a 1650 px wide frame (about a 25 degree field of view: a long lens, little perspective) |
 | Viewing angle | the camera looks at the top face from about 23 degrees above it. The quarter's ellipse independently gives about 22 degrees |
 | Check that did not depend on the fit | the warped top face is **square to within 1%** (4432 x 4400 px) and the cells come out as clean right-angled rectangles |
-| Scale | the top face is taken as **140 mm** square (MUSES-CN, 14 x 14 x 6 cm). That is an assumption: the quarter alone allows roughly 130 to 140 mm, and the photo's own caption says "approximately 10 cm on a side", which the square face and the quarter rule out |
+| Scale | the top face is taken as **140 mm** square (MUSES-CN, 14 x 14 x 6 cm). That is an assumption, and the shared-drivetrain cross-check below says the true scale is about 1.11 times larger (about 155 mm): the quarter alone allows roughly 130 to 140 mm, and the photo's own caption says "approximately 10 cm on a side", which the square face and the quarter rule out |
 
-## Solar cells on the top face (top view, millimetres at the 140 mm scale)
+## Solar cells on the top face (top view, millimetres at the 140 mm scale; multiply by about 1.11 under the shared-drivetrain scale below)
 
 | Cells | Count | Size | Notes |
 |---|---|---|---|
@@ -70,6 +70,22 @@ The silver unit is now the primary model (owner's decision), so its absolute siz
 | Strut length, pivot to wheel centre | about 86 mm | 70 mm |
 
 The hub faces match the papers' 14 x 6 cm almost exactly, which supports the wheel scale. The length (154 mm) and the strut (86 mm) do not. The strut to wheel-diameter ratio, about 1.3, also appears in the first (black) photo, where the same fit gave 75.9 mm struts for 59 mm wheels. So the photographed prototypes have relatively longer struts than the published flight design. If instead the papers' 70 mm strut were true, the whole silver unit would be 0.81 times these sizes (113 x 125 x 50 mm, wheels 53 mm across). The uncertainty on these sizes is several percent: it rests on the wheel normalisation and on picking the hub axis point.
+
+## The two units share a drivetrain (owner's statement): a cross-check of the scales
+
+The owner states that the struts and wheels are identical on the black and silver units (the black unit being a running mock-up used for publicity, the silver unit the internal test unit that carries the optics). Taking that as a constraint gives an independent scale for the first (black) photo, which otherwise rests on assuming its top face is 140 mm:
+
+| Quantity | Black photo at its 140 mm assumption | Silver photo (wheels = 65 mm across the grousers) | Scale factor that would make them equal |
+|---|---|---|---|
+| Wheel across the grousers | 59 mm | 65 mm | 1.10 |
+| Strut length, pivot to wheel centre | 75.9 mm | about 86 mm | 1.13 |
+| Strut length / wheel diameter | 1.29 | 1.32 | (3% apart) |
+| Cone rim plane outboard of the body face | about 43 mm after correcting for the cone | 47 to 49 mm | within about 4 mm |
+
+The two independent factors agree to 3%, so the black photo's true scale is about **1.11 times the 140 mm assumption**, with the same wheel and strut. That makes the black unit's top face about **155 mm square** (not 140), its end face about 40 to 49 mm tall to the PCB-like base seam (not 36 to 44), and every sized value taken from the first photo about 11% larger: the solar cells on the top face become about 44 x 26 mm (large) and 22 x 49 mm (centre), the square camera window about 28 x 24 mm, and the wheel is the same wheel as the silver unit's.
+The silver unit's own sizes stand, since they were scaled from its wheels: hub faces about 138 x 61 mm, length about 154 mm. So both units have a body dimension of about 154 mm; the black one is a thin square box (about 155 x 155 x 45 mm), the silver one a thicker box (138 x 154 x 61 mm). That fits the owner's account: a mock-up without the optical bench would be thinner, and the instrument stack sets the silver unit's height.
+
+The scale rests on the wheel normalisation (65 mm across the grousers, the published MUSES-CN size; the prototypes are described as "about 6 cm", which would shrink everything by about 9%) and on how well the hub and wheel points were placed (a few percent).
 
 ## The black unit's camera aperture
 
