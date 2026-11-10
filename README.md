@@ -22,6 +22,7 @@ Every figure is marked with how well it is sourced, and conflicting figures are 
 | [`docs/jpl-nanorover-literature.md`](docs/jpl-nanorover-literature.md) | Annotated bibliography, specification table with verification levels, image sources and the list of conflicting figures |
 | [`docs/body-spec.md`](docs/body-spec.md), [`strut-spec.md`](docs/strut-spec.md), [`wheel-spec.md`](docs/wheel-spec.md) | The CAD design decisions: what is sourced, what is measured from the photo, what is assumed, and the checks |
 | [`docs/design-comparison.md`](docs/design-comparison.md) | The three designs in the sources (the published design and the two photographed units), side by side, with what the CAD is today and what choosing would change |
+| [`docs/smaller-than-nanorover.md`](docs/smaller-than-nanorover.md) | A side question: what the sources say about rovers smaller than the nanorover (the 10 to 100 g task goal, widget boards) |
 | [`docs/photo-measurements.md`](docs/photo-measurements.md) | Camera solution and measurements (solar cell sizes, wheel) taken from the JPL prototype photograph |
 | [`hardware/`](hardware/) | Parametric CAD (build123d, STEP output): [body](hardware/body/body.py), [struts](hardware/strut/strut.py), [wheels](hardware/wheel/wheel.py), [assembly](hardware/assembly/rover.py) |
 
