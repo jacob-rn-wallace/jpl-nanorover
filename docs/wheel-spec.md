@@ -6,6 +6,16 @@ The sources give one wheel number: **65 mm diameter** (Wilcox & Jones, MUSES-CN;
 inside and helical cleats). Everything else comes from two JPL photographs of the prototype, kept in the private companion repository:
 `NanoRover-hires.original.jpg` (a silver-bodied unit, three-quarter view) and `img840-340-hires.original.jpg` (a black-bodied unit beside a quarter).
 
+## Which wheel? (open decision)
+
+The model below copies the **aluminium cleated wheel of the 1997-98 prototypes** as photographed. It is not the wheel the MUSES-CN papers describe. Jones & Wilcox write that the flight wheels
+"are a complex assembly of thin conductors and insulator designed to function both as a mechanical wheel and as a proximity sensor to the asteroid surface" (the sentence is split across columns in the
+PDF text; it follows the strut-motor description in section 4.3), and that each strut/wheel assembly includes a contact sensor. JPL's 1998 "Nanorover Technology Task" video
+(`vid1016-91-video2.mov` in the private companion repository, about 3:25 to 3:35 and the computer-generated sequences) shows what that looks like: **plain cylindrical wheels with flat ends and
+bands of gold-orange and silver around them**, on a lab prototype and on the animated flight vehicle, and nothing like the saw-tooth wheel. So for a replica of the MUSES-CN flight design the wheel
+would be a banded cylinder; the cleated wheel is the earlier prototype's. The wheel width in the video is roughly half to 0.6 of the diameter by eye (not measured). The owner chose the cleated wheel for now,
+so it stays the model; swapping it is a change to `hardware/wheel/wheel.py` only.
+
 ## What the wheel is
 
 A **smooth hollow cylinder carrying grousers in a helix, closed at the outside by a real cone**, the collar sitting on the cone's apex.
