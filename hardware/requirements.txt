@@ -3,3 +3,4 @@ build123d
 numpy
 matplotlib
 trimesh
+shapely  # only for hardware/drivetrain/render_compare.py (mesh cutaway)

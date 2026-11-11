@@ -72,3 +72,7 @@ Flat lathe-finished wheel disk -> a real cone. Stack of saw-blade discs, then a 
 ## 10. Not verified
 
 The owner's account of each unit's role (and the KTLA segment's unit) is taken on trust; the 1998 paper's contents come from search snippets; every size from the photographs is an estimate good to a few percent and depends on the quarter being read correctly and on the silver unit sharing the black unit's wheels; the cost and market comparisons for a toy version are rough and partly unverified.
+
+## 11. Update, 2026-11-11 (drivetrain session)
+
+Decided by the owner: the replica must lift itself under Earth gravity; design mass 1.0 kg total (the body will be redesigned later, deferred); metal wheels; **layout C** (thin-walled aluminium wheels with the wheel motor inside, strut motors in the body). Everything is in `docs/drivetrain-spec.md`, with scripts in `hardware/drivetrain/`. Summary: strut motors maxon EC-max 16 5 W with GP 16 C 1621:1 (73 g); wheel motors ECX SPEED 10 M with GPX 10 A 256:1 (20 g); drive speed about 40 mm/s (from the videos); drivetrain about 660 g, leaving about 340 g of the 1.0 kg for the body and everything else. Belt layouts (2a, 2b) and JPL's friction-pivot layout (3) were studied and not taken. Next: update `wheel.py` for the thin-walled wheel and the motor mount, the strut tip and axle stub, then the coaxial hub; check the datasheets and prices before buying anything. Section 9's list is superseded where it conflicts. Torque and mass numbers use assumptions listed in the spec.
