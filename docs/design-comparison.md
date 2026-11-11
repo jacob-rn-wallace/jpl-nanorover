@@ -7,7 +7,7 @@ of what to replicate is made once, in one place. Status: **the reference unit is
 
 | | A. The published MUSES-CN design | B. The silver-bodied unit | C. The black-bodied unit |
 |---|---|---|---|
-| Where it comes from | Wilcox & Jones, Jones & Wilcox (1999 to 2000), four papers | `NanoRover-hires.original.jpg` (JPL research page, "Prototype of the nanorover, only 20cm long"); shown with its body open and the optics in JPL's 1997 video | `img840-340-hires.original.jpg` (JPL gallery, "Nanorover (circa 1997)"); seen running in JPL's 1997 and 1998 videos, in a 1997 KTLA news segment (owner's statement; not viewed), and as an animation in the saved IROS'97 page |
+| Where it comes from | Wilcox & Jones, Jones & Wilcox (1999 to 2000), four papers; one sentence repeated in all four: "Each strut is 7 cm long from the center of their pivot to the center of the wheel axis" | `NanoRover-hires.original.jpg` (JPL research page, "Prototype of the nanorover, only 20cm long"); **the same photograph is Figure 1 of Jones & Wilcox 2000**; shown with its body open and the optics in JPL's 1997 video | `img840-340-hires.original.jpg` (JPL gallery, "Nanorover (circa 1997)"); seen running in JPL's 1997 and 1998 videos, in a 1997 KTLA news segment (owner's statement; not viewed), and as an animation in the saved IROS'97 page |
 | Role (owner's account) | the intended flight vehicle | internal test unit that carried the science optics; used to demonstrate the optical train and teleoperation | running mock-up with no instruments, used for publicity |
 | Body | 14 x 14 x 6 cm, mass 1300 g | about 138 x 154 x 61 mm (scaled from its wheels) | about 155 x 155 x 45 mm (scaled from its wheels, with the shared drivetrain; 140 x 140 if its top face is taken as the papers' size) |
 | Struts | 7 cm, pivot to wheel axis | about 86 mm | same as B (shared drivetrain; 75.9 mm on the 140 mm scale) |
@@ -21,6 +21,7 @@ The papers' wheel is a different design from B and C's, and the papers' strut/wh
 
 ## What the evidence says
 
+- **The papers' own rover figure is the silver unit.** Figure 1 of Jones & Wilcox (2000) is the same photograph as `NanoRover-hires.original.jpg`: the silver body, round window, headlamp, antenna loop and the same rock. So the papers' text (14 x 14 x 6 cm, 6.5 cm wheels, 7 cm struts) is illustrated by unit B, and A and B are not independent sources. The strut figure is stated only in the four Jones/Wilcox papers (one author pair repeating one sentence); Tunstel (1999) and Weisbin (1998) do not give a strut length.
 - **B and C share a drivetrain** (owner). A cross-check supports it: scaling each photo by its own wheels gives the same strut-to-wheel ratio to 3% (1.32 and 1.29) and the same wheel position outboard of the body to about 4 mm.
 - **B's hub faces are the papers' 14 x 6 cm** (138 x 61 mm). Its length, about 154 mm, is not 14 cm. C is square, but about 155 mm square and about 45 mm tall: neither unit is 14 x 14 x 6.
 - **The height fits the owner's account.** The instrument stack sets B's height; a mock-up without the optical bench would be thinner, as C is.
