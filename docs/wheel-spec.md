@@ -11,7 +11,7 @@ inside and helical cleats). Everything else comes from two JPL photographs of th
 The model below copies the **aluminium cleated wheel of the 1997-98 prototypes** as photographed. It is not the wheel the MUSES-CN papers describe. Jones & Wilcox write that the flight wheels
 "are a complex assembly of thin conductors and insulator designed to function both as a mechanical wheel and as a proximity sensor to the asteroid surface" (the sentence is split across columns in the
 PDF text; it follows the strut-motor description in section 4.3), and that each strut/wheel assembly includes a contact sensor. JPL's 1998 "Nanorover Technology Task" video
-(`vid1016-91-video2.mov` in the private companion repository, about 3:25 to 3:35 and the computer-generated sequences) shows what that looks like: **plain cylindrical wheels with flat ends and
+(`vid1016-91-video2.mp4` in the private companion repository, about 3:25 to 3:35 and the computer-generated sequences) shows what that looks like: **plain cylindrical wheels with flat ends and
 bands of gold-orange and silver around them**, on a lab prototype and on the animated flight vehicle, and nothing like the saw-tooth wheel. So for a replica of the MUSES-CN flight design the wheel
 would be a banded cylinder; the cleated wheel is the earlier prototype's. The wheel width in the video is roughly half to 0.6 of the diameter by eye (not measured). The owner decided (2026-11-10) to stay with the cleated wheel, so it is the model; swapping it later is a change to `hardware/wheel/wheel.py` only.
 
