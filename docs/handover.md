@@ -62,10 +62,11 @@ Flat lathe-finished wheel disk -> a real cone. Stack of saw-blade discs, then a 
 ## 9. Next steps (drivetrain first)
 
 1. **Torque and speed budget** for lifting, self-righting and stepping with a body of 1.3 to 1.5 kg on 70 mm struts (a quick estimate: about 0.25 N.m per strut at worst, which is large for micro gearmotors); this decides the motors.
-2. **Kinematic simulation** of the four-strut chassis with the body as a block of the right mass (poses, tipping, self-righting, step climbing).
+2. **Kinematic simulation** of the four-strut chassis with the body as a block of the right mass (poses, tipping, self-righting, step climbing). JPL itself ran a low-gravity dynamic simulation and planned KC-135 aircraft tests (the 1997 video, about 4:05 to 4:40 and 5:05); Tunstel (1999) evolved the self-righting sequences by genetic programming.
 3. **Motor and hub design:** the strut-pivot motor at the hub, the wheel motor inside the drum, bearings, wire passage, the real hub size; then the wheel interior.
 4. Make wheel diameter and strut length switchable parameters.
 5. Later: the headlamp and window, the connector-free end face, wiring feedthroughs, the lid screws, the banded-wheel option.
+- A side discussion on a toy-grade version and the possible pivot is in `docs/toy-version-notes.md`; a guide to what is in each video, with approximate timestamps, is in the private repo (`video/GUIDE.md`).
 - **Research leads:** the Wilcox oral history; the full texts of the 1997 and 1998 papers (try `hdl.handle.net/2014/22984` and `/21976` from a browser, then put the PDFs in the private `papers/`); JPL Archives; the people named in the papers (Brian Wilcox, Ross Jones, Allen Sirota, Mike Johnson, Jack Morrison, Art Thompson; check whether any can be reached) with questions that survive foggy memory: which unit is which, do the units still exist, drawings or CAD, did the flight design keep the cleated wheel; measure the black unit's height and struts from the edge-on video frames (1997 video 0:23 to 0:29); transcribe the narrations.
 
 ## 10. Not verified

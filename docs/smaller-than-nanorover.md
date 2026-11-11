@@ -27,6 +27,10 @@ So the third rover in the animation is the under-100 g goal vehicle of the nanor
 
 Also found: Stern et al., "Extreme temperature (-170 C to +125 C) electronics for nanorover operation", IEEE Aerospace 2001, on the 1.3 kg, 1666 cm3 nanorover's 2.5 W control and data system; Weisbin's report also lists JPL microrobots for urban terrain, which are a different, human-portable class.
 
+## Also in the 1997 video
+
+At about 5:05 the 1997 "Nanorover Technology Task" video has a title card "Future Nanorover Development": **further overall reduction in rover mass and volume**, **low gravity dynamic analysis simulation**, and **testing on KC-135 aircraft** (the parabolic-flight microgravity aircraft). The sections before it (about 4:05 to 4:40) show a wireframe "Dynamic Simulation in Low Gravity Environment" of the rover hopping. So smaller rovers, a hopping simulation and aircraft microgravity tests were all named as the next steps in 1997.
+
 ## What this suggests, and what is missing
 
 - A rover in the 10 to 100 g class was a stated goal of the nanorover task from 1997 or earlier, and Wilcox spoke publicly about "a few ounces" in 1999. The narration confirms that the animated third rover is that goal vehicle ("an even smaller Nanorover", under 100 g), not a separate project, and that the Widget Board was the key enabling technology.
