@@ -46,7 +46,7 @@ apparent cone-rim diameter (169 px) as 59.5 mm; that is a normalisation, not a m
 | Grousers | 16, helical, 43.5 degrees from the axle at the crests, right-handed | spacing of the dark lines 19 to 25 degrees on the visible arc (14 to 19 by that count); the first photo gave 17 at the rim |
 | Serrations along each crest | about 3 mm pitch, 1.4 mm deep | read from the silhouette bumps |
 
-The scale factor 65 / 59 is applied to every measured length so the diameter over the grousers is the published MUSES-CN 65 mm. The photographed wheels are about 59 mm across the grousers.
+The scale factor 65 / 59 is applied to every measured length so the diameter over the grousers is the published MUSES-CN 65 mm (the papers' value stands under the settling rule). The photographed wheels are about 59 mm across the grousers, which the quarter in the first photo confirms (57 to 60 mm).
 
 ## What the CAD has
 
@@ -64,6 +64,6 @@ The scale factor 65 / 59 is applied to every measured length so the diameter ove
 
 - The scale is a normalisation. If the photographed rover is smaller or larger than the published sizes, every measurement scales with it.
 - Wall thicknesses, the hollow interior, the hub tube, the blade thickness, the number of grousers (16, give or take two) and the serration shape are estimates.
-- The two photos disagree on the cone depth, and the second photo's body is not 14 x 14 cm (its top face is about 1.11:1), so it is not the same unit as the first. The wheel here
+- The two photos disagree on the cone depth, and the second photo's body is not square (its top face is about 1.11:1), so it is not the same unit as the first. The wheel here
   follows the second photo; revise `H_CONE` if a better source appears.
 - Change the numbers in the parameter block at the top of `wheel.py`; the checks rerun.

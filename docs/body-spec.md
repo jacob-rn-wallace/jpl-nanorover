@@ -91,7 +91,7 @@ screw bores are open to the cavity, and the screws are sealed with O-rings under
   - **Open:** potted wires crossing a rotating strut joint (a hollow axle allows limited twist, not continuous rotation), the strut torque
     reaction on the stud, the anti-rotation fit, and the strut bearings and seals. The struts and wheels are not modelled.
 - **Viewing window (modelled).** The second JPL photo shows a round window and a small sealed-beam light (the rover's headlamp, for lighting close-range subjects in front of the aperture) on one 140 x 60 end face. Rectified face-on (see
-  `photo-measurements.md`), the window is **26 mm across, its axis 29 mm from one edge of the face and 36.8 mm above the base**, and the face measures about 140 x 62 mm.
+  `photo-measurements.md`), the window is **26 mm across, its axis 29 mm from one edge of the face and 36.8 mm above the base**, as proportions of a face taken as 140 mm wide (at the quarter-based scale the silver unit's face is about 125 mm wide and these lengths are about 0.89 of that).
   On the +y face, seen from outside, the window is on the left: x = +40.8, z = 36.8. The model cuts a 26 mm aperture and a 31 mm counterbore 2.4 mm deep (2.14 mm of wall left
   under the pane) and adds a 30.6 x 2.0 mm glass or acrylic pane (`window_pane.step`), bonded with RTV and recessed 0.44 mm. The wall there is plain (4.6 mm, drafted): the
   aperture's outer edge reaches the thickened corner fillet at x = 50 to 54, which adds about 90 mm3 of cutting and leaves the wall whole. Nothing behind the window is

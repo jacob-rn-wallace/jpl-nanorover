@@ -11,9 +11,9 @@ The replica aims to match the original's appearance and dimensions and to perfor
 ![preview](docs/images/rover-preview.png)
 
 ## Target
-The primary reference is the silver-bodied JPL unit in the prototype photograph (a round imaging window and a sealed-beam headlamp on one end face, four wheels on posable struts, solar cells on top). Scaled
-from its wheels, its hub faces are about 14 x 6 cm, as the MUSES-CN papers give, but it is about 15.4 cm long and its struts are about 8.6 cm, against the papers' 14 x 14 x 6 cm body and 7 cm struts. The papers'
-other figures (four 6.5 cm wheels, solar cells on four of six faces, about 1.3 kg) stay as published reference. Wheel tread, strut cross-section, hub detail and finish are not published and are scaled from photographs.
+The reference units are the two built JPL prototypes in the photographs and videos: a silver-bodied unit (a round imaging window and a sealed-beam headlamp on one end face) and a black-bodied unit (a square camera window), which share their struts and wheels. Measured against a quarter in one photo, the black unit is about
+139 x 139 mm on top with wheels about 59 mm across and struts about 76 mm, and the silver unit about 125 x 140 x 55 mm. The MUSES-CN papers give a 14 x 14 x 6 cm body, 6.5 cm wheels and 7 cm struts, and win by default where the units do not agree with each other
+independently (`docs/design-comparison.md`); the units differ from the papers by 8 to 11%. Solar cells on four of six faces and about 1.3 kg stay as published reference. Wheel tread, strut cross-section, hub detail and finish are not published and are scaled from photographs.
 Every figure is marked with how well it is sourced, and conflicting figures are listed.
 
 ## What's here
