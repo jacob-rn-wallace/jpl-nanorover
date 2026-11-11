@@ -37,6 +37,16 @@ PLATE_T = 3.0                  # arm plate thickness
 AXLE_D = 6.0                   # wheel axle stub
 BORE_D = 12.1                  # pivot bore on the stud's 12 mm axle
 GAP = 1.0                      # washer gap between layers
+TIP_MODE = "motor"             # "motor": the wheel motor sits in the wheel, carried by the strut tip (layout C, docs/drivetrain-spec.md);
+                               # "axle": the earlier 6 mm wheel-axle stub (no motor)
+# Wheel motor: maxon ECX SPEED 10 M (25.1 mm) + GPX 10 A 4-stage (19.8 mm), 20.2 g (catalogue 2025/26, pages 199 and 373).
+MOTOR_D, MOTOR_BODY_L, GEAR_L = 10.0, 25.1, 19.8
+MOTOR_L = MOTOR_BODY_L + GEAR_L
+MOTOR_G = 20.2
+SHAFT_D = 3.0                  # ASSUMED output shaft diameter (not read from the catalogue)
+MOTOR_PAD = 3.0                # ASSUMED shaft and hub allowance between the gearhead's front face and the cone apex
+# Copies of the thin-walled wheel in wheel.py (keep in step): cone shell, cone height, rim radius
+CONE_T, CONE_H, CONE_R = 0.8, 10.1, 29.75
 # --------------------------------------------
 
 X0 = E.SPOT_OUT + E.HUB_FLANGE_T                # outer face of the stud flange, |x|
@@ -45,6 +55,9 @@ B_BOSS = (A_BOSS[1] + GAP, A_BOSS[1] + GAP + BOSS_T)
 A_PLATE = (A_BOSS[1] - PLATE_T, A_BOSS[1])      # plate flush with the outer face of boss A
 B_PLATE = (B_BOSS[0], B_BOSS[0] + PLATE_T)      # plate flush with the inner face of boss B
 WHEEL_X = (B_PLATE[1] + 1.0, B_PLATE[1] + 1.0 + WHEEL_W)
+# motor front face: as far toward the cone apex as the cone's inner radius allows (it narrows), less MOTOR_PAD
+MOTOR_FRONT = WHEEL_X[1] - CONE_T - CONE_H * (MOTOR_D / 2) / CONE_R - MOTOR_PAD
+MOTOR_TAIL = MOTOR_FRONT - MOTOR_L
 
 
 def plate_outline(r1, r2, d):
@@ -72,10 +85,14 @@ def strut(boss_range, plate_range, wheel_inner, direction):
     boss = on_axle(boss, boss_range[0])
     arm = extrude(plate_outline(BOSS_D / 2, TIP_D / 2, STRUT_L), amount=t_plate)
     arm = on_axle(arm, plate_range[0])
-    tip_axle = Cylinder(AXLE_D / 2, WHEEL_X[1] + COLLAR_L - plate_range[1], align=(Align.CENTER, Align.CENTER, Align.MIN)).moved(
-        Location((STRUT_L, 0, 0)))
-    tip_axle = on_axle(tip_axle, plate_range[1])
-    s = boss + arm + tip_axle
+    s = boss + arm
+    if TIP_MODE == "axle":
+        tip_axle = Cylinder(AXLE_D / 2, WHEEL_X[1] + COLLAR_L - plate_range[1], align=(Align.CENTER, Align.CENTER, Align.MIN)).moved(
+            Location((STRUT_L, 0, 0)))
+        s = s + on_axle(tip_axle, plate_range[1])
+    else:   # a bore through the tip boss and plate for the wheel motor (0.05 mm radial clearance)
+        bore = Cylinder((MOTOR_D + 0.1) / 2, 30, align=(Align.CENTER, Align.CENTER, Align.MIN)).moved(Location((STRUT_L, 0, 0)))
+        s = s - on_axle(bore, plate_range[0] - 5)
     s = s - on_axle(Cylinder(BORE_D / 2, 20, align=(Align.CENTER, Align.CENTER, Align.MIN)), boss_range[0] - 1)
     s = s.moved(Location((0, 0, E.HUB_Z)))
     if direction < 0:
@@ -91,6 +108,19 @@ def wheel_envelope(direction):
     return w
 
 
+def motor(direction):
+    """Wheel motor and gearhead plus the output shaft, at the strut tip, arm along +y (direction +1) or -y (-1), horizontal."""
+    z0 = E.HUB_Z
+    cyl = Cylinder(MOTOR_D / 2, MOTOR_L, align=(Align.CENTER, Align.CENTER, Align.MIN)).moved(Location((STRUT_L, 0, 0)))
+    shaft = Cylinder(SHAFT_D / 2, WHEEL_X[1] + COLLAR_L - 1.0 - MOTOR_FRONT, align=(Align.CENTER, Align.CENTER, Align.MIN)).moved(
+        Location((STRUT_L, 0, 0)))
+    m = on_axle(cyl, MOTOR_TAIL) + on_axle(shaft, MOTOR_FRONT)
+    m = m.moved(Location((0, 0, z0)))
+    if direction < 0:
+        m = m.rotate(Axis((0, 0, z0), (1, 0, 0)), 180)
+    return m
+
+
 def posed(shape, direction, deg):
     """Rotate about the hub axis so the arm points `deg` below horizontal."""
     return shape.rotate(Axis((0, 0, E.HUB_Z), (1, 0, 0)), -deg if direction > 0 else deg)
@@ -98,15 +128,19 @@ def posed(shape, direction, deg):
 
 def main():
     OUT.mkdir(exist_ok=True)
-    struts, wheels = [], []
+    struts, wheels, motors = [], [], []
     for side in (1, -1):
         for (bossr, platr, d) in ((A_BOSS, A_PLATE, +1), (B_BOSS, B_PLATE, -1)):
             s = posed(strut(bossr, platr, WHEEL_X[0], d), d, POSE_DEG)
             w = posed(wheel_envelope(d), d, POSE_DEG)
+            m = posed(motor(d), d, POSE_DEG) if TIP_MODE == "motor" else None
             if side < 0:
                 s, w = s.mirror(Plane.YZ), w.mirror(Plane.YZ)
+                m = m.mirror(Plane.YZ) if m else None
             struts.append(s)
             wheels.append(w)
+            if m:
+                motors.append(m)
     S, W = Compound(struts), Compound(wheels)
 
     # ---- checks ----
@@ -124,6 +158,9 @@ def main():
     bad = {}
     sa0 = strut(A_BOSS, A_PLATE, WHEEL_X[0], +1)
     sb0 = strut(B_BOSS, B_PLATE, WHEEL_X[0], +1)
+    if TIP_MODE == "motor":      # the motor is carried by its own strut; the other strut must clear it too
+        m0 = motor(+1)
+        sa0, sb0 = sa0 + m0, sb0 + m0
     axis = Axis((0, 0, E.HUB_Z), (1, 0, 0))
     STEP_DEG = 30
     angles = range(0, 360, STEP_DEG)
@@ -134,7 +171,7 @@ def main():
             hit = sa_rot[a] & sb_rot[b]
             if hit and hit.volume > 1e-3:
                 bad[(a, b)] = hit.volume
-    print(f"strut A vs strut B    interference at {len(bad)} of {len(angles)**2} angle pairs ({STEP_DEG} degree steps); layers are {GAP:.1f} mm apart")
+    print(f"strut A vs strut B    {'(with the wheel motors) ' if TIP_MODE == 'motor' else '(axle stubs) '}interference at {len(bad)} of {len(angles)**2} angle pairs ({STEP_DEG} degree steps); layers are {GAP:.1f} mm apart")
     for nm, shp in (("stud (incl. axle stub)", stud_hubs), ("body", body)):
         hit = Compound(struts) & shp
         print(f"struts vs {nm:<22} overlap {hit.volume if hit else 0.0:.2f} mm3 (default pose)")
@@ -152,6 +189,16 @@ def main():
           f"overall width {max(v[5] for v in wh.values()) - min(v[4] for v in wh.values()):.1f} mm")
     flat = 2 * (STRUT_L + WHEEL_D / 2)
     print(f"struts horizontal (0 deg): overall length {flat:.1f} mm  (JPL's caption: prototype 'only 20cm long')")
+    if motors:
+        M = Compound(motors)
+        for nm, shp in (("body", body), ("stud", stud_hubs), ("struts", S)):
+            hit = M & shp
+            print(f"wheel motors vs {nm:<7} overlap {hit.volume if hit else 0.0:.2f} mm3 (default pose; the strut tip has a 0.05 mm clearance bore)")
+        print(f"wheel motor           {MOTOR_D:.0f} mm x {MOTOR_L:.1f} mm ({MOTOR_BODY_L} motor + {GEAR_L} gearhead), {MOTOR_G} g each (catalogue); |x| tail {MOTOR_TAIL:.2f} to front {MOTOR_FRONT:.2f}; "
+              f"tail is {MOTOR_TAIL - 69.94:+.2f} mm from the body face and {WHEEL_X[0] - MOTOR_TAIL:.2f} mm inboard of the wheel's inner face; output shaft {SHAFT_D} mm (assumed)")
+        export_step(M, str(OUT / "wheel_motors.step"))
+        chk = import_step(OUT / "wheel_motors.step")
+        print(f"re-imported wheel_motors.step: {len(chk.solids())} solids, volume {chk.volume / 1000:.2f} cm3 (live {M.volume / 1000:.2f})")
 
     export_step(S, str(OUT / "struts.step"))
     print("wrote", OUT / "struts.step")

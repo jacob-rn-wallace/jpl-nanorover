@@ -54,11 +54,24 @@ The scale factor 65 / 59 is applied to every measured length so the diameter ove
   Each blade is extruded with a twist of 58 degrees along the cylinder (the twist follows from the 43.5 degree helix at the crest radius), so it follows a helix and stays radial.
   About 190 small right-triangle notches cut the serrations along the crests (3 mm pitch, 1.4 mm deep).
 - A 1.5 mm conical shell closing the outer end (apex 10.1 mm above the rim), a 12 mm hub tube around the 6 mm axle, and an 8 x 8 mm collar on the apex.
-- Mass about 78 g per wheel as aluminium with no motor, 313 g for four. The hollow interior, wall thicknesses, hub tube, blade thickness and collar are estimates.
+- Mass about 78 g per wheel as aluminium with no motor, 313 g for four (preset `v1`; see "Presets"). The hollow interior, wall thicknesses, hub tube, blade thickness and collar are estimates.
 - The same wheel on both sides (a rotated copy, so the helix keeps its handedness).
 - Checks: the wheels overlap nothing (casting, studs, struts, lid) and the exported STEP re-imports with the same volume. Default stance: overall 275.7 mm wide
   by 191.9 mm long, wheel bottoms 32.1 mm below the box floor. The width depends on the strut layout, which is a placeholder (see `strut-spec.md`).
 - Projecting the CAD wheel back onto the second photo, the cone profile, the collar, the end of the cylinder and the grouser lines line up with the dark lines on the photo.
+
+## Presets (2026-11-11, layout C)
+
+`wheel.py` has two presets, switched with `use_preset(name)` (`PRESET` at the top selects the default): **`thin`** (default) and **`v1`**.
+
+| | `v1` (as first modelled) | `thin` (layout C, owner chose metal wheels) |
+|---|---|---|
+| Cylinder wall | 2.5 mm | 1.0 mm |
+| End plate / cone shell / blades | 2.0 / 1.5 / 1.2 mm | 1.0 / 0.8 / 0.8 mm |
+| Hub | 12 mm tube on a 6 mm axle | none: 12 mm hole in the end plate for the motor; an 8 mm boss under the cone apex and the collar, bored 3.1 mm for the motor's output shaft |
+| Mass (aluminium) | 78 g | 34 g |
+
+The outline, grousers, serrations and cone are identical, so the wheel looks the same from outside. In `thin` the wheel motor (`strut/out/wheel_motors.step`, see `strut-spec.md`) sits inside, fixed to the strut tip, and drives the wheel through its output shaft at the cone apex. The checks show no overlap between the wheels and the body, studs, struts, lid plate or motors, and the STEP re-imports with the same volume. **Not decided:** how a 0.8 mm-walled aluminium wheel with helical serrated grousers is made (CNC, multi-part, metal printing), how the wheel is fixed to the shaft, the shaft diameter, and the stiffness of the thin shell (no analysis).
 
 ## Caveats
 

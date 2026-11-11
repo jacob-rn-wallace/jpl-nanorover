@@ -25,6 +25,7 @@ PARTS = [  # (label, file, material density g/cm3 as used by the individual scri
     ("hub studs", HW / "body/out/hub_studs.step", 7.9),
     ("hub O-rings and nuts", HW / "body/out/hub_orings_and_nuts.step", 7.9),
     ("struts", HW / "strut/out/struts.step", 2.70),
+    ("wheel motors (ECX 10 + GPX 10)", HW / "strut/out/wheel_motors.step", 20.2 / 3.616),   # catalogue 20.2 g each over the 3.616 cm3 envelope
     ("wheels", HW / "wheel/out/wheels.step", 2.70),
 ]
 
@@ -42,7 +43,7 @@ def main():
         print(f"{label:<24} {m:7.0f} g")
     asm = Compound(shapes)
     bb = asm.bounding_box()
-    print(f"{'total (no motors, wiring, electronics)':<24} {total:7.0f} g   [MUSES-CN rover: 1300 g]")
+    print(f"{'total (wheel motors in; no strut motors, wiring, electronics)':<24} {total:7.0f} g   [MUSES-CN rover: 1300 g]")
     print(f"default stance: {bb.size.X:.1f} wide x {bb.size.Y:.1f} long x {bb.size.Z:.1f} high; body floor {-bb.min.Z:.1f} mm above the wheel bottoms")
     export_step(asm, str(OUT / "rover_full.step"))
     print("wrote", OUT / "rover_full.step")

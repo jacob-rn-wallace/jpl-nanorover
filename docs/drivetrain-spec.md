@@ -107,6 +107,10 @@ Caveats: the uncertainty is about plus or minus 40 %. The background rock in the
 
 **Effect on the drivetrain:** the wheel motor choice (256:1) suits this: 12 rpm at the wheel is about 3000 rpm at the motor, comfortably inside the GPX 10's 12 000 rpm input limit and smooth for a hall-sensor motor. Wheel power at 0.1 N.m and 1.2 rad/s is about 0.12 W. So the earlier assumed 5 to 20 mm/s is replaced by **a design drive speed of 40 mm/s, with a cruise range of 20 to 50 mm/s taken from the videos**, until the owner sets another.
 
+## Option C in the CAD (2026-11-11)
+
+Layout C is modelled: `wheel.py` preset `thin` (34 g wheels), `strut.py` `TIP_MODE = "motor"` (22 g struts, bored tips, `wheel_motors.step` with the four 20.2 g motors), and `assembly/rover.py` counts them. The whole model is 1338 g with the wheel motors (954 g of it is the Hammond box and lid plate, to be redesigned) and no strut motors, wiring or electronics. Wheel masses: the model gives 34 g against the 45 g estimated above, because it has no hub tube.
+
 ## Option C clearance (CAD check, 2026-11-11)
 
 `hardware/drivetrain/motor_clearance.py` (needs `.venv`, run after `body.py` and `strut.py`) puts the 10 mm x 45 mm wheel motor and gearhead in each wheel, carried by the strut tip, with the output end as far toward the cone apex as the cone's inner radius allows (|x| = 127.35 mm) less a shaft-and-hub pad, and the tail running inboard.
@@ -118,7 +122,7 @@ Caveats: the uncertainty is about plus or minus 40 %. The background rock in the
 | 6 mm | 76.35 | 6.4 mm | 8.9 mm |
 
 - **The struts and wheels still clear the body.** The tail stays at least 6 mm from the body face even with a 6 mm pad. The wheels and struts hang outside the body faces and never meet the body (the wheel is 15 mm outboard of the casting); only the stud flange and nuts are near the hub.
-- **No new strut collisions.** One strut's motor hits the other strut of the same hub at the same 12 of 144 angle pairs (30 degree steps) as the 6 mm axle stubs do (equal angles; the struts cannot swap places, as before).
+- **No new strut collisions.** One strut's motor against the other strut alone gives 0 of 144 angle pairs (30 degree steps). With both motors included `strut.py` finds the same 12 equal-angle pairs as before, where two wheels would be in the same place (the struts cannot swap places, as before).
 - **Not covered:** the motor's flexprint cable at the tail (about 4 mm), a finer angle step than 30 degrees, the strut's real tip mounting (a 10 mm bore in the 18 mm tip boss leaves 4 mm of wall), and the thin-wall wheel's end plate. The motor is a plain cylinder.
 
 ## Idea: motors in the body, belts to the wheels (NPO-20057)

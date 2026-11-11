@@ -42,11 +42,17 @@ N_TEETH = 16                      # grousers around the cylinder
 HELIX_DEG = 43.5                  # helix angle of the grousers from the axle at the crests, right-handed (seen from outside it turns counterclockwise going outward)
 L_DRUM = 31.3 * K_SCALE           # cylinder length (about 34.5 mm after scaling)
 H_CONE = 9.2 * K_SCALE            # cone apex above the rim (about 10 mm): the collar centre is about 14 mm above the rim, the collar being 8 mm long
-CONE_T = 1.5                      # cone shell thickness (an estimate)
-R_INNER = R_ROOT - 2.5            # inner radius of the cylinder shell (an estimate: the wheel holds a gearmotor)
-END_T = 2.0                       # inboard end plate
-GROUSER_T = 1.2                   # grouser blade thickness (an estimate)
-HUB_D = 12.0                      # hub tube around the axle
+# Wall thicknesses are estimates.  "thin" is layout C (docs/drivetrain-spec.md): thin-walled aluminium, the wheel motor sits inside on the strut tip
+# and drives the wheel through its output shaft at the cone apex, so there is no hub tube.  "v1" is the wheel as first modelled (with a hub tube on a 6 mm axle).
+PRESETS = {
+    "v1":   dict(WALL=2.5, END_T=2.0, CONE_T=1.5, GROUSER_T=1.2, HUB_TUBE=True),
+    "thin": dict(WALL=1.0, END_T=1.0, CONE_T=0.8, GROUSER_T=0.8, HUB_TUBE=False),
+}
+PRESET = "thin"
+HUB_D = 12.0                      # hub tube around the axle (v1 only)
+HOLE_D = 12.0                     # hole in the inboard end plate for the wheel motor, 10 mm (thin only; 1 mm clearance all round)
+SHAFT_BORE = S.SHAFT_D + 0.1      # bore in the apex boss and collar for the motor's output shaft (diameter assumed in strut.py)
+BOSS_IN = 4.0                     # boss under the cone apex that the output shaft drives (thin only)
 SERR_PITCH = 3.0                  # axial pitch of the serrations along each crest
 SERR_DEPTH = 1.4
 SERR_WIDTH = 2.4                  # tangential width of each notch
@@ -54,6 +60,16 @@ AXLE_D = S.AXLE_D
 COLLAR_D = 8.0                    # collar on the cone apex (about 8 mm across and 8 mm long in the second photo)
 COLLAR_L = S.COLLAR_L
 # --------------------------------------------------------------------
+
+def use_preset(name):
+    """Switch the wall thicknesses and the hub style: sets the module-level parameters the builders read."""
+    g = globals()
+    g["PRESET"] = name
+    g.update(PRESETS[name])
+    g["R_INNER"] = R_ROOT - PRESETS[name]["WALL"]
+
+
+use_preset(PRESET)
 
 TWIST = math.degrees(L_DRUM * math.tan(math.radians(HELIX_DEG)) / R_TIP)   # azimuth turned over the cylinder length, from the helix angle at the crests
 W = L_DRUM + H_CONE                                                      # inner face to the cone apex
@@ -92,10 +108,16 @@ def wheel_local():
     with BuildSketch(Plane.XZ) as sk:
         Polygon((R_ROOT, L_DRUM), (R_ROOT, L_DRUM - CONE_T), (0, L_DRUM + H_CONE - CONE_T), (0, L_DRUM + H_CONE), align=None)
     cone = revolve(sk.sketch, Axis.Z)
-    hub = Cylinder(HUB_D / 2, W, align=(Align.CENTER, Align.CENTER, Align.MIN))
     collar = Cylinder(COLLAR_D / 2, COLLAR_L, align=(Align.CENTER, Align.CENTER, Align.MIN)).moved(Location((0, 0, W)))
-    solid = d + cone + hub + collar
-    solid = solid - Cylinder(AXLE_D / 2, W + COLLAR_L + 2, align=(Align.CENTER, Align.CENTER, Align.MIN)).moved(Location((0, 0, -1)))
+    if HUB_TUBE:
+        hub = Cylinder(HUB_D / 2, W, align=(Align.CENTER, Align.CENTER, Align.MIN))
+        solid = d + cone + hub + collar
+        return solid - Cylinder(AXLE_D / 2, W + COLLAR_L + 2, align=(Align.CENTER, Align.CENTER, Align.MIN)).moved(Location((0, 0, -1)))
+    boss = Cylinder(COLLAR_D / 2, BOSS_IN + CONE_T, align=(Align.CENTER, Align.CENTER, Align.MIN)).moved(Location((0, 0, W - BOSS_IN - CONE_T)))
+    solid = d + cone + boss + collar
+    solid = solid - Cylinder(HOLE_D / 2, END_T + 2, align=(Align.CENTER, Align.CENTER, Align.MIN)).moved(Location((0, 0, -1)))
+    z0 = W - BOSS_IN - CONE_T - 1
+    solid = solid - Cylinder(SHAFT_BORE / 2, W + COLLAR_L + 2 - z0, align=(Align.CENTER, Align.CENTER, Align.MIN)).moved(Location((0, 0, z0)))
     return solid
 
 
@@ -119,7 +141,7 @@ def main():
           f"{W:.1f} mm inner face to apex plus a {COLLAR_L:.0f} mm collar (bounding box {bb.size.X:.1f} x {bb.size.Y:.1f} x {bb.size.Z:.1f})")
     print(f"                    {N_TEETH} helical grousers ({360 / N_TEETH:.1f} degrees apart), blades {GROUSER_T} mm thick standing {R_TIP - R_ROOT:.2f} mm proud, "
           f"{HELIX_DEG} degrees from the axle at the crests, right-handed: {TWIST:.0f} degrees of turn over the cylinder; serrations {SERR_PITCH} mm pitch, {SERR_DEPTH} mm deep")
-    print(f"                    valid {w0.is_valid}, solids {len(w0.solids())}, mass about {w0.volume * 2.70e-3:.0f} g each in aluminium (hollow drum, no motor); photo scale {K_SCALE:.3f}")
+    print(f"                    valid {w0.is_valid}, solids {len(w0.solids())}, mass about {w0.volume * 2.70e-3:.0f} g each in aluminium (hollow drum, no motor; preset '{PRESET}'); photo scale {K_SCALE:.3f}")
     wheels = []
     for side in (1, -1):
         for d in (+1, -1):
@@ -129,6 +151,8 @@ def main():
     # ---- checks against the other parts at the default pose ----
     parts = {"body": import_step(BODY_OUT / "body_hammond.step"), "hub studs": import_step(BODY_OUT / "hub_studs.step"),
              "struts": import_step(STRUT_OUT / "struts.step"), "lid plate": import_step(BODY_OUT / "lid_plate.step")}
+    if (STRUT_OUT / "wheel_motors.step").exists() and not HUB_TUBE:
+        parts["motors"] = import_step(STRUT_OUT / "wheel_motors.step")
     for nm, shp in parts.items():
         assert shp.volume > 0, f"{nm} imported with zero volume; re-run its script"
         hit = WH & shp
