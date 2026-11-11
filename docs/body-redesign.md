@@ -231,6 +231,54 @@ Surplus of one lit face (W): in full sun A +2.55, B +2.45, **C +1.30, D -0.34, E
 - Both lids need their own gasket and fasteners, doubling the lid screws and inserts in the budget (not yet doubled).
 - Bonded cells on a carbon lid need an insulating layer under them.
 
+## Design method: a solid block with cavities (owner, 2026-11-11; `hardware/body/block.py`)
+
+**Method (owner):** treat the body as a completely solid, uniform 140 x 140 x 60 mm block; cut the components and their required connections and views out of it; when every component is specified and placed, derive from that one block both (a) a chassis made of carbon tubs joined together (the block's faces, exterior and interior, become laminate) and (b) a forged-carbon unibody (the cavities become the cores of a mould). **Purchasing is deferred indefinitely (owner), so no bench tests for now.** Current inputs are the placeholders of `layout.py`.
+
+**What `block.py` does:** cuts 33 cavities from a 140 x 140 x 60 mm block as real CAD: four servo pockets (envelope plus 1 mm, with the output and back bosses), the hub drive on both sides (housing tube through the hub wall, gear and pinion discs, hollow shaft, horn adapter), the two lid-borne boards, the battery, the camera, the beamsplitter plate's bounding box, the lamp and its beam to the plate, the 26 mm window through the +y wall, **the camera's view as a 60 degree cone from the lens to the window**, the antenna swing disc and its shaft hole through the -y wall. It exports `hardware/body/out/body_block.step` (our own geometry), re-imports it (one solid, 867.2 cm3, matching) and measures what the cavities leave.
+
+### What the block says
+- **Cavities remove 26% of the block**: 867 of 1,176 cm3 remain. As solid carbon that would be **about 1.34 kg**, so the block is a design volume, never the part: all of the remaining material between the surfaces has to be taken out.
+- **Almost everything is far from the outside.** The servo pockets are 11 to 24.5 mm from the nearest outer face and the battery 18 mm; **only the hub tubes (through the hub walls), the window and its optics, and the antenna shaft touch or come within 2 mm of the exterior.** So the exterior skin and the cavities do not share material except at those penetrations: lining a cavity means a second, separate skin.
+- **The cost of lining every surface, outside and in** (surface area times thickness; no skin shared with a neighbour):
+
+| Lined surface | Area | 1.0 mm woven | 1.5 mm forged |
+|---|---|---|---|
+| Outside | 728 cm2 | 113 g | 158 g |
+| 4 servo pockets | 331 cm2 | 51 g | 72 g |
+| Hub drive, both sides | 154 cm2 | 24 g | 33 g |
+| Boards (ride on the lids) | 232 cm2 | 36 g | 51 g |
+| Camera, beamsplitter, lamp and window | 94 cm2 | 15 g | 20 g |
+| Antenna pivot | 36 cm2 | 6 g | 8 g |
+| Battery | 20 cm2 | 3 g | 4 g |
+| **Everything** | **1,594 cm2** | **247 g** | **347 g** |
+
+  A voxel check (1 mm, unions where surfaces share material) gives a 1 mm skin of 135 cm3, 210 g woven or 196 g forged, consistent with the area sum less overlaps. **The voxel step is too coarse for 1.5 mm** (it jumps from 141 to 263 cm3 between 1.5 and 2.0 mm, grid rounding); the area-based figures are the better ones.
+- **Against the 386 g budget** (shell, rings and screws 32 g, seal 15 g, electronics 100 g, cells 47 to 109 g, all from `layout.py`):
+
+| Treatment | Total at cells 47 / 78 / 109 g |
+|---|---|
+| Line every cavity (woven 1.0 mm): 247 g of shell | **441 / 472 / 503 g, over budget by 55 to 117 g** |
+| Outside + servo pockets + camera group + antenna pivot lined (woven 1.0 mm): 184 g | 378 / 409 / 440 g (under by 8 g only with the lightest cells) |
+| Outside only (woven 1.0 mm + 28 g of keys): 141 g | 335 / 366 / 397 g (under by 51, 20 g; over by 11 g with the heaviest cells) |
+
+  **The same holds for a forged unibody.** Forged at 1.5 mm with every surface lined is about 347 g of shell, 530 g or more in total: well over budget.
+
+### Reading
+- **The method works as a design tool**: it keeps one master model, shows exactly what touches the outside and what does not, and lets both bodies be checked against the same cavities.
+- **The rule for deriving the part is what decides the mass.** **Lining every cavity does not fit the budget at 1.0 mm woven, and certainly not at 1.5 mm forged.** What the block says is that the interior should be mostly one open volume, with a lining or a local feature only for what needs a located, stiff interface: the servo group, the camera and window group, and the antenna pivot. Boards and battery do not need their own tubs: they ride on the lids or on standoffs.
+- **The hub drive group does not need a lining either**: the aluminium hub housing is itself the structure; the wall needs a bonded reinforcing ring where the housing tube passes through it.
+- **A cheaper way to locate the servos than four tubs:** the four servos could sit between two or three bulkhead plates (so the cost is a plate, not a box around each servo); the block can be re-cut with the bulkheads as surfaces to test this.
+- **For the tub chassis:** the four walls and two lids form one set; the servo group, the camera group and the antenna pivot become small tubs bonded into the frame. **For the forged unibody:** the cores are the interior void plus the pockets; the mould is a pair of cores in a cavity, with the same wall rule.
+
+### Not done yet
+- The wiring channels and connectors (not specified), the lid split and its joint, the keys, the screws and insert bosses, the cells' surface, and the lamp beam's exact path are not cut. The pockets are boxes and discs, not the real part shapes.
+- Nothing is derived into a tub or unibody design yet; it waits until the components are specified.
+
+### Decisions needed to continue (owner)
+1. For the derived designs, **which cavities become structural linings** (tubs, or in the forged case moulded pockets) versus open interior or bulkheads: my suggestion above is the servo group, the camera group and the antenna pivot only.
+2. Whether to **test servo mounting on bulkhead plates** instead of pockets (cheaper in mass, by the area figures above).
+
 ## Open decisions (owner)
 1. **Woven laminate or forged carbon** (revised recommendation: woven plates bonded into a box, for the crisp edges), and the manufacturing route (a mould from a printed plug, CNC-cut plate bonded into a box, or a bought moulded part).
 2. **Closed shell or open frame:** a sealed box is not required by the scope (no spaceflight), but dust and water tolerance would need deciding.
