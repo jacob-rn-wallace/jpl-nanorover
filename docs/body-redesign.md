@@ -109,6 +109,52 @@ Model: `hardware/body/cf_cost.py`; every input there is tagged **SRC** (a vendor
 - **Revised recommendation stands (bonded woven plates)** for a first body. **A middle path worth testing cheaply:** print a small test mould for the lid or a corner and press one forged part, to see what edge radius, surface and thickness the process really gives before committing to the deep tub.
 - **Uncertainty:** the table's gap between low and high is a factor of 3 to 8; the sourced prices pin only the materials. Get two quotes (a cutting service for the six plates, and a print or press) before treating any figure as a budget.
 
+## Decision deferred; interior layout first (owner, 2026-11-11)
+
+**The woven-versus-forged choice is deferred** until the interior is laid out, so the comparison can use real part placement instead of allowances. The layout is material-independent by design:
+- **Keep-in volume:** the 140 x 140 x 60 mm envelope pulled in **2.5 mm** from every outer face (a 1.5 mm forged wall plus 1 mm of draft and tolerance; a 1.0 mm plate wall fits inside with room to spare), minus a **6 mm strip along every edge** (room for the plate box's bonded keys). If forged wins the keys disappear and the interior only gains room; designing for forged and then switching to plates would be the risky direction.
+- **Fixed regardless:** the 24.2 mm hub bores, the servo and hub positions from `hub.py`, the window (26 mm, on the +y face at x = +40.8, z = 36.8), the headlamp about 30.6 mm toward -x of it.
+- **What the layout feeds back to the comparison:** the real wall-thickness need (local thickening at the servos, board mounts, camera), the number and place of mounting bosses (many favour forged, which can mould them in; few favour bonded standoffs), whether the interior tolerates draft, the lid face and size, a measured mass, and a better cost model.
+- **In parallel, if wanted:** a small printed test mould for a lid or corner (about $100) to see the real edge radius and surface forged gives.
+
+## Interior layout, first pass (`hardware/body/layout.py`, 2026-11-11)
+
+![body layout](images/body-layout.png)
+
+Top view looking down with +y (the window end) at the top and **+x on the page's right, so the window at x = +40.8 appears on the right here; standing at +y facing the end face (the viewer's view) it is on the left.** The side view looks from +x with +y to the right. Servos grey, components coloured, the dashed line is the keep-in inset; overlaps between a component and a servo in one view are projection (they differ in the other axis).
+
+**All component sizes and masses are placeholders (ASM): no electronics, camera, headlamp, antenna or cells have been chosen.** The servos and hub are the real modelled geometry from `hub.py`, with 1 mm clearance.
+
+### What the numbers say
+| | Result |
+|---|---|
+| Keep-in volume | 1,016 cm3 (of 1,176 cm3 envelope) after the 2.5 mm inset and 6 mm edge strips |
+| Taken by servos and hub (1 mm clearance) | 198 cm3; **818 cm3 free** |
+| Free bays | front (behind the window, y beyond servo B): 136 x 32 x 56 mm, 236 cm3; lower (under the servos): 136 x 136 x 15 mm, 268 cm3; upper (above them): 136 x 136 x 15 mm, 268 cm3; rear: 136 x 9 x 56 mm, only 62 cm3; centre gap between the two servo pairs: 16 mm wide x 136 x 56 mm, 121 cm3 |
+| Placed placeholders | main board 70 x 68 x 7.6 mm (lower bay), power board 44 x 30 x 6 mm and a 35 x 35 x 4 mm patch antenna (upper bay), a 25 x 24 x 9 mm camera behind the window, a 22 x 14.5 x 15 mm headlamp: all clear of the keep-in limits, the servos and each other; **they use 7% of the free volume** |
+
+- **Volume is not the constraint; mass is.** With over 800 cm3 free and the placeholders using 61 cm3, the box has far more room than it needs. The 386 g budget is the tight resource.
+- **Solar cells are the biggest unknown in the mass budget.** Cells on four faces at 60% coverage are about 560 cm2 x 0.6; at an assumed 0.15 to 0.35 g/cm2 (**no cell chosen**) that is 50 to 118 g. Total body contents (shell, rings and screws 32 g, seal 15 g, electronics and wiring 85 g, cells):
+
+| Shell | cells 0.15 g/cm2 | 0.25 | 0.35 |
+|---|---|---|---|
+| woven plates 1.0 mm + keys (141 g) | 323 g (63 g under 386) | 357 g (29 g under) | 391 g (5 g over) |
+| forged tub 1.5 mm (164 g) | 346 g (40 g under) | 380 g (6 g under) | 414 g (28 g over) |
+
+  So **the shell choice is worth about 23 g, the cell choice 68 g.** Forged at 1.5 mm is only workable with light cells, and plates with all but the heaviest. Light cells matter more than the shell material.
+- **Balance.** The simulation put the whole rover's centre of mass 2.9 mm toward -y of the hub axis because the two servos on a side sit at different y (servo B +12.4, servo A -35.4 mm). With the camera, headlamp and main board toward the +y end, the body contents' centre of mass is at **y = +5.7 mm** (z = 29.1 mm against the hub at 30), which moves the whole rover's to **y = -0.9 mm** (z shift 0.3 mm). A 386 g body would need +7.5 mm to centre it exactly. This is a good side effect of putting the camera at the window end; the sim's tip-over numbers improve slightly (not re-run).
+
+### Cautions
+- The 1 mm voxel grid and 1 mm clearance make the checks good to about 1 mm. The servo connector side, cable bends, the hub housing's retention and the strut stops are not modelled.
+- The antenna in the top face needs a non-conductive window; with a carbon body it cannot sit behind a bare top.
+- The camera and headlamp positions put their mass at the front, which also moves the centre of mass; changing them changes the balance.
+- Nothing has been placed for the lid screws, board standoffs, camera mounts, sealing or the wiring paths.
+
+### Next
+1. Choose cells (the 68 g spread), and a board/camera/lamp, so the placeholders become parts.
+2. Decide the lid face, which fixes the joints and the seal for either shell material.
+3. Re-run the comparison (`cf_cost.py`, `cf_compare.py`) with the real wall thickness, mount count and mass.
+
 ## Open decisions (owner)
 1. **Woven laminate or forged carbon** (revised recommendation: woven plates bonded into a box, for the crisp edges), and the manufacturing route (a mould from a printed plug, CNC-cut plate bonded into a box, or a bought moulded part).
 2. **Closed shell or open frame:** a sealed box is not required by the scope (no spaceflight), but dust and water tolerance would need deciding.
