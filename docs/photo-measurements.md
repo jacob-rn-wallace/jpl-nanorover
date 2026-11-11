@@ -86,6 +86,21 @@ The sizes still depend on the camera solution, on the near wheel standing on the
 
 In the first photo the black unit's end face has a rounded-square window, about 25 mm wide and 22 mm tall (clear), inside a lighter bonded border about 35 x 30 mm (an adhesive fillet), near one end of the face. This is the camera aperture on the end face opposite the silver unit's round window (owner's reading). At the 140 mm scale of that photo; rough, because the face is seen at a steep angle.
 
+## The Space Place top decal (compared by eye, 2026-11-11)
+
+NASA Space Place's toy nanorover (a 1998 JPL pattern PDF, see `jpl-nanorover-literature.md`, item 19) has a printed top decal of solar cells. Compared with the top faces in the two photographs:
+
+| Feature | Decal | Black unit (`img840-340`) | Silver unit (`NanoRover-hires`) |
+|---|---|---|---|
+| Large cells along two opposite edges | 5 + 5, in two rows | 5 + 5, in two columns (measured above) | not matched: about 14 flat cells in a different arrangement, several tilted in pairs |
+| Cells beside the centre | 4 small (two of each orientation) | 4 centre cells | not matched |
+| Extra cells | 2 + 2 more on the other two edges (18 in all, flat) | none; 14 flat cells | 14 flat cells |
+| Centre | a flat cross and the antenna ring | a raised block with sloped cell faces | a raised block with a cell on its face, plus the antenna loop |
+
+Reading: the decal's 5 + 5 edge rows and 4 centre cells match the black unit's layout, but it adds 4 side cells and has no raised block, so it is a simplified drawing, not a plan of either unit. It does not change the cell sizes above. It weakly suggests that JPL's own outreach drawing in October 1998 was drawn from something like the black unit's cell layout, not the silver unit's; that is an inference from one cartoon and settles nothing about the reference unit. Its lens decal (a ring around a crosshair) is round, like the silver unit's window, not the black unit's square one.
+
+Wheel treads on the toy: the four printed strips come as two with one slant and two with the opposite slant, so the toy's four wheels are in mirror-image pairs. The CAD uses one handedness for all four wheels (`wheel-spec.md`, "right-handed"). Whether the real wheels were mirrored was not checked here; the two photographs could settle it (open question).
+
 ## What this does not give
 
 Absolute accuracy better than a few percent, any dimension of the two faces not visible, the hub details (only partly visible), or the finish.

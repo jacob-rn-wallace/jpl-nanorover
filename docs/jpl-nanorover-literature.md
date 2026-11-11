@@ -86,7 +86,7 @@ The Sojourner/Rocky lineage vehicles are conceptual ancestors only. The nanorove
 
 ### E. Outreach and secondary
 
-19. **NASA Space Place, "Make a Balloon-powered Nanorover!"** Says the real rover weighs 1 kg and is "a couple of inches high"; includes a prototype photo.[^spaceplace] Educational, not dimensional.
+19. **NASA Space Place, "Make a Balloon-powered Nanorover!"** Says the real rover weighs 1 kg and is "a couple of inches high"; includes a prototype photo.[^spaceplace] Educational, not dimensional. It also links a two-page pattern PDF (`roverpat.pdf`, by D. F. Miller at JPL, dated 1998-10-20)[^roverpat] for a styrofoam toy. The toy is **not a scale model** (measured from the PDF at its printed size, unverified: body about 4.75 x 4.75 in with 1.85 in sides, wheel 1.8 in, strut 2.97 in pivot to axle; wheel/body 0.38 and strut/body 0.63 against the papers' 0.46 and 0.50), so no dimension is taken from it. Qualitatively it has two struts per side on one shaft through the middle of each side, the lens on an end face, the antenna in the middle of the top, and a top decal of cells (see `photo-measurements.md`, "The Space Place top decal"). Verification level: informal outreach drawing; supports layout only.
 20. **Scigliano (1998), MIT Technology Review.** Source of the one-pound nanorover framing and the two-wheeled prototype mention.[^techreview] Journalism.
 21. **Starek et al. (2015), Springer preprint.** Describes the Nanorover as "grapefruit-sized."[^starek] Secondary.
 22. **ETHW oral history, Brian Wilcox.** Career context; no specs verified.[^ethw]
@@ -144,6 +144,7 @@ The Sojourner/Rocky lineage vehicles are conceptual ancestors only. The nanorove
 [^barcohen]: Y. Bar-Cohen, "Electroactive Polymers as Artificial Muscles - Reality and Challenges" (slides). [NTRS PDF](https://ntrs.nasa.gov/api/citations/20010067234/downloads/20010067234.pdf).
 [^kawaguchi]: J. Kawaguchi et al., "The MUSES-C mission for the sample and return," *Acta Astronautica* (2003). [ScienceDirect](https://www.sciencedirect.com/science/article/abs/pii/S0094576502001467).
 [^spaceplace]: NASA Space Place, "Make a Balloon-powered Nanorover!" [Page](https://spaceplace.nasa.gov/nanorover/en/).
+[^roverpat]: D. F. Miller (JPL), pattern sheets for the Space Place nanorover toy, PDF dated 1998-10-20. [PDF](https://spaceplace.nasa.gov/review/nanorover/roverpat.pdf). A saved copy is in the private repo (`reference-material/roverpat-1.pdf`); usage terms unchecked.
 [^techreview]: E. Scigliano, "Honey, They've Shrunk the Rover," *MIT Technology Review*, Jan 1, 1998. [Article](https://www.technologyreview.com/1998/01/01/237105/honey-theyve-shrunk-the-rover/).
 [^starek]: J. Starek et al., "Spacecraft Autonomy Challenges for Next-Generation Space Missions," Springer, 2015. [Preprint](http://stanford.edu/~pavone/papers/Starek.Acikmese.ea.Springer15.pdf).
 [^ethw]: "Oral-History: Brian Wilcox," ETHW. [Page](https://ethw.org/Oral-History:Brian_Wilcox).
