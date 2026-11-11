@@ -11,7 +11,7 @@ Where the numbers come from (docs/wheel-spec.md has the full record)
       - the outer disk is a real **cone**: the collar sits on the apex (about 10 mm proud of the rim, the collar centre about 14 mm) for a rim of 59.5 mm across;
       - behind it is a smooth cylinder whose radius equals the cone's rim, carrying **grousers in a helix**: thin blades that stand straight up, radially, from
         the cylinder surface, with fine saw-tooth serrations along their outer edges.  The helix leans 43.5 degrees from the axle at the crests,
-        right-handed, and there are about 16 grousers (the dark step lines are spaced 19 to 25 degrees on the visible arc);
+        right-handed (two of the four wheels are mirrored, see ALTERNATE_HANDS), and there are about 16 grousers (the dark step lines are spaced 19 to 25 degrees on the visible arc);
       - the cylinder is about 34 mm long and the grousers stand about 2.75 mm proud of it.
   * img840-340-hires.original.jpg (the earlier prototype) gives the same cone rim to tooth-tip ratio (27.0 / 29.5 = 0.915) and about 17 teeth;
     its disk looks nearly flat, so that wheel differs from the one in the second photo.  The second photo is the better guide to the MUSES-CN wheel.
@@ -39,6 +39,7 @@ K_SCALE = 65.0 / 59.0
 R_TIP = 29.5 * K_SCALE            # grouser crests = 32.5 mm
 R_ROOT = 27.0 * K_SCALE           # smooth cylinder = rim of the cone = 29.75 mm
 N_TEETH = 16                      # grousers around the cylinder
+ALTERNATE_HANDS = True            # owner, 2026-11-11, from the photos: front and rear wheels on one side have opposite handedness and the other side mirrors it (bilateral symmetry)
 HELIX_DEG = 43.5                  # helix angle of the grousers from the axle at the crests, right-handed (seen from outside it turns counterclockwise going outward)
 L_DRUM = 31.3 * K_SCALE           # cylinder length (about 34.5 mm after scaling)
 H_CONE = 9.2 * K_SCALE            # cone apex above the rim (about 10 mm): the collar centre is about 14 mm above the rim, the collar being 8 mm long
@@ -140,12 +141,18 @@ def main():
     print(f"wheel               grouser tips {2 * R_TIP:.1f} mm across, cylinder and cone rim {2 * R_ROOT:.1f} mm, cylinder {L_DRUM:.1f} mm long, cone apex {H_CONE:.1f} mm above the rim, "
           f"{W:.1f} mm inner face to apex plus a {COLLAR_L:.0f} mm collar (bounding box {bb.size.X:.1f} x {bb.size.Y:.1f} x {bb.size.Z:.1f})")
     print(f"                    {N_TEETH} helical grousers ({360 / N_TEETH:.1f} degrees apart), blades {GROUSER_T} mm thick standing {R_TIP - R_ROOT:.2f} mm proud, "
-          f"{HELIX_DEG} degrees from the axle at the crests, right-handed: {TWIST:.0f} degrees of turn over the cylinder; serrations {SERR_PITCH} mm pitch, {SERR_DEPTH} mm deep")
+          f"{HELIX_DEG} degrees from the axle at the crests, right-handed (mirrored on two wheels when ALTERNATE_HANDS): {TWIST:.0f} degrees of turn over the cylinder; serrations {SERR_PITCH} mm pitch, {SERR_DEPTH} mm deep")
     print(f"                    valid {w0.is_valid}, solids {len(w0.solids())}, mass about {w0.volume * 2.70e-3:.0f} g each in aluminium (hollow drum, no motor; preset '{PRESET}'); photo scale {K_SCALE:.3f}")
     wheels = []
+    w0_left = w0.mirror(Plane.YZ)         # the left-handed wheel: a mirror image across a plane through the axle
     for side in (1, -1):
         for d in (+1, -1):
-            wheels.append(place(w0, d if side > 0 else -d, S.POSE_DEG, side))
+            w = place(w0, d if side > 0 else -d, S.POSE_DEG, side)
+            c = w.center()
+            if ALTERNATE_HANDS and c.X * c.Y < 0:     # right-handed where x*y > 0 (+x +y and -x -y), left-handed on the other diagonal
+                w = place(w0_left, d if side > 0 else -d, S.POSE_DEG, side)
+            wheels.append(w)
+            print(f"  wheel at x {c.X:+6.1f}, y {c.Y:+6.1f}: {'right' if (c.X * c.Y > 0 or not ALTERNATE_HANDS) else 'left'}-handed")
     WH = Compound(wheels)
 
     # ---- checks against the other parts at the default pose ----

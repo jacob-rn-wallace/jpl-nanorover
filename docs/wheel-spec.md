@@ -27,7 +27,8 @@ A **smooth hollow cylinder carrying grousers in a helix, closed at the outside b
 - **The grousers are thin blades that stand straight up from the cylinder, radially, and run along a helix.** They are not a ratchet profile and not separate saw-blade discs:
   the wide bright bands between the dark lines on the photo are the smooth cylinder, and the dark lines are the grousers and their shadows. Each blade has fine
   saw-tooth serrations along its outer edge. (The owner's description. My first model stacked eight saw-tooth discs, and my second twisted a ratchet profile; both read the pattern wrongly.)
-- **Helix:** the grousers lean 43.5 degrees from the axle at their crests and are right-handed (seen from outside they turn counterclockwise going outward). That comes from
+- **Handedness alternates (owner, 2026-11-11, from the photos).** Front and rear wheels on one side have opposite handedness, and the other side is the mirror image of the first, so the wheels are bilaterally symmetric (the body is too, apart from the camera and headlamp cutouts). On the silver unit (`NanoRover-hires`) the wheels read, in my own check by eye: front-left right-handed, back-left left-handed, front-right left-handed (back-right hidden), which fits; the black unit's back-left and front-left also fit, but I read its front-right as right-handed, which does not (taken as a misread; low-resolution crops). "Front" is the end with the round window (the CAD's +y face) and "left" is the viewer's, facing that end. In the CAD that is: right-handed at (+x, +y) and (-x, -y), left-handed at (+x, -y) and (-x, +y) (`ALTERNATE_HANDS` in `wheel.py`; the left-handed wheel is a mirror of the right-handed one, not a rotated copy). The Space Place toy's tread strips (two of each slant) point the same way. Earlier versions of this spec and the CAD had all four right-handed.
+- **Helix:** the grousers lean 43.5 degrees from the axle at their crests and are right-handed for the wheel as modelled (seen from outside they turn counterclockwise going outward; two of the four are mirrored, see above). That comes from
   the slope of the dark lines on the front of the cylinder (about 20 degrees on the image, which the camera model turns into 43.5 degrees from the axle).
 
 ## How it was measured
@@ -55,7 +56,7 @@ The scale factor 65 / 59 is applied to every measured length so the diameter ove
   About 190 small right-triangle notches cut the serrations along the crests (3 mm pitch, 1.4 mm deep).
 - A 1.5 mm conical shell closing the outer end (apex 10.1 mm above the rim), a 12 mm hub tube around the 6 mm axle, and an 8 x 8 mm collar on the apex.
 - Mass about 78 g per wheel as aluminium with no motor, 313 g for four (preset `v1`; see "Presets"). The hollow interior, wall thicknesses, hub tube, blade thickness and collar are estimates.
-- The same wheel on both sides (a rotated copy, so the helix keeps its handedness).
+- Two right-handed and two left-handed wheels (see "Handedness alternates"); the left-handed ones are mirror copies.
 - Checks: the wheels overlap nothing (casting, studs, struts, lid) and the exported STEP re-imports with the same volume. Default stance: overall 275.7 mm wide
   by 191.9 mm long, wheel bottoms 32.1 mm below the box floor. The width depends on the strut layout, which is a placeholder (see `strut-spec.md`).
 - Projecting the CAD wheel back onto the second photo, the cone profile, the collar, the end of the cylinder and the grouser lines line up with the dark lines on the photo.
