@@ -15,7 +15,7 @@ Layout (hub axis along x, at |x| = SPOT_OUT = 69.25 on each side, z = HUB_Z; thi
 Where the numbers come from
   * STS3215: Feetech product specification, STS3215 A/0 2020-04-10 (core-electronics.com.au copy), page 6 drawing and page 4: body 45.23 x 24.73 mm, 55 +- 1 g,
     32 mm body height along the shaft (35 mm with the ears), a 25-tooth spline output with a 3.4 mm boss on the output face and a 4.1 mm boss on the back (the shaft
-    comes out of both faces), shaft about 10.7 mm from one end of the long side (READ BY EYE from the drawing's scale, plus or minus 1 mm), page 7 horn 19.95 mm, 4 x M3.
+    comes out of both faces), shaft 10.2 mm from the chamfered end of the long side (measured in pixels on the page 6 drawing, 2026-11-11, against the 45.23 mm dimension: 10.19 mm, +- 0.1 mm; checked by the drawing's own 12.5 mm label from the shaft to the second centreline, which measures 12.5; the drawing is stretched about 1.18 times along the long side relative to the width, so only measurements along that side were used; the 32, 35, 36.5, 29, 3.4 and 4.1 mm height labels are printed), page 7 horn 19.95 mm, 4 x M3.
   * Everything else is a design choice of mine: shaft and bearing sizes (typical catalogue sizes, mass and rating not looked up), gear size, positions.
 NOT modelled: gear teeth (the gears are plain discs at the pitch diameter + 2 mm), the servo mounting, wire routing, the housing's retention and seals, the
 shaft retainers and set screws, the servo's cable, the strut stops.  Printed or aluminium gears: see docs/drivetrain-spec.md for the tooth stress.
@@ -38,7 +38,7 @@ BODY_OUT = HERE.parent / "body" / "out"
 HZ = E.HUB_Z
 # servo STS3215
 SV_L, SV_W, SV_H = 45.23, 24.73, 32.0        # long side (along y), width (along z), body height along the hub axis (x)
-SV_SHAFT_END = 10.7                          # shaft to the near end of the long side (read from the drawing by eye)
+SV_SHAFT_END = 10.2                          # shaft to the chamfered end of the long side (measured from the drawing, see above)
 SV_BOSS_D, SV_BOSS_H = 9.0, 3.4              # output boss on the front face
 SV_G = 55.0
 # shafts and bearings

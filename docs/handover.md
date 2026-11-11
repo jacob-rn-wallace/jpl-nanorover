@@ -91,7 +91,7 @@ The owner's account of each unit's role (and the KTLA segment's unit) is taken o
 ## 12. Open items and next steps after the drivetrain session
 
 1. **The body redesign** (deferred by the owner; the next big job). Requirements it now has to meet: a mass of about 386 g with electronics and cells, the hub holes opened to 24.2 mm, room for four servos (45.2 x 24.7 x 32 mm, positions in `hub.py`) and the batteryless electronics, the centre of mass near the hub axis (the simulation's tip-over numbers assume it).
-2. **Check the two unverified servo dimensions** against a real part or the full drawing: the shaft offset (about 10.7 mm from the end of the long side, read by eye) and the 32 mm body height.
+2. **Servo dimensions (checked 2026-11-11):** measured on the Feetech page 6 drawing, the shaft is 10.2 mm from the end of the long side (was 10.7 by eye; `hub.py` updated) and the 32 mm body height is a printed dimension. Still from a drawing, not a part.
 3. **Smaller strut servos:** the load is low enough (0.17 N.m maximum hold) that a 3 to 5 kg.cm class servo could do; none was chosen. Dynamic loads are not simulated, so test before shrinking.
 4. **Details not modelled:** gear teeth and backlash, how the pinion, the horn adapter, the wheel and the spindle tubes are fixed, a coupling of the right length (7.5 mm is tight), seals against dust on every shaft, strut stops, wiring, the shaft retainers, and the thermal paste or adhesive in the strut bores.
 5. **Simulation extensions:** both struts moving together, momentum in the rolls, friction, steps and slopes (the handover asked for step climbing), the hop (JPL's 10 cm/s), and side-to-side tipping.
