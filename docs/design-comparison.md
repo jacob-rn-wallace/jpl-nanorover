@@ -32,30 +32,26 @@ The papers' wheel is a different design from B and C's, and the papers' strut/wh
 A hybrid: the **papers' body size** (140 x 140 x 60 mm, which B's hub faces match), the **papers' 70 mm struts**, the **units' cleated wheel** (the owner chose it over the papers' banded wheel),
 **B's round window** (the headlamp is not modelled yet), and **C's-photo-derived solar cell sizes** (at the 140 mm scale; about 11% larger under the shared-drivetrain scale). It is good for fit checks and mechanics. It is not any one of A, B or C.
 
-## Rule for settling values, and what it locks (proposed by the owner 2026-11-10, with two amendments)
+## Rule for settling values (owner, 2026-11-10; replaces the earlier two-of-three rule)
 
-**Rule.** A value is authoritative when at least two of the three designs (A the papers, B the silver unit, C the black unit) agree on it. Amendments: (1) votes must be independent: B and C share the same struts and wheels (owner), so for anything that is part of the drivetrain they count as **one** vote; (2) B's and C's absolute sizes were scaled from A's 65 mm wheel, so they cannot confirm A's absolute numbers, only scale-free ratios (for example B's hub face is 0.44 high to wide, against A's 0.43). Agreement must hold within the stated uncertainty. A tie stays open and is decided by the owner.
+**Rule.** The papers (A) are authoritative by default. A paper value is overridden only when the two built units (B the silver unit, C the black unit) **independently** agree on a different one. Independence is required: B and C carry the same struts and wheels (owner), so on anything that is part of the drivetrain they count as one observation, not two. B's and C's absolute sizes are also scaled from A's 65 mm wheel, so they cannot contradict A's absolute numbers on their own, only scale-free ratios and features. Ties and exceptions are decided by the owner and recorded here.
 
-**Locked (all three agree):**
-- Four wheels on four independently posable struts.
-- The struts are on hubs at the centre of two opposite faces of the body.
-- A flat rectangular box body.
-- Solar cells on the top face.
-- An imaging window on one end face.
+Note that the papers' own rover figure is unit B (Figure 1 of Jones & Wilcox 2000), so A and B are not independent of each other either; the rule gives the papers priority all the same.
 
-**Locked (two independent votes):**
-- Height about 60 mm: A 60 mm, B 61 mm (the ratio of height to width agrees independently of scale).
-- Hub-axis width about 140 mm: A 140 mm, B 138 mm.
-- A square footprint: A 14 x 14 cm and C square (scale-free). B's 1.11 : 1 is the outvoted exception.
+**Applied to the values in play:**
 
-So the rule gives a **140 x 140 x 60 mm body**, which is what the CAD already has.
+| Value | Papers (A) | Built units | Result |
+|---|---|---|---|
+| Body, hub-axis width x length x height | 140 x 140 x 60 mm | B about 138 x 154 x 61, C about 155 x 155 x 45: they disagree with each other | **140 x 140 x 60 mm stands** (no independent override) |
+| Strut length, pivot to wheel centre | 70 mm | B and C both about 86 mm, but shared hardware: one observation | **70 mm stands** |
+| Wheel diameter | 65 mm | scaled from it, so no contradiction possible | **65 mm stands** |
+| Wheel construction | banded conductor and insulator cylinder | cleated wheel on both, shared hardware: one observation | the papers would stand; **the owner chose the cleated wheel** (an exception, 2026-11-10) |
+| Struts on hubs at the centre of two opposite faces | stated | seen on both | stands |
+| Solar cells | four of six faces, antenna on the top face | cells on top, antenna loop on B | the papers stand; the units show only the top face |
+| Window and lamp | a view window on the front face; a headlamp is listed among the optics | B round window and headlamp, C square window | the papers say nothing on shape: **open**; the owner may choose |
+| Mass | 1300 g | not measurable | stands |
 
-**Open (no two independent votes agree):**
-- Strut length: A 70 mm against B and C together about 86 mm (one vote each).
-- Wheel construction: A banded cylinder against B and C together cleated. The owner chose the cleated wheel, a decision outside the rule.
-- Window shape (round on B, square on C, not stated in A), its size, and whether there is a headlamp (B only).
-- Body finish, solar cell layout and counts, the antenna, and the mass (only A gives one).
-- Body length where it matters (B about 154 mm; A and C say square): decided by the square-footprint vote above, so 140 mm.
+The earlier two-of-three rule would also have given 140 x 140 x 60 mm; it differed only on how to count the two units (it counted a shared strut as two votes against the papers). The shared-hardware count is the amendment that keeps the strut at 70 mm.
 
 ## What choosing would change
 
@@ -64,7 +60,7 @@ So the rule gives a **140 x 140 x 60 mm body**, which is what the CAD already ha
 | A, the published design | 140 x 140 x 60 | 70 mm | banded cylinder | one window |
 | B, the silver unit | about 138 x 154 x 61 (a 154 mm box, not the Hammond 140 mm one) | about 86 mm | cleated (as now) | round window plus headlamp |
 | C, the black unit | about 155 x 155 x 45 | about 86 mm | cleated (as now) | square bonded window, black finish |
-| A hybrid (today) | 140 x 140 x 60 | 70 mm | cleated | round window |
+| A hybrid (today; also what the rule gives, with the owner's cleated-wheel exception) | 140 x 140 x 60 | 70 mm | cleated | round window |
 
 Choices that do not depend on the unit: four wheels on two hubs with independently posable struts, a flat sealed box, cells on top, the hub studs and the O-ring lid.
 
