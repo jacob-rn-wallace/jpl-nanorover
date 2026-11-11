@@ -31,6 +31,31 @@ The papers' wheel is a different design from B and C's, and the papers' strut/wh
 A hybrid: the **papers' body size** (140 x 140 x 60 mm, which B's hub faces match), the **papers' 70 mm struts**, the **units' cleated wheel** (the owner chose it over the papers' banded wheel),
 **B's round window** (the headlamp is not modelled yet), and **C's-photo-derived solar cell sizes** (at the 140 mm scale; about 11% larger under the shared-drivetrain scale). It is good for fit checks and mechanics. It is not any one of A, B or C.
 
+## Rule for settling values, and what it locks (proposed by the owner 2026-11-10, with two amendments)
+
+**Rule.** A value is authoritative when at least two of the three designs (A the papers, B the silver unit, C the black unit) agree on it. Amendments: (1) votes must be independent: B and C share the same struts and wheels (owner), so for anything that is part of the drivetrain they count as **one** vote; (2) B's and C's absolute sizes were scaled from A's 65 mm wheel, so they cannot confirm A's absolute numbers, only scale-free ratios (for example B's hub face is 0.44 high to wide, against A's 0.43). Agreement must hold within the stated uncertainty. A tie stays open and is decided by the owner.
+
+**Locked (all three agree):**
+- Four wheels on four independently posable struts.
+- The struts are on hubs at the centre of two opposite faces of the body.
+- A flat rectangular box body.
+- Solar cells on the top face.
+- An imaging window on one end face.
+
+**Locked (two independent votes):**
+- Height about 60 mm: A 60 mm, B 61 mm (the ratio of height to width agrees independently of scale).
+- Hub-axis width about 140 mm: A 140 mm, B 138 mm.
+- A square footprint: A 14 x 14 cm and C square (scale-free). B's 1.11 : 1 is the outvoted exception.
+
+So the rule gives a **140 x 140 x 60 mm body**, which is what the CAD already has.
+
+**Open (no two independent votes agree):**
+- Strut length: A 70 mm against B and C together about 86 mm (one vote each).
+- Wheel construction: A banded cylinder against B and C together cleated. The owner chose the cleated wheel, a decision outside the rule.
+- Window shape (round on B, square on C, not stated in A), its size, and whether there is a headlamp (B only).
+- Body finish, solar cell layout and counts, the antenna, and the mass (only A gives one).
+- Body length where it matters (B about 154 mm; A and C say square): decided by the square-footprint vote above, so 140 mm.
+
 ## What choosing would change
 
 | If the replica follows | Body | Struts | Wheel | End face |

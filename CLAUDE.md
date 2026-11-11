@@ -6,6 +6,7 @@ by NASA in November 2000. A hobby build in the spirit of the sibling project `ma
 ## Scope (owner's decisions)
 - **Goal:** a replica that matches the original's appearance and dimensions and performs most, if not all, of its non-science functions: driving on
   four wheels, posing its four struts independently, self-righting, solar power, and the camera (the owner counts the camera as a function, not as science).
+- **Rule for settling values (owner, 2026-11-10; amended):** a value is authoritative when two independent designs agree (the papers, the silver unit, the black unit; the two units count as one vote on their shared struts and wheels, and their sizes cannot confirm the papers' absolute numbers because they are scaled from the papers' wheel). It locks a 140 x 140 x 60 mm body and leaves the strut length (70 mm in the papers, about 86 mm in the units) and the wheel type open. See `docs/design-comparison.md`.
 - **Reference unit: undecided (owner, 2026-11-10: "not really sure").** Two JPL units are photographed: the silver-bodied unit (`NanoRover-hires.original.jpg`) and the black-bodied unit
   (`img840-340-hires.original.jpg`). The owner's account: the struts and wheels are identical on both; the black unit is a running mock-up with no instruments, used for publicity (both videos, a 1997 KTLA
   news segment); the silver unit is the internal test unit that carries the optics and was used for demonstrations of the instruments and teleoperation. Earlier the owner leaned to the silver unit as the more
