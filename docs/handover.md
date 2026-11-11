@@ -36,7 +36,7 @@ Open at the end of the session: which of three descriptions to copy, scale and m
 - **Wheel (`docs/wheel-spec.md`, fitted to the silver photo and checked by projecting the CAD back onto it):** a cone (apex about 10 mm above the rim) on a smooth hollow cylinder carrying 16 grousers in a helix: thin blades standing radially, serrated along their edges, 43.5 degrees from the axle, right-handed. Scaled to the papers' 65 mm over the grousers in the CAD (measured 59 mm).
 - Window 26 mm, headlamp bezel about 22 x 14.5 mm, cell sizes (large cells about 40 x 23.5 mm on top), all as proportions of a face taken as 140 mm.
 
-## 6. CAD status (`hardware/`, specs in `docs/*-spec.md`)
+## 6. CAD status (`hardware/`, specs in `docs/*-spec.md`; the struts, wheels and hub below are superseded by section 11)
 
 | Part | Modelled | Notes |
 |---|---|---|
@@ -57,9 +57,9 @@ Flat lathe-finished wheel disk -> a real cone. Stack of saw-blade discs, then a 
 2. Wheel diameter (59 measured, 65 papers) and strut length (76 to 78 measured, 70 papers): both parameters; papers are the defaults under the rule.
 3. Window shape, the headlamp, and whether to copy the black unit's look.
 4. Purpose: a faithful display or working replica; a fun drivable rover (a camera-equipped toy-grade build: a Plantraco Desktop Rover plus camera cost about $180 in 2002; see the discussion of a possible pivot); or an open design others can build cheaply. A proposed two-stage path: a cheap working proof of concept first, the faithful build after.
-5. The body is deferred; the next work is the drivetrain.
+5. The body is deferred; the drivetrain work of 2026-11-11 is in sections 11 and 12, and the body redesign is the next big job.
 
-## 9. Next steps (drivetrain first)
+## 9. Next steps (drivetrain first; superseded by sections 11 and 12)
 
 1. **Torque and speed budget** for lifting, self-righting and stepping with a body of 1.3 to 1.5 kg on 70 mm struts (a quick estimate: about 0.25 N.m per strut at worst, which is large for micro gearmotors); this decides the motors.
 2. **Kinematic simulation** of the four-strut chassis with the body as a block of the right mass (poses, tipping, self-righting, step climbing). JPL itself ran a low-gravity dynamic simulation and planned KC-135 aircraft tests (the 1997 video, about 4:05 to 4:40 and 5:05); Tunstel (1999) evolved the self-righting sequences by genetic programming.
@@ -73,6 +73,28 @@ Flat lathe-finished wheel disk -> a real cone. Stack of saw-blade discs, then a 
 
 The owner's account of each unit's role (and the KTLA segment's unit) is taken on trust; the 1998 paper's contents come from search snippets; every size from the photographs is an estimate good to a few percent and depends on the quarter being read correctly and on the silver unit sharing the black unit's wheels; the cost and market comparisons for a toy version are rough and partly unverified.
 
-## 11. Update, 2026-11-11 (drivetrain session)
+## 11. The drivetrain session, 2026-11-11 (what was decided and built)
 
-Decided by the owner: the replica must lift itself under Earth gravity; design mass 1.0 kg total (the body will be redesigned later, deferred); metal wheels; **layout C** (thin-walled aluminium wheels with the wheel motor inside, strut motors in the body). Everything is in `docs/drivetrain-spec.md`, with scripts in `hardware/drivetrain/`. Summary: strut motors maxon EC-max 16 5 W with GP 16 C 1621:1 (73 g); wheel motors ECX SPEED 10 M with GPX 10 A 256:1 (20 g); drive speed about 40 mm/s (from the videos); drivetrain about 660 g, leaving about 340 g of the 1.0 kg for the body and everything else. Belt layouts (2a, 2b) and JPL's friction-pivot layout (3) were studied and not taken. Next: update `wheel.py` for the thin-walled wheel and the motor mount, the strut tip and axle stub, then the coaxial hub; check the datasheets and prices before buying anything. Section 9's list is superseded where it conflicts. Torque and mass numbers use assumptions listed in the spec.
+**Owner's decisions** (all recorded in `CLAUDE.md`): the replica must lift itself under Earth gravity; design mass 1.0 kg total, with the body to be redesigned later; metal wheels; layout C (thin-walled aluminium wheels with the wheel motor inside, strut servos in the body); motors chosen on cost (maxon motors are over $200 each, so Pololu and Feetech parts); a drive speed of about 40 mm/s, estimated from the videos (20 to 50 mm/s).
+
+**What exists** (`docs/drivetrain-spec.md` is the long record; `docs/chassis-simulation.md` the simulation; `docs/strut-spec.md` and `docs/wheel-spec.md` the parts; scripts in `hardware/drivetrain/`):
+- **Wheel:** `wheel.py` presets `thin` (default; 1.0 mm wall, 33 g) and `v1`. Maxon, Pololu #3046, Pololu #3068, 130-size and PCB-motor options were compared (`motor_options.py`); the **Pololu #3068** (9.5 g, $26.45) is in the CAD, clamped in the strut tip so the strut is its heat sink (about 7 times better than the motor alone, my estimate).
+- **Wheel support** (`strut.py`, `TIP_MODE = "motor"`): the motor cannot carry the wheel (a 9 mm shaft, 0.25 to 0.5 kgf limit), so each wheel runs on two 3 x 8 x 4 mm bearings on a 3 mm stub shaft in a 19 mm aluminium spindle tube that the strut tip clamps, driven through an assumed coupling. Each strut's support starts flush with its own plate.
+- **Coaxial hub** (`hardware/hub/hub.py`, `HUB_MODE = "coaxial"`): two Feetech STS3215 servos per side (55 g, datasheet), servo B on the axis driving a 5 mm inner shaft (outer strut B), servo A offset 23 mm driving a 15/11 mm hollow shaft (inner strut A) through a 1:1 gear pair, in a stationary housing with four small bearings.
+- **Simulation:** the model shows the strut load is half what was designed for (maximum hold 0.166 N.m per strut), that the rover can right itself in about 3 s with 0.12 to 0.13 N.m, and that the working stance should stay at 25 to 40 degrees (tip-over 38 to 51 degrees).
+- **Mass:** everything outside the old box is about 614 g, leaving **about 386 g of the 1.0 kg** for the body, electronics, solar cells and camera. The assembly model weighs 1574 g because it still contains the 961 g Hammond box and lid.
+- **Checks:** 0 of 48 solids overlap at the default pose (struts, wheel support, wheels, hub, servos), and the servos fit inside the box with the wall's hub hole opened to 24.2 mm.
+- **Studied and not taken:** belt layouts (2a, 2b), JPL's friction-pivot layout (3; now feasible, with 19 % margin), isogrid on the struts (2 g saved, stiffness 16 %), a custom PCB-stator motor, and 130-size motors.
+
+**Run order:** body, hub, strut, wheel, assembly (`CLAUDE.md`); the first run needs `python3 -m venv .venv && .venv/bin/pip install -r hardware/requirements.txt`.
+
+## 12. Open items and next steps after the drivetrain session
+
+1. **The body redesign** (deferred by the owner; the next big job). Requirements it now has to meet: a mass of about 386 g with electronics and cells, the hub holes opened to 24.2 mm, room for four servos (45.2 x 24.7 x 32 mm, positions in `hub.py`) and the batteryless electronics, the centre of mass near the hub axis (the simulation's tip-over numbers assume it).
+2. **Check the two unverified servo dimensions** against a real part or the full drawing: the shaft offset (about 10.7 mm from the end of the long side, read by eye) and the 32 mm body height.
+3. **Smaller strut servos:** the load is low enough (0.17 N.m maximum hold) that a 3 to 5 kg.cm class servo could do; none was chosen. Dynamic loads are not simulated, so test before shrinking.
+4. **Details not modelled:** gear teeth and backlash, how the pinion, the horn adapter, the wheel and the spindle tubes are fixed, a coupling of the right length (7.5 mm is tight), seals against dust on every shaft, strut stops, wiring, the shaft retainers, and the thermal paste or adhesive in the strut bores.
+5. **Simulation extensions:** both struts moving together, momentum in the rolls, friction, steps and slopes (the handover asked for step climbing), the hop (JPL's 10 cm/s), and side-to-side tipping.
+6. **Tests to do on a first print or prototype:** whether the STS3215 holds its position unpowered and how warm it runs at the hold torque; the #3068's temperature at the slope load; the wheel's stiffness at 0.8 mm walls; the gear mesh with printed against metal gears.
+7. Older open items still stand: which unit to replicate, the banded-wheel option, the headlamp and window, the lid screws, and the research leads in section 9.
+8. **Not verified:** the maxon price (owner's report), bearing masses and ratings (typical values), the servo's overload protection and torque limit register, prices and stock of every part, and every figure that comes from the planar simulation (see its limits).

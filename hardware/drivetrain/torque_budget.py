@@ -1,5 +1,8 @@
 """Torque and speed budget for the four-strut drivetrain (first pass, quasi-static).
 
+SUPERSEDED FOR THE STRUT LOADS by hardware/drivetrain/chassis_sim.py (docs/chassis-simulation.md): this script puts the whole weight on the struts and uses the full 70 mm lever, so its
+strut numbers are about 1.5 to 2 times too high (the simulation gives a maximum hold of 0.166 N.m per strut).  The wheel loads and speeds below still stand.
+
 Pure Python, no CAD needed:  python3 hardware/drivetrain/torque_budget.py
 
 Sourced inputs (papers, see docs/jpl-nanorover-literature.md): strut 70 mm, wheel 65 mm, rolling speed 1.5 mm/s,

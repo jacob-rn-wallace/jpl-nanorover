@@ -14,6 +14,10 @@ What it implies (from `torque_budget.py`, margin x2, 70 mm struts): at 1.0 kg a 
 
 Levers, to be decided: larger or higher-ratio strut motors (and a bigger hub); a non-backdriving stage (worm or lead screw) so holding is free; mass cut (the cast Hammond box is the heavy part); a dynamic flip for righting instead of a quasi-static push. Any change to the hub or strut motors breaks the "papers' 10 g motors" match, so record it as a deliberate deviation.
 
+## Revised by the chassis simulation (2026-11-11, `docs/chassis-simulation.md`)
+
+The planar simulation (validated against the CAD's 32.1 mm floor clearance) shows that the strut loads in the sections below are **too high**: the wheels, struts and wheel supports rest on the ground and do not load the joints, and a support must sit under the centre of mass, so the lever is not the full 70 mm. The hold torque at the 25 degree stance is **0.11 to 0.12 N.m per strut** (not 0.155), and the **maximum holding torque in any stable pose is 0.166 N.m per strut**, about **0.33 N.m with a margin of 2** (not the 0.69 N.m "push" used for the motor and gear sizing). Where this page and the simulation differ, the simulation wins: the Feetech ST3215 has 5.9 times its maximum hold in rated torque, gear tooth stress at the 0.33 N.m design load is about 14.5 MPa, and the friction-pivot layout 3 passes with a 19 % margin. The wheel loads (0.027 N.m slope, 0.138 N.m step) are not covered by the simulation and stand. Self-righting needs 0.12 to 0.13 N.m and about 3 s of strut motion.
+
 ## Torque and speed budget (first pass, quasi-static)
 
 Sourced inputs: 70 mm struts, 65 mm wheels, 1.5 mm/s rolling, 256:1 gearheads, two ~10 g brushless motors per strut (papers; one source, see the bibliography). Mass is the 1.0 kg design mass. The 25 degree stance is a choice. **The motor torque (0.6 mN.m continuous at the motor, 60 % gearhead efficiency) is an assumption, not a datasheet or paper value.**
@@ -241,7 +245,7 @@ Conclusion: **it does not beat the bought gearmotor on mass, cost or effort**, b
 
 ## Isogrid on the struts and other thermal levers (2026-11-11)
 
-The owner asked whether isogrid pockets on the hidden faces of the struts could improve heat sinking and free mass. Result (`strut.py` `ISOGRID`, `isogrid_study.py`; details in `strut-spec.md`): **no, at this size.** The arm plate is 3 mm thick and about 24 mm wide, so pockets 1.8 mm deep remove only 2.2 g from the four struts (2 %), leave arm conduction unchanged (3.6 to 3.8 K/W) and add little convective area (the pockets face the body or the other strut, with almost no air flow), while the out-of-plane stiffness drops to 16 % and the safety factor for a 5 N sideways knock from 25 to 3 (my assumed load). Isogrid pays off on large thin panels, not on a 70 mm arm.
+The owner asked whether isogrid pockets on the hidden faces of the struts could improve heat sinking and free mass. Result (`strut.py` `ISOGRID`, `isogrid_study.py`; details in `strut-spec.md`): **no, at this size.** The arm plate is 3 mm thick and about 24 mm wide, so pockets 1.8 mm deep remove only 2.0 g from the four struts (2 %), leave arm conduction unchanged (3.6 to 3.8 K/W) and add little convective area (the pockets face the body or the other strut, with almost no air flow), while the out-of-plane stiffness drops to 16 % and the safety factor for a 5 N sideways knock from 25 to 3 (my assumed load). Isogrid pays off on large thin panels, not on a 70 mm arm.
 
 Better thermal levers (my estimates, same assumptions as the heating section: strut path about 0.099 W/K, 10 K/W):
 - **Black anodising the struts:** bare aluminium has an emissivity of about 0.05 to 0.1, black anodising about 0.8, which adds about 5 W/m2K of radiation to the 10 W/m2K of convection, raising the arm's air path from 0.034 to 0.051 W/K and the total by about **17 %**.
