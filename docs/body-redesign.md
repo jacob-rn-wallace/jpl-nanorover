@@ -155,6 +155,82 @@ Top view looking down with +y (the window end) at the top and **+x on the page's
 2. Decide the lid face, which fixes the joints and the seal for either shell material.
 3. Re-run the comparison (`cf_cost.py`, `cf_compare.py`) with the real wall thickness, mount count and mass.
 
+## Owner's layout decisions and power study (2026-11-11)
+
+**Decisions (owner), recorded in `CLAUDE.md`:**
+1. **Top and bottom faces are the lids**, identical, each carrying solar cells so the rover works as well upside down; cells also on the front and back (end) faces, as the papers planned (cells on four of six faces); none on the hub faces, where the struts are.
+2. **The body is kept symmetric about the transverse (z = 30) plane**: for a centred centre of mass and so the same parts can be reused around the body.
+3. **Camera window centred on a 60 x 60 mm square at one end of an end face**, i.e. 30 mm from the top, bottom and side edges: x = +40, z = 30 on the +y face. (The earlier window, copied from the silver unit, was at x = +40.8, z = 36.8.)
+4. **One window shared by camera and lamp**, through a beamsplitter.
+5. **Antenna on the opposite end face, at the diagonally opposite position** (x = -40, z = 30 on the -y face: a 180 degree turn about z carries the camera's square onto the antenna's), a whip standing vertically in the plane of the face, on a low-friction pivot with a counterweight so it points up whichever way up the rover is.
+
+**These are deliberate departures from all three descriptions of the original** (papers, silver unit, black unit): none has cells on a bottom lid, a shared camera and lamp window, or a gravity-oriented antenna. The papers' own antenna is a patch on the top face.
+
+### Solar cells: target layout and area
+- **Top and bottom faces (each):** the black unit's measured top-face layout (`photo-measurements.md`): 10 large cells of about 39.6 x 23.5 mm in two columns of five, and 4 centre cells of about 19.6 x 44 mm (plus or minus 2 mm), with gaps of 5 to 8 mm: **127.6 cm2 per face (65% of the 196 cm2 face)**. The NASA Space Place toy decal has 5 + 5 edge rows, 4 centre cells and 2 + 2 more on the other edges, 18 flat cells; it is a simplified drawing, so I used the measured layout. The black unit's raised centre block is left out: the antenna no longer goes there.
+- **End faces (each):** the 60 x 60 mm window or antenna square leaves an 80 x 60 mm area; **three cells of 23.5 x 39.6 mm standing side by side fit** (about 76.5 mm with 3 mm gaps), **27.9 cm2 each**. No source gives an end-face layout; this is my choice. The two end faces are 180 degrees symmetric.
+- **Total 311 cm2** (top 127.6 + bottom 127.6 + two ends 55.8). Mass at an assumed 0.15 to 0.35 g/cm2 (no cell chosen) is **47 to 109 g**; the bottom face alone is 19 to 45 g.
+
+### Power: what the cells can supply (`hardware/body/power_budget.py`)
+Sourced: 1000 W/m2 AM1.5 full sun; measured output at 500 lux LED of about 8 uW/cm2 (polycrystalline silicon) and 10 uW/cm2 (amorphous silicon) ([MDPI, indoor light sources](https://www.mdpi.com/1996-1073/7/3/1500) and a review of indoor photovoltaics); STS3215 about 180 mA moving at 12 V and a standby draw between 6 mA (datasheet) and 60 mA (some listings), sources disagree; a bare ESP32-S3 deep sleep of 7 to 8 uA ([Lucidar](https://lucidar.me/en/esp32/power-consumption-of-esp32-s3-devkitm-1/)) and about 31.7 mA connected on a dev board. Assumed (**ASM**): cell efficiency 15 / 20 / 24%, a 10% overcast, radio transmit 0.65 W, camera 0.3 W, lamp 0.2 W, wheel motors about 0.1 W each.
+
+| One lit face supplies | Power |
+|---|---|
+| Full sun, square to it (20% cells) | **2.55 W** (1.9 to 3.1 W over the efficiency range) |
+| Full sun, 45 degrees off | 1.8 W |
+| Thin overcast (ASM) | 0.26 W |
+| **Indoors, 500 lux LED** | **about 1 to 1.3 mW** |
+
+| Scenario | Load |
+|---|---|
+| A keep-alive: MCU deep sleep, RTC, wake input | about 0.1 mW (ASM) |
+| B controller awake, radio idle | 0.105 W |
+| C camera, radio streaming and lamp | 1.26 W |
+| D driving (wheels, controller, radio, camera; four servos holding at 30 mA each) | 2.9 W (servo hold alone is 1.4 W; 0.3 to 2.9 W over the standby range) |
+| E posing one strut (one servo moving) | 4.5 W |
+
+Surplus of one lit face (W): in full sun A +2.55, B +2.45, **C +1.30, D -0.34, E -1.94**; overcast A +0.26, B +0.15, C and beyond negative; **indoors only A is positive (+1 mW) and even B is short by 0.1 W**. A 500 mAh battery (1.85 Wh, about 12 g, ASM) runs scenario D for about 38 minutes, C for 88 minutes and B for 18 hours; indoors the panel adds 0.031 Wh a day, 1.7% of it.
+
+**What this means for your two ideas:**
+- **Panels charging the rover:** works **outdoors**: in sun an idle rover (B) nets +2.4 W and the battery refills in about 45 minutes; even thin overcast beats idle (+0.15 W). **Indoors it does not**: 1.3 mW is about 1% of idle-with-radio. So the panels are an outdoor charger and an indoor trickle at best.
+- **A subsystem run directly from the panels, so battery loads can power down fully:** in sun the whole controller, radio, camera and lamp (C, 1.26 W) runs from one face with 1.3 W to spare, so that works outdoors. **Driving (D) and posing (E) exceed one face even in full sun**, so they need the battery (the cells extend its runtime). **Indoors the only thing the cells can run is a micro-power keep-alive** (scenario A, a timer or wake input, tens of microwatts), which is enough to let the battery loads hard-off with a load switch and be woken from outside.
+- **Suggested architecture (mine, for your decision):** three tiers: a keep-alive controller on the cells with a small supercapacitor; the battery behind a load switch for everything else (hard off at idle); the cells topping up the battery outdoors. **Servo hold current is the biggest unknown and the biggest lever**: four servos holding is 0.3 to 2.9 W against the sources' 6 to 60 mA range, so test whether the STS3215 holds a pose unpowered (already in the handover's prototype tests); if it does, idle drops to the keep-alive.
+- **The bottom cells** exist for inverted operation. Right way up they see almost no light (the floor is 32 mm below, in the rover's own shadow), so they cost 19 to 45 g for a use that is occasional. That is your choice; the numbers just show the price.
+- Not decided: the cell type (a-Si does better indoors, crystalline outdoors; the indoor figures are roughly 8 to 10 uW/cm2 for either), the battery chemistry and voltage (the servos and wheel motors want 12 V and 6 V, so boost converters or a 2S pack, neither modelled), and the radio.
+
+### Layout with these decisions (`hardware/body/layout.py`; first pass, placeholders)
+- **Two identical lid modules:** a processor board (about 20 g) on the bottom lid and a power and motor-driver board (about 20 g) on the top lid, mirror images about z = 30; the **mass above z = 30 equals the mass below (52 g each, cells and boards)**. The camera, beamsplitter, lamp, battery and antenna pivot sit on the plane. **Centre of mass x = +0.3 mm, z = 30.0 mm** (servos and hub included). The lid modules need a board-to-board link between them when a lid is removed: not designed.
+- **Camera and lamp:** window axis at x = +40, z = 30. The camera (25 x 24 x 9 mm) sits behind at y = 36.5 to 45.5, looking +y through a 28 x 24 x 1.5 mm glass **plate** beamsplitter at 45 degrees (bounding box 20 x 20 x 24 mm at y = 47 to 67), and the lamp is on the body-centre side of the plate (x = 14 to 28) shining +x so the plate reflects it out of the window. All inside the free front bay, clear of servo B by 1 mm. **A 25 mm cube beamsplitter would weigh about 39 g (my estimate) against about 3 g for a plate.**
+- **Antenna pivot:** a bearing, rotary RF joint and a 40 mm swing disc carrying the counterweight, behind the -y wall at x = -40, z = 30, 8 mm deep (y = -67.5 to -59.5), 2 mm clear of servo A; the whip stands outside.
+- **All placeholders clear** the keep-in volume, the servos and each other; they use 14% of the free volume (113 of 818 cm3). Volume is still not the constraint.
+- **Mass** (shell, rings and screws 32 g, seal 15 g, electronics 100 g now including battery, beamsplitter, pivot and wiring, and cells):
+
+| Shell | cells 0.15 g/cm2 (47 g) | 0.25 (78 g) | 0.35 (109 g) |
+|---|---|---|---|
+| woven plates 1.0 mm + keys (141 g) | 335 g (51 g under 386) | 366 g (20 under) | 397 g (11 over) |
+| forged 1.5 mm (164 g) | 358 g (28 under) | 389 g (**3 over**) | 420 g (34 over) |
+
+  The shell choice is worth 23 g and the cell choice 62 g. **Forged at 1.5 mm is over budget at the middle cell weight; plates are not.** This leans further toward plates, and a four-wall frame with two identical lids suits plates directly (four 140 x 60 wall plates and two 140 x 140 lid plates), where forged would need a deep through-frame mould.
+- **Balance:** the whole-rover centre of mass is about **-1.7 mm in y** (the simulation had -2.9). It is less well centred than the first pass (-0.9) because the boards are now centred; shifting the boards about 10 mm toward +y would centre it. The antenna's mass (13 g at -y) is partly offset by the camera group (20 g at +y).
+
+### Problems to resolve (found while placing these; none is a blocker)
+**The gravity-oriented antenna (a pendulum):**
+1. **The counterweight must over-balance, not balance.** A pivot balanced exactly stays wherever it is left. For the whip to hang up, the weight opposite the whip must have a larger moment than the whip: the net unbalance sets the restoring torque. Example (mine): 2 g net at 15 mm gives about 0.3 mN.m; pivot and rotary-joint friction of 0.05 to 0.3 mN.m (an assumed range) would leave a dead band of about 10 to 90 degrees. A net unbalance of 5 g at 15 mm (about 0.7 mN.m) is a better start, within the 10 g allowance for the whole pivot.
+2. **It only corrects rotation about its own axis**, which is the y-axis (normal to the end face): the rover rolling side to side. If the body pitches about x (a slope, a stance, a self-righting roll), the axis tilts and the whip tilts with it by the same angle; standing on an end, it points sideways. Fine for the rest poses the rover normally takes, not for steep ones.
+3. **The feed needs a rotary RF joint or a limited-turn cable.** Upright to inverted is 180 degrees of rotation, and several rolls in one direction would wind a plain coax pigtail. A sprung contact or capacitive joint works at low frequency but is lossy and noisy; a stop with a pigtail good for about plus or minus 200 degrees is simpler. The antenna may also be a dummy, as the signal is not part of the scope.
+4. **Damping.** A low-friction pendulum rings when the rover accelerates or rolls; a little viscous damping (grease, an eddy-current magnet) keeps the whip from swinging.
+5. **The whip and the ground.** It stands off the end face by the stub length; rolling end over end in a righting sequence puts the face on the ground, so the whip must be flexible or short.
+6. **The wall.** A shaft hole through the -y wall needs a bonded bushing and a seal; a carbon wall also screens the antenna's feed point.
+
+**The beamsplitter:**
+1. **Light loss.** A 50/50 plate sends half the lamp light out and passes half the scene light to the camera: ambient light to the camera is one stop darker, and the lamp needs about twice the power for the same illumination on the scene.
+2. **Glare.** The lamp light that reflects from the window pane (about 4% per glass surface, then half through the plate) goes straight back into the camera, coaxially, and can swamp the dim return from a diffuse object centimetres away. Remedies: crossed linear polarisers (lamp polarised, camera analyser at 90 degrees), anti-reflection coated glass, a black baffle between the plate and the window, and a wedged plate to avoid a double image. **This is the biggest optical risk and I have not tested it.** A bench test with a cheap plate beamsplitter and a phone camera would decide it before the design is committed.
+
+**Two lids:**
+- Each lid has cells outside and a board inside; **when a lid is removed its board comes with it**, so the link between the two boards (and the cells' wiring) needs a connector at the lid joint on a face both lids share.
+- Both lids need their own gasket and fasteners, doubling the lid screws and inserts in the budget (not yet doubled).
+- Bonded cells on a carbon lid need an insulating layer under them.
+
 ## Open decisions (owner)
 1. **Woven laminate or forged carbon** (revised recommendation: woven plates bonded into a box, for the crisp edges), and the manufacturing route (a mould from a printed plug, CNC-cut plate bonded into a box, or a bought moulded part).
 2. **Closed shell or open frame:** a sealed box is not required by the scope (no spaceflight), but dust and water tolerance would need deciding.
