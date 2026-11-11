@@ -16,7 +16,7 @@ HERE = Path(__file__).resolve().parent
 HW = HERE.parent
 OUT = HERE / "out"
 
-MASS_FIXED = {"wheel drive (3068, coupler, rod)": 4 * (9.5 + 1.0 + 1.9), "wheel bearings (693 size)": 8 * 0.6}
+MASS_FIXED = {"hub shafts (hollow, inner, adapters)": 2 * (6.0 + 6.3 + 2.4), "hub bearings (6702, 685 size)": 2 * (2 * 2.5 + 2 * 1.2), "strut servos (STS3215)": 4 * 55.0, "wheel drive (3068, coupler, rod)": 4 * (9.5 + 1.0 + 1.9), "wheel bearings (693 size)": 8 * 0.6}
 
 PARTS = [  # (label, file, material density g/cm3 as used by the individual scripts)
     ("box (die-cast, cut)", HW / "body/out/body_hammond.step", 2.70),
@@ -24,8 +24,11 @@ PARTS = [  # (label, file, material density g/cm3 as used by the individual scri
     ("lid O-ring", HW / "body/out/oring.step", 1.2),
     ("window pane", HW / "body/out/window_pane.step", 2.5),
     ("cover-screw inserts", HW / "body/out/inserts.step", 7.9),
-    ("hub studs", HW / "body/out/hub_studs.step", 7.9),
-    ("hub O-rings and nuts", HW / "body/out/hub_orings_and_nuts.step", 7.9),
+    ("hub housings", HW / "hub/out/hub_housing.step", 2.70),
+    ("hub shafts (hollow, inner, adapters)", HW / "hub/out/hub_shafts.step", None),    # 6.0 g hollow Al + 6.3 g inner steel + 2.4 g adapter, per side
+    ("hub bearings (6702, 685 size)", HW / "hub/out/hub_bearings.step", None),        # 2 x 2.5 g + 2 x 1.2 g per side (typical, not looked up)
+    ("hub gears (plain discs)", HW / "hub/out/hub_gears.step", 2.70),
+    ("strut servos (STS3215)", HW / "hub/out/strut_servos.step", None),               # 55 g each, Feetech datasheet
     ("struts", HW / "strut/out/struts.step", 2.70),
     ("wheel drive (3068, coupler, rod)", HW / "strut/out/wheel_motors.step", None),   # 9.5 g catalogue + 1.0 g coupler (assumed) + 1.9 g stub shaft, each
     ("wheel spindles (tube, cap, barrel)", HW / "strut/out/wheel_spindles.step", 2.70),
@@ -47,7 +50,7 @@ def main():
         print(f"{label:<24} {m:7.0f} g")
     asm = Compound(shapes)
     bb = asm.bounding_box()
-    print(f"{'total (wheel drive in; no strut motors, wiring, electronics)':<24} {total:7.0f} g   [MUSES-CN rover: 1300 g]")
+    print(f"{'total (servos, hub and wheel drive in; no wiring, electronics)':<24} {total:7.0f} g   [MUSES-CN rover: 1300 g]")
     print(f"default stance: {bb.size.X:.1f} wide x {bb.size.Y:.1f} long x {bb.size.Z:.1f} high; body floor {-bb.min.Z:.1f} mm above the wheel bottoms")
     export_step(asm, str(OUT / "rover_full.step"))
     print("wrote", OUT / "rover_full.step")

@@ -1,5 +1,7 @@
 # Struts
 
+**Hub (2026-11-11):** `strut.py` now defaults to `HUB_MODE = "coaxial"`: the two struts of a side turn on concentric shafts driven by servos in the body (`hardware/hub/hub.py`, `docs/drivetrain-spec.md`); the pivot bores are 15.05 mm (strut A, on a hollow shaft) and 5.05 mm (strut B, on the inner shaft), and the stationary 12 mm stud described below is the earlier arrangement (`HUB_MODE = "stud"`). Run order: body, hub, strut, wheel, assembly.
+
 Spec and design record for `hardware/strut/strut.py` (run after `hardware/body/body.py`).
 
 Four struts, two per side on the stud's axle stub. The sources give two numbers: **70 mm from the pivot

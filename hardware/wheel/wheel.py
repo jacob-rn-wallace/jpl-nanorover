@@ -149,7 +149,7 @@ def main():
     WH = Compound(wheels)
 
     # ---- checks against the other parts at the default pose ----
-    parts = {"body": import_step(BODY_OUT / "body_hammond.step"), "hub studs": import_step(BODY_OUT / "hub_studs.step"),
+    parts = {"body": import_step(BODY_OUT / "body_hammond.step"), "hub": (import_step(BODY_OUT / "hub_studs.step") if S.HUB_MODE == "stud" else Compound([import_step(S.HW_HUB / f"{n}.step") for n in ("hub_housing", "hub_shafts", "hub_bearings", "hub_gears")])),
              "struts": import_step(STRUT_OUT / "struts.step"), "lid plate": import_step(BODY_OUT / "lid_plate.step")}
     if (STRUT_OUT / "wheel_motors.step").exists() and not HUB_TUBE:
         parts["motors"] = import_step(STRUT_OUT / "wheel_motors.step")

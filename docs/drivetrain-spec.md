@@ -109,11 +109,11 @@ Caveats: the uncertainty is about plus or minus 40 %. The background rock in the
 
 ## Option C in the CAD (2026-11-11)
 
-Layout C is modelled with the **Pololu #3068** wheel motor and a **wheel support**: `wheel.py` preset `thin` (33 g wheels, 20.5 mm end-plate hole), `strut.py` `TIP_MODE = "motor"` (23 g struts, 24 mm tip boss, a 19.1 mm bore) with the wheel drive (motor box, assumed coupling, 3 mm stub shaft), a 19 mm spindle tube with barrel (9.1 to 9.9 g each, starting flush with each strut's plate) and two 3 x 8 x 4 mm bearings per wheel, and `assembly/rover.py` counts them. The whole model is **1351 g** (954 g of it the Hammond box and lid plate, to be redesigned), with the wheel drive and supports and no strut motors, wiring or electronics.
+Layout C is modelled with the **Pololu #3068** wheel motor and a **wheel support**: `wheel.py` preset `thin` (33 g wheels, 20.5 mm end-plate hole), `strut.py` `TIP_MODE = "motor"` (23 g struts, 24 mm tip boss, a 19.1 mm bore) with the wheel drive (motor box, assumed coupling, 3 mm stub shaft), a 19 mm spindle tube with barrel (9.1 to 9.9 g each, starting flush with each strut's plate) and two 3 x 8 x 4 mm bearings per wheel, and `assembly/rover.py` counts them. The whole model is **1574 g** (961 g of it the Hammond box, lid plate and fittings, to be redesigned), with the wheel drive, supports, coaxial hub and servos and no wiring or electronics.
 
-**Mass with the support:** wheel drive 50 g (motors 9.5 g + coupling 1.0 g + stub shaft 1.9 g, four), spindles 38 g, bearings 5 g, wheels 133 g, struts 93 g: 319 g; with four Feetech ST3215 struts (276 g) the drivetrain is 596 g, **leaving about 405 g of the 1.0 kg** for the body, electronics, cells and camera (462 g before the support was designed). The spindle tubes are the largest addition; a 0.6 mm wall would save about 18 g.
+**Mass with the support:** wheel drive 50 g (motors 9.5 g + coupling 1.0 g + stub shaft 1.9 g, four), spindles 38 g, bearings 5 g, wheels 133 g, struts 93 g: 319 g; with the coaxial hub and four Feetech ST3215 servos the drivetrain is 614 g, **leaving about 386 g of the 1.0 kg** for the body, electronics, cells and camera (see the hub section; 462 g before the wheel support and the hub were designed). The spindle tubes are the largest addition; a 0.6 mm wall would save about 18 g.
 
-The support design and its loads are in `strut-spec.md` ("Wheel support"). Not modelled: the strut motors (Feetech ST3215, 45.2 x 24.7 x 35 mm, in the body), the coaxial hub, how the wheel and tube are retained, and the real coupling.
+The support design and its loads are in `strut-spec.md` ("Wheel support"). Not modelled: how the wheel and tube are retained, the real coupling, and the hub's open items (see the hub section).
 
 ## Option C clearance (CAD check, 2026-11-11, Pololu #3068 with its spindle)
 
@@ -247,6 +247,25 @@ Better thermal levers (my estimates, same assumptions as the heating section: st
 - **Black anodising the struts:** bare aluminium has an emissivity of about 0.05 to 0.1, black anodising about 0.8, which adds about 5 W/m2K of radiation to the 10 W/m2K of convection, raising the arm's air path from 0.034 to 0.051 W/K and the total by about **17 %**.
 - **The pivot is the weak link:** the 12 mm stainless stud is about 8 K/W against about 7 K/W for the arm itself. A path through aluminium instead (an aluminium hub, or a copper or aluminium braid or shim across the pivot) would cut it below 1 K/W and raise the total by up to about **60 %**, but the stud is stainless for the O-ring seal and corrosion, so this is a hub design question.
 - **Mass:** better places to take it out are the pivot bosses (about 11 g of each strut's 23 g, 4 mm of each boss is a plain disc), the wheels (33 g each) and above all the body (954 g).
+
+## Coaxial hub and strut servos (2026-11-11, `hardware/hub/hub.py`)
+
+**Servo data, from the Feetech STS3215 specification** (A/0, 2020-04-10, a copy on core-electronics.com.au, read from the PDF): body **45.23 x 24.73 mm**, **55 +- 1 g** (so the 69 g from a retailer listing is wrong; use 55 g), 32 mm body height along the shaft (35 mm with the mounting ears), a 25-tooth spline output with a 3.4 mm boss on the output face and a 4.1 mm boss on the back (**the shaft comes out of both faces**), 12-bit magnetic encoder, 360 degrees with no limit, brass gears, and an accessory horn of 19.95 mm with four M3 screws. The shaft sits about **10.7 mm from one end** of the long side: **read by eye from the drawing's scale, plus or minus 1 mm**; the page's own dimension labels were not clear enough to confirm it.
+
+**Layout (one side; the other is a mirror):**
+- **Servo B** (47.7 mm long axis along y) sits **on the hub axis** and drives the **5 mm steel inner shaft**, which carries the outermost strut B, through a 20 mm horn adapter.
+- **Servo A** is offset **23 mm** in y (its long side toward -y; 1.6 mm clear of servo B) and drives the inboard strut A through a **1:1 spur pair** (23-tooth, module 1 gears, 6 mm wide) to a **15/11 mm aluminium hollow shaft** around the inner shaft.
+- A stationary **housing** (28 mm flange on the wall's outer spot-face, 24 mm tube through the wall, bored 21 mm) holds two **6702-size** thin bearings (15 x 21 x 4 mm) for the hollow shaft; two **685-size** bearings (5 x 11 x 5 mm) run between the shafts. All bearing sizes are typical catalogue sizes; mass and rating were not looked up.
+- The struts' layers are unchanged (A boss 73.25 to 80.25, B boss 81.25 to 88.25); their pivot bores become 15.05 mm (A) and 5.05 mm (B) (`strut.py`, `HUB_MODE = "coaxial"`; `"stud"` keeps the earlier stationary stud).
+- Per side the servos sit at |x| 8.9 to 52.9, z 17.6 to 42.4, y -57.5 to 34.5.
+
+**Checks (all zero):** no overlap between any two of the hub parts on a side (0 of 45 pairs), none against the struts (bores 0.05 mm clear), the wheels, the lid plate, or the box **with the wall's hub hole opened to 24.2 mm** (the current casting has a 12.6 mm double-D hole for the stud and 30 and 26 mm spot-faces; `body.py` has not been changed, because the body is to be redesigned).
+
+**Loads at the 0.69 N.m push (margin x2 included):** inner shaft 28 MPa shear; hollow shaft 1.5 MPa; gear tooth force 60 N, Lewis bending stress about 30 MPa (module 1, 6 mm face, my estimate): fine for aluminium, **marginal for printed PA12**, so the gears should be metal; the servo itself can deliver 2.9 N.m peak (12 V), more than 4 times the design push, so its torque limit must be set in firmware (the servo has one; not checked) or the gears and shaft can be overloaded.
+
+**Mass (per side, aluminium gears):** housing 4.8 g, hollow shaft 6.0 g, inner shaft 6.3 g, adapter 2.4 g, gears 10.2 g, bearings 7.4 g (assumed), servos 110 g: 147 g, 294 g for both sides (it replaces the stud and nut, 72 g of steel in the old model). With everything else the drivetrain, including the servos and the whole hub, is **614 g**, leaving **about 386 g of the 1.0 kg** for the body, electronics, cells and camera (404 g before the hub was designed, because it is 18 g heavier than the first estimate once the gears, shafts and bearings are counted and the servo is 55 g, not 69 g).
+
+**Open:** gear teeth (plain discs at the pitch circle are modelled; backlash of the 1:1 pair adds to strut A's pose error), how the pinion and the adapter are fixed to the servo horns, servo mounting and cables, the housing's retention and seals (a dust seal on each shaft), the shaft retainers and set screws, strut stops, the body's wall hole opened to 24.2 mm, thermal paths from the servos, and a cheaper layout that puts both servos on the axis (the servo's back shaft is a second output, not used here).
 
 ## Hub sizing
 

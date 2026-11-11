@@ -24,6 +24,7 @@ import body as E  # noqa: E402
 
 OUT = HERE / "out"
 BODY_OUT = HERE.parent / "body" / "out"
+HW_HUB = HERE.parent / "hub" / "out"
 
 # ---------------- PARAMETERS ----------------
 STRUT_L = 70.0                 # pivot axis to wheel axle (Wilcox & Jones)
@@ -37,6 +38,8 @@ PLATE_T = 3.0                  # arm plate thickness
 AXLE_D = 6.0                   # wheel axle stub
 BORE_D = 12.1                  # pivot bore on the stud's 12 mm axle
 GAP = 1.0                      # washer gap between layers
+HUB_MODE = "coaxial"           # "coaxial": the two struts of a side turn on concentric shafts driven by servos in the body (hardware/hub/hub.py): strut A's bore is 15.05 mm
+                               # (hollow shaft), strut B's 5.05 mm (inner shaft); "stud": the earlier stationary 12 mm stud with a 12.1 mm bore (body.py)
 TIP_MODE = "motor"             # "motor": the wheel motor sits in the wheel, carried by the strut tip (layout C, docs/drivetrain-spec.md);
                                # "axle": the earlier 6 mm wheel-axle stub (no motor)
 # Isogrid lightening (off by default): triangular pockets cut from the INBOARD face of each arm plate only, so the outward faces stay smooth.
@@ -144,7 +147,8 @@ def strut(boss_range, plate_range, wheel_inner, direction):
     else:   # a round bore through the tip boss and plate for the spindle tube (0.05 mm radial clearance, filled with thermal paste or adhesive)
         bore = Cylinder((SPINDLE_OD + 0.1) / 2, 30, align=(Align.CENTER, Align.CENTER, Align.MIN)).moved(Location((STRUT_L, 0, 0)))
         s = s - on_axle(bore, plate_range[0] - 5)
-    s = s - on_axle(Cylinder(BORE_D / 2, 20, align=(Align.CENTER, Align.CENTER, Align.MIN)), boss_range[0] - 1)
+    bore_d = BORE_D if HUB_MODE == "stud" else (15.05 if boss_range == A_BOSS else 5.05)
+    s = s - on_axle(Cylinder(bore_d / 2, 20, align=(Align.CENTER, Align.CENTER, Align.MIN)), boss_range[0] - 1)
     s = s.moved(Location((0, 0, E.HUB_Z)))
     if direction < 0:
         s = s.rotate(Axis((0, 0, E.HUB_Z), (1, 0, 0)), 180)
@@ -235,12 +239,19 @@ def main():
     print(f"strut pivot-to-axle   {STRUT_L:.2f} mm (by construction); boss {BOSS_D} x {BOSS_T}, plate {PLATE_T} mm, tip boss {TIP_D} mm")
     print(f"layers (|x|)          flange face {X0:.2f}; boss A {A_BOSS[0]:.2f}-{A_BOSS[1]:.2f}; boss B {B_BOSS[0]:.2f}-{B_BOSS[1]:.2f}; "
           f"plate A {A_PLATE[0]:.2f}-{A_PLATE[1]:.2f}; plate B {B_PLATE[0]:.2f}-{B_PLATE[1]:.2f}; wheels {WHEEL_X[0]:.2f}-{WHEEL_X[1]:.2f}")
-    print(f"stud axle stub ends at |x| = {X0 + E.HUB_AXLE_L:.2f}; {X0 + E.HUB_AXLE_L - B_BOSS[1]:.2f} mm left for a retainer")
+    if HUB_MODE == "stud":
+        print(f"stud axle stub ends at |x| = {X0 + E.HUB_AXLE_L:.2f}; {X0 + E.HUB_AXLE_L - B_BOSS[1]:.2f} mm left for a retainer")
+    else:
+        print(f"hub mode coaxial: strut A on the 15 mm hollow shaft (bore 15.05), strut B on the 5 mm inner shaft (bore 5.05), see hardware/hub/hub.py")
     one_mass = lambda s: s.volume * 2.70e-3
     print(f"strut mass            about {one_mass(s0):.0f} g each (6061 estimate), {sum(one_mass(x) for x in struts):.0f} g for four")
 
     # interference of every strut with the stud/axle, the body and each other, over relative angles
-    stud_hubs = import_step(BODY_OUT / "hub_studs.step")
+    if HUB_MODE == "stud":
+        stud_hubs = import_step(BODY_OUT / "hub_studs.step")
+    else:      # the coaxial hub's parts that reach the struts (run hardware/hub/hub.py first)
+        hub_parts = [import_step(HW_HUB / f"{n}.step") for n in ("hub_housing", "hub_shafts", "hub_bearings", "hub_gears") if (HW_HUB / f"{n}.step").exists()]
+        stud_hubs = Compound(hub_parts) if hub_parts else import_step(BODY_OUT / "hub_studs.step")
     body = import_step(BODY_OUT / "body_hammond.step")
     bad = {}
     sa0 = strut(A_BOSS, A_PLATE, WHEEL_X[0], +1)
