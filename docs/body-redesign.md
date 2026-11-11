@@ -7,6 +7,7 @@
 - Hub holes opened to **24.2 mm**, on the middle of two opposite 140 x 60 faces, hub axis at 30 mm height.
 - Room for four STS3215 servos, 45.23 x 24.73 x 32 mm (positions in `hardware/hub/hub.py`; shaft offset 10.2 mm, measured on Feetech's drawing, see `drivetrain-spec.md`), and the batteryless electronics.
 - Centre of mass near the hub axis (the simulation's tip-over numbers assume it).
+- **Edges (owner, 2026-11-11): crisp enough to look completely rectilinear, not sharp enough to injure; consumer-product crispness, which I take as an edge radius of about 0.5 to 1 mm.** A single layup over a plug is expected to leave about 1.5 to 3 mm at the corners (general practice, not sourced), so it is borderline at best.
 - A sealed or at least dust-tight box, a window (26 mm, silver unit) and room for the headlamp and antenna.
 
 ## Mass budget (`hardware/body/cf_budget.py`; typical densities, not measured parts)
@@ -70,10 +71,10 @@ The hub-load result covers only the hub. **A drop on a corner or edge, and a whe
 - **A hybrid** is possible: a woven tub with moulded forged or printed bosses and hub rings bonded in. It adds a joint but puts each material where it is good.
 - **Appearance against the originals:** the black unit's body is black and the silver unit's silver (`design-comparison.md`); a bare carbon body matches neither, whichever type. If looking like the originals matters, either type needs finishing, and then the look argument for forged disappears.
 
-**Recommendation: woven twill laminate, 4 to 5 plies (about 1.0 mm), made over a printed plug as a tub with a separate lid, with bonded printed or machined hub rings and bosses.** I would revisit forged carbon only for the lid or the bosses, if a mould becomes available. This follows from the 55 mm draw and the one-off nature of the build, not from strength. The inputs are mine or vendor-supplied and untested; a printed-plug test tub and a drop test would settle it.
+~~**Recommendation: woven twill laminate, 4 to 5 plies (about 1.0 mm), made over a printed plug as a tub with a separate lid, with bonded printed or machined hub rings and bosses.** I would revisit forged carbon only for the lid or the bosses, if a mould becomes available. This follows from the 55 mm draw and the one-off nature of the build, not from strength.~~ **Superseded by the edge requirement:** **Revised recommendation (after the edge requirement above): woven carbon as six CNC-cut flat plates of about 1.0 mm, bonded into a box, with every outside edge broken to a 0.5 to 1 mm radius by hand and the cut edges sealed with epoxy; the lid is one plate that stays removable.** Flat plates give true flat faces meeting at a crisp edge with no tooling, and a flat face is the best surface for the solar cells. The cost is that the box is no longer seamless: each edge needs an inside key (a printed or carbon angle) to carry load and seal the joint, which I estimate at about 25 to 30 g with adhesive (my rough figure, not designed), and the cut fibre ends need sealing. A layup over a plug stays the fallback if you accept 1.5 to 3 mm corners; forged carbon is only worth it if a proper mould is available. Both choices follow from the edge and the build, not from strength. The inputs are mine or vendor-supplied and untested; a printed-plug test tub and a drop test would settle it.
 
 ## Open decisions (owner)
-1. **Woven laminate or forged carbon** (recommendation above: woven twill over a printed plug), and the manufacturing route (a mould from a printed plug, CNC-cut plate bonded into a box, or a bought moulded part).
+1. **Woven laminate or forged carbon** (revised recommendation: woven plates bonded into a box, for the crisp edges), and the manufacturing route (a mould from a printed plug, CNC-cut plate bonded into a box, or a bought moulded part).
 2. **Closed shell or open frame:** a sealed box is not required by the scope (no spaceflight), but dust and water tolerance would need deciding.
 3. Antenna: a real patch behind a window, or a dummy.
 
