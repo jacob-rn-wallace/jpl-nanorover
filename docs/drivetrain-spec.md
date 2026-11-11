@@ -109,18 +109,18 @@ Caveats: the uncertainty is about plus or minus 40 %. The background rock in the
 
 ## Option C in the CAD (2026-11-11)
 
-Layout C is modelled with the **Pololu #3068** wheel motor and a **wheel support**: `wheel.py` preset `thin` (33 g wheels, 20.5 mm end-plate hole), `strut.py` `TIP_MODE = "motor"` (23 g struts, 24 mm tip boss, a 19.1 mm bore) with the wheel drive (motor box, assumed coupling, 3 mm stub shaft), a 19 mm spindle tube with barrel (9.7 g each) and two 3 x 8 x 4 mm bearings per wheel, and `assembly/rover.py` counts them. The whole model is **1351 g** (954 g of it the Hammond box and lid plate, to be redesigned), with the wheel drive and supports and no strut motors, wiring or electronics.
+Layout C is modelled with the **Pololu #3068** wheel motor and a **wheel support**: `wheel.py` preset `thin` (33 g wheels, 20.5 mm end-plate hole), `strut.py` `TIP_MODE = "motor"` (23 g struts, 24 mm tip boss, a 19.1 mm bore) with the wheel drive (motor box, assumed coupling, 3 mm stub shaft), a 19 mm spindle tube with barrel (9.1 to 9.9 g each, starting flush with each strut's plate) and two 3 x 8 x 4 mm bearings per wheel, and `assembly/rover.py` counts them. The whole model is **1351 g** (954 g of it the Hammond box and lid plate, to be redesigned), with the wheel drive and supports and no strut motors, wiring or electronics.
 
-**Mass with the support:** wheel drive 50 g (motors 9.5 g + coupling 1.0 g + stub shaft 1.9 g, four), spindles 39 g, bearings 5 g, wheels 133 g, struts 93 g: 320 g; with four Feetech ST3215 struts (276 g) the drivetrain is 596 g, **leaving about 404 g of the 1.0 kg** for the body, electronics, cells and camera (462 g before the support was designed). The spindle tubes are the largest addition; a 0.6 mm wall would save about 18 g.
+**Mass with the support:** wheel drive 50 g (motors 9.5 g + coupling 1.0 g + stub shaft 1.9 g, four), spindles 38 g, bearings 5 g, wheels 133 g, struts 93 g: 319 g; with four Feetech ST3215 struts (276 g) the drivetrain is 596 g, **leaving about 405 g of the 1.0 kg** for the body, electronics, cells and camera (462 g before the support was designed). The spindle tubes are the largest addition; a 0.6 mm wall would save about 18 g.
 
 The support design and its loads are in `strut-spec.md` ("Wheel support"). Not modelled: the strut motors (Feetech ST3215, 45.2 x 24.7 x 35 mm, in the body), the coaxial hub, how the wheel and tube are retained, and the real coupling.
 
 ## Option C clearance (CAD check, 2026-11-11, Pololu #3068 with its spindle)
 
-`hardware/drivetrain/motor_clearance.py` (needs `.venv`, run after `body.py`): the motor (10 x 12 x 25 mm) has its tail at |x| = 77.25 (the inboard face of strut A's plate) and its front at 102.25, inside a 19 mm spindle tube that runs to |x| = 113.5 and a barrel to 124.8.
+`hardware/drivetrain/motor_clearance.py` (needs `.venv`, run after `body.py`): each strut's motor (10 x 12 x 25 mm) has its tail flush with the inboard face of that strut's plate (|x| = 77.25 for A, 81.25 for B) inside a 19 mm spindle tube that runs to a cap at |x| = 116.25 and a barrel to 124.5.
 
-- **The struts and wheels clear the body.** The tail is **7.3 mm from the body face** (casting rim at 69.94 mm) and 8.0 mm inboard of the wheel's inner face; the wheels sit 15 mm outboard of the casting.
-- **No strut collisions from the wheel support:** one strut's motor, tube and bearings against the other strut gives 0 of 144 angle pairs (30 degree steps). `strut.py` with both supports included finds the same 12 equal-angle pairs as before (two wheels in the same place, impossible anyway). The tube lies in the other strut's layer, so it would meet that strut when the two point within about 20 degrees of each other; the wheels collide first (within about 55 degrees).
+- **The struts and wheels clear the body.** Strut A's tail is **7.3 mm from the body face** (casting rim at 69.94 mm) and 8.0 mm inboard of the wheel's inner face; the wheels sit 15 mm outboard of the casting.
+- **No strut collisions from the wheel support:** one strut's motor, tube and bearings against the other strut gives 0 of 144 angle pairs (30 degree steps). `strut.py` with both supports included finds the same 12 equal-angle pairs as before (two wheels in the same place, impossible anyway). A scan in 10 degree steps shows a contact only at 10 degrees apart or less for the first version; the wheels collide at under about 55 degrees in any case. Strut B's support no longer reaches behind its plate.
 - **Not covered:** a finer angle step, the retention of the tube and wheel, the coupling's real size, the cable.
 - (The earlier maxon motor, 10 mm x 45 mm, is superseded.)
 

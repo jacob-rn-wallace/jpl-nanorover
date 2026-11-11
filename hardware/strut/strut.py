@@ -57,10 +57,11 @@ SHAFT_D = 3.0
 SPINDLE_OD, SPINDLE_ID = 19.0, 16.2    # tube; the motor is 15.6 mm across its diagonal
 CAP_T = 1.5                            # end wall of the tube
 BARREL_OD, BRG_OD, BRG_ID, BRG_W = 11.0, 8.0, 3.0, 4.0
-BRG_X = (114.0, 120.0)                 # |x| of the inboard face of each bearing (centres 116 and 122)
-BARREL_END = 124.8                     # |x| where the barrel ends (the wheel's apex boss starts at 125.05)
-COUPLER_D, COUPLER_L = 8.0, 9.0        # ASSUMED small flexible 3 mm coupling, between the motor's front face and the cap
-TUBE_END = 113.5                       # |x| of the outer face of the cap
+TUBE_END = 116.25                      # |x| of the outer face of the cap (the same for both struts)
+BRG_X = (116.25, 120.25)               # |x| of the inboard face of each bearing: side by side, no spacer (centres 118.25 and 122.25)
+BARREL_END = 124.5                     # |x| where the barrel ends (the wheel's apex boss starts at 125.05)
+COUPLER_D, COUPLER_L = 8.0, 7.5        # ASSUMED small flexible 3 mm coupling, 0.5 mm from the motor's front face and 0.5 mm short of the cap (tight: real couplings are usually longer)
+# Each strut's support starts flush with the inboard face of ITS OWN plate (A: 77.25, B: 81.25), so nothing sticks out behind the plate.
 # --------------------------------------------
 
 X0 = E.SPOT_OUT + E.HUB_FLANGE_T                # outer face of the stud flange, |x|
@@ -174,9 +175,15 @@ def _cyl(r_out, r_in, x0, x1):
     return on_axle(c.moved(Location((STRUT_L, 0, 0))), x0)
 
 
-def spindle(direction):
-    """Spindle tube, end cap and bearing barrel (one aluminium part): tube OD 19 / ID 16.2 from the motor's tail to the cap, then the 11 mm barrel with an 8 mm bearing bore."""
-    tube = _cyl(SPINDLE_OD / 2, SPINDLE_ID / 2, MOTOR_TAIL, TUBE_END - CAP_T)
+def tail_for(direction):
+    """|x| of the support's tail: the inboard face of the strut's own plate (the +y strut is A, the -y strut is B)."""
+    return A_PLATE[0] if direction > 0 else B_PLATE[0]
+
+
+def spindle(direction, tail=None):
+    """Spindle tube, end cap and bearing barrel (one aluminium part): tube OD 19 / ID 16.2 from the strut plate's inboard face to the cap, then the 11 mm barrel with an 8 mm bearing bore."""
+    tail = tail_for(direction) if tail is None else tail
+    tube = _cyl(SPINDLE_OD / 2, SPINDLE_ID / 2, tail, TUBE_END - CAP_T)
     cap = _cyl(SPINDLE_OD / 2, 2.5, TUBE_END - CAP_T, TUBE_END)                 # end wall with a 5 mm hole for the shaft
     barrel = _cyl(BARREL_OD / 2, BRG_OD / 2, TUBE_END, BARREL_END)
     return _at_tip(tube + cap + barrel, direction)
@@ -185,15 +192,17 @@ def spindle(direction):
 def bearings(direction):
     """Two 3 x 8 x 4 mm ball bearings (as rings) in the barrel."""
     rings = [_cyl(BRG_OD / 2, BRG_ID / 2, x, x + BRG_W) for x in BRG_X]
-    return _at_tip(rings[0] + rings[1], direction)
+    return _at_tip(Compound(rings), direction)          # a Compound, not a union: the two bearings touch and must stay separate parts
 
 
-def motor(direction):
-    """Wheel drive at the strut tip: the 10 x 12 x 25 mm gearmotor box, the coupling, and the 3 mm stub shaft from the motor's front face to the wheel's collar."""
+def motor(direction, tail=None):
+    """Wheel drive at the strut tip: the 10 x 12 x 25 mm gearmotor box (tail flush with the strut plate's inboard face), the coupling, and the 3 mm stub shaft to the wheel's collar."""
+    tail = tail_for(direction) if tail is None else tail
+    front = tail + MOTOR_L
     box = Box(MOTOR_H, MOTOR_W, MOTOR_L, align=(Align.CENTER, Align.CENTER, Align.MIN)).moved(Location((STRUT_L, 0, 0)))
-    box = on_axle(box, MOTOR_TAIL)
-    coupler = _cyl(COUPLER_D / 2, 0, MOTOR_FRONT + 0.5, MOTOR_FRONT + 0.5 + COUPLER_L)
-    shaft = _cyl(SHAFT_D / 2, 0, MOTOR_FRONT, WHEEL_X[1] + COLLAR_L - 1.0)
+    box = on_axle(box, tail)
+    coupler = _cyl(COUPLER_D / 2, 0, front + 0.5, front + 0.5 + COUPLER_L)
+    shaft = _cyl(SHAFT_D / 2, 0, front, WHEEL_X[1] + COLLAR_L - 1.0)
     return _at_tip(box + coupler + shaft, direction)
 
 
@@ -268,7 +277,8 @@ def main():
     flat = 2 * (STRUT_L + WHEEL_D / 2)
     print(f"struts horizontal (0 deg): overall length {flat:.1f} mm  (JPL's caption: prototype 'only 20cm long')")
     if motors:
-        M, SP, BR = Compound(motors), Compound(spindles), Compound(brgs)
+        M, SP = Compound(motors), Compound(spindles)
+        BR = Compound([b for g in brgs for b in g.solids()])     # flattened: a compound of compounds reports zero volume
         for nm, shp in (("body", body), ("stud", stud_hubs), ("struts", S)):
             for lab, grp in (("motor drive", M), ("spindle", SP), ("bearings", BR)):
                 hit = grp & shp
@@ -278,10 +288,11 @@ def main():
         for lab, a_, b_ in (("motor drive vs spindle", M, SP), ("bearings vs spindle", BR, SP), ("bearings vs motor drive", BR, M)):
             hit = a_ & b_
             print(f"{lab:<24} overlap {hit.volume if hit else 0.0:.2f} mm3")
-        print(f"wheel motor           {MOTOR_W:.0f} x {MOTOR_H:.0f} x {MOTOR_L:.0f} mm (Pololu #3068), {MOTOR_G} g each; |x| tail {MOTOR_TAIL:.2f} to front {MOTOR_FRONT:.2f}; "
-              f"tail is {MOTOR_TAIL - 69.94:+.2f} mm from the body face")
-        print(f"spindle tube          OD {SPINDLE_OD} / ID {SPINDLE_ID} mm from |x| {MOTOR_TAIL:.2f} to the cap at {TUBE_END}, barrel to {BARREL_END}; "
-              f"bearings 3 x 8 x 4 at |x| {BRG_X[0]:.0f} and {BRG_X[1]:.0f}; stub shaft {SHAFT_D} mm to {WHEEL_X[1] + COLLAR_L - 1.0:.2f}; mass of one spindle {spindles[0].volume * 2.70e-3:.1f} g (6061)")
+        print(f"wheel motor           {MOTOR_W:.0f} x {MOTOR_H:.0f} x {MOTOR_L:.0f} mm (Pololu #3068), {MOTOR_G} g each; |x| tail {A_PLATE[0]:.2f} (strut A) and {B_PLATE[0]:.2f} (strut B), "
+              f"flush with each strut plate's inboard face; strut A's tail is {A_PLATE[0] - 69.94:+.2f} mm from the body face")
+        print(f"spindle tube          OD {SPINDLE_OD} / ID {SPINDLE_ID} mm from the plate's inboard face to the cap at {TUBE_END}, barrel to {BARREL_END}; "
+              f"bearings 3 x 8 x 4 at |x| {BRG_X[0]:.2f} and {BRG_X[1]:.2f}; stub shaft {SHAFT_D} mm to {WHEEL_X[1] + COLLAR_L - 1.0:.2f}; "
+              f"spindle mass {spindles[0].volume * 2.70e-3:.1f} g (A) and {spindles[1].volume * 2.70e-3:.1f} g (B), 6061")
         for nm, grp in (("wheel_motors.step", M), ("wheel_spindles.step", SP), ("wheel_bearings.step", BR)):
             export_step(grp, str(OUT / nm))
             chk = import_step(OUT / nm)

@@ -24,20 +24,21 @@ def main():
     axis = Axis((0, 0, E.HUB_Z), (1, 0, 0))
     angles = range(0, 360, 30)
     print(f"body half-width (casting rim) {face:.2f} mm; wheel {S.WHEEL_X[0]:.2f} to {S.WHEEL_X[1]:.2f}")
-    print(f"motor {S.MOTOR_W:.0f} x {S.MOTOR_H:.0f} x {S.MOTOR_L:.0f} mm from |x| = {S.MOTOR_TAIL:.2f} to {S.MOTOR_FRONT:.2f}; tail is {S.MOTOR_TAIL - face:+.2f} mm from the body face, "
-          f"{S.WHEEL_X[0] - S.MOTOR_TAIL:.2f} mm inboard of the wheel's inner face")
+    print(f"motor {S.MOTOR_W:.0f} x {S.MOTOR_H:.0f} x {S.MOTOR_L:.0f} mm; each support starts flush with its own plate's inboard face: strut A at |x| = {S.A_PLATE[0]:.2f} "
+          f"({S.A_PLATE[0] - face:+.2f} mm from the body face), strut B at {S.B_PLATE[0]:.2f}")
     sa = S.strut(S.A_BOSS, S.A_PLATE, S.WHEEL_X[0], +1)
     sb = S.strut(S.B_BOSS, S.B_PLATE, S.WHEEL_X[0], +1)
-    m = S.motor(+1) + S.spindle(+1) + S.bearings(+1)      # the whole wheel support, which the strut clamps
+    sup_a = S.motor(+1, S.A_PLATE[0]) + S.spindle(+1, S.A_PLATE[0]) + S.bearings(+1)      # A's whole wheel support, which strut A clamps
+    sup_b = S.motor(+1, S.B_PLATE[0]) + S.spindle(+1, S.B_PLATE[0]) + S.bearings(+1)      # B's, drawn on a +y arm so it can be rotated like the strut
     bad_a = bad_b = 0
     for a in angles:
         for b in angles:
-            h = m.rotate(axis, a) & sb.rotate(axis, b)       # A's motor against B's strut
+            h = sup_a.rotate(axis, a) & sb.rotate(axis, b)       # A's wheel support against strut B
             bad_a += bool(h and h.volume > 1e-3)
-            h = m.rotate(axis, b) & sa.rotate(axis, a)       # B's motor against A's strut
+            h = sup_b.rotate(axis, b) & sa.rotate(axis, a)       # B's wheel support against strut A
             bad_b += bool(h and h.volume > 1e-3)
     print(f"A's wheel support hits strut B at {bad_a} of {len(angles)**2} angle pairs; B's wheel support hits strut A at {bad_b}")
-    print("(B's spindle tube lies in strut A's layer, so it meets strut A when the two point within about 20 degrees of each other; the wheels collide well before that.)")
+    print("(A's tube lies in B's layer only from B's plate outward, B's starts flush with its own plate: only A's tube reaches into B's layer, and the wheels collide well before.)")
 
 
 if __name__ == "__main__":
