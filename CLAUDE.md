@@ -3,6 +3,8 @@
 An open replica of the JPL nanorover, the small four-wheeled asteroid rover designed for the Japanese MUSES-C (Hayabusa) mission and cancelled
 by NASA in November 2000. A hobby build in the spirit of the sibling project `maha-rover` (same layout, same licence model).
 
+**Picking the project back up: read `docs/handover.md` first** (status as of 2026-11-10, open decisions, next steps). The owner decided to defer the body and work on the drivetrain next.
+
 ## Scope (owner's decisions)
 - **Goal:** a replica that matches the original's appearance and dimensions and performs most, if not all, of its non-science functions: driving on
   four wheels, posing its four struts independently, self-righting, solar power, and the camera (the owner counts the camera as a function, not as science).
