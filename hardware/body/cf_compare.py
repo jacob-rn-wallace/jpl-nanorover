@@ -21,7 +21,7 @@ for n, (E, r) in MATS.items():
     t = T_REF * (E0 / E) ** (1 / 3)
     m = AREA_CM2 * t / 10 * r
     print(f"{n:30s} {t:6.2f} {m:8.0f} {m / (AREA_CM2 * T_REF / 10 * R0) - 1:+9.0%}")
-print("   Panel bending stiffness sets a thin shell's feel and the board/servo mounting, not strength. Forged standard needs about 17% more\n"
+print("   Panel bending stiffness sets a thin shell's feel and the board/servo mounting, not strength. Forged standard needs about 16% more\n"
       "   wall for the same stiffness, which is about 12% more shell mass at the lower density; 'optimised' forged (continuous tow added) is about equal.\n")
 
 # 2. Loads at the hub: how stressed is the wall? (planar, quasi-static, my arithmetic)
