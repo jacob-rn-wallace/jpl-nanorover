@@ -32,6 +32,31 @@ The papers' wheel (6.5 cm, banded) is a different design from the units' wheel (
 A hybrid: the **papers' body size** (140 x 140 x 60 mm; C's footprint and B's length match it), the **papers' 70 mm struts**, the **units' cleated wheel** (the owner chose it over the papers' banded wheel),
 **B's round window** (the headlamp is not modelled yet), and **C's-photo-derived solar cell sizes** (at the 140 mm scale; about 11% larger under the shared-drivetrain scale). It is good for fit checks and mechanics. It is not any one of A, B or C.
 
+## There is no final nanorover: what is built, planned and conceptual
+
+NASA cancelled the nanorover in November 2000, years before its planned launch (2002), so none of the three descriptions is a finished design; each is a snapshot of a design still being developed. The papers are written in the language of a design in progress ("the mechanical elements of the rover are being designed to 100 Gs", "the entire rover system is being qualified", "the solar cells are planned to be state of the art multijunction cells"), and the hardware in the photographs and videos is prototype hardware. What a "true" nanorover would have been after the rest of the development cycle cannot be known; the most recent snapshots are what can be copied.
+Each element is therefore tagged with its status:
+
+- **Built:** seen on hardware in a photograph or video.
+- **Planned:** stated in the papers as part of the flight design, not seen built.
+- **Concept:** an idea under development (a lab demonstration or a slide), not yet part of a vehicle.
+
+| Element | Status | Where |
+|---|---|---|
+| Four wheels on four posable struts, struts on hubs at the centre of two opposite faces; cone and helical-grouser (cleated) aluminium wheel, about 59 mm across | Built | units B and C (photographs, 1997 and 1998 videos) |
+| Round imaging window with a tilted sealed-beam headlamp on one end face; optics (camera, spectrometer) inside the body | Built | unit B (photograph, the opened body in the 1997 video) |
+| Square camera window bonded over its opening; thin black enclosure on a PCB-like base | Built | unit C (photograph, videos) |
+| Solar cells on the top face; a raised block with cells; an antenna loop | Built | units B and C (the loop on B only) |
+| 8051-class computer, 500 g of lithium batteries (prototype electronics) | Built | the archived Brescia page and the 1998 embedded-control paper (abstract and snippets) |
+| Solar cells on four of six faces, the antenna as a square patch on the top face | Planned | the papers |
+| Synova R3000 flight processor, no battery, 2.3 W of sunlight power, 4800 bit/s radio, 100 g design loads | Planned | the papers |
+| Optical sun detectors on all six faces, a laser range finder, a contact sensor on each strut and wheel | Planned | the papers |
+| Wheels as an assembly of thin conductors and insulator that also senses the ground (banded cylinders in the 1998 animation and on a 1998 lab prototype) | Planned, with a lab demonstration | the papers; the 1998 video |
+| Electroactive-polymer wipers for dust on the optical window | Concept | JPL slides (Bar-Cohen); dust tests in the 1998 video |
+| A sub-100 g "even smaller Nanorover" with the Widget Board | Concept | the 1998 video narration; the nanorover task goals |
+
+**Consequence for the replica.** The default target is the **most recent built hardware** (units B and C); planned and concept items are opt-in, chosen by the owner one at a time (the owner has chosen the cleated wheel, which is built, over the papers' planned banded wheel). This sits beside the settling rule below, which governs numerical values: the papers' dimensions win by default because they are the only complete set, even though they describe a design that was never finished.
+
 ## Rule for settling values (owner, 2026-11-10; replaces the earlier two-of-three rule)
 
 **Rule.** The papers (A) are authoritative by default. A paper value is overridden only when the two built units (B the silver unit, C the black unit) **independently** agree on a different one. Independence is required: B and C carry the same struts and wheels (owner), so on anything that is part of the drivetrain they count as one observation, not two. B's and C's absolute sizes are also scaled from A's 65 mm wheel, so they cannot contradict A's absolute numbers on their own, only scale-free ratios and features. Ties and exceptions are decided by the owner and recorded here.
