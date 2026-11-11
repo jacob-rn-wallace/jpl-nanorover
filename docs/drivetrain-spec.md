@@ -1,6 +1,6 @@
 # Drivetrain
 
-**Decided (owner, 2026-11-11): layout C.** Thin-walled aluminium wheels with the wheel motor (maxon ECX SPEED 10 M with a GPX 10 A 4-stage 256:1 gearhead) inside each wheel, fixed to the strut tip with its tail poking inboard; strut motors (EC-max 16 5 W with GP 16 C 1621:1) in the body, 1.0 kg design mass, drive speed about 40 mm/s. The belt layouts 2a, 2b and the friction-pivot layout 3 were studied and not taken (see "Layout comparison"). Datasheet checks, the shaft pad and the strut-tip mounting are still to do.
+**Decided (owner, 2026-11-11): layout C.** Thin-walled aluminium wheels with the wheel motor inside each wheel, clamped in a slot in the strut tip so the strut is its heat sink; strut motors in the body; 1.0 kg design mass; drive speed about 40 mm/s. **Motors, after the cost review: Pololu #3068 for the wheels (in the CAD) and Feetech ST3215 for the struts (not yet in the CAD); the maxon parts of the earlier sections are superseded on cost.** The belt layouts 2a, 2b and the friction-pivot layout 3 were studied and not taken (see "Layout comparison"). Datasheet checks, the shaft pad and the strut-tip mounting are still to do. **The motor choice is reopened on cost (owner, 2026-11-11): maxon's motors are over $200 each; see "Motor cost" below. Nothing is decided; the CAD still shows the maxon wheel motor.**
 
 Record for `hardware/drivetrain/torque_budget.py` (plain Python, no CAD). Started 2026-11-11, following handover section 9, step 1.
 
@@ -109,21 +109,16 @@ Caveats: the uncertainty is about plus or minus 40 %. The background rock in the
 
 ## Option C in the CAD (2026-11-11)
 
-Layout C is modelled: `wheel.py` preset `thin` (34 g wheels), `strut.py` `TIP_MODE = "motor"` (22 g struts, bored tips, `wheel_motors.step` with the four 20.2 g motors), and `assembly/rover.py` counts them. The whole model is 1338 g with the wheel motors (954 g of it is the Hammond box and lid plate, to be redesigned) and no strut motors, wiring or electronics. Wheel masses: the model gives 34 g against the 45 g estimated above, because it has no hub tube.
+Layout C is modelled with the **Pololu #3068** wheel motor: `wheel.py` preset `thin` (33 g wheels, 16.5 mm motor hole), `strut.py` `TIP_MODE = "motor"` (23 g struts, 20 mm tip boss, a 10.1 x 12.1 mm slot, `wheel_motors.step` with the four 9.5 g motors), and `assembly/rover.py` counts them. The whole model is **1296 g** (954 g of it the Hammond box and lid plate, to be redesigned) with the wheel motors and no strut motors, wiring or electronics. Not modelled: the strut motors (Feetech ST3215, 45.2 x 24.7 x 35 mm, in the body), the coaxial hub, and **the wheel's own bearings and spindle**: the #3068's 9 mm shaft has a practical radial limit of 0.25 to 0.5 kgf against 0.25 kgf of static wheel load, so the motor cannot carry the wheel (see `strut-spec.md`).
 
-## Option C clearance (CAD check, 2026-11-11)
+## Option C clearance (CAD check, 2026-11-11, Pololu #3068)
 
-`hardware/drivetrain/motor_clearance.py` (needs `.venv`, run after `body.py` and `strut.py`) puts the 10 mm x 45 mm wheel motor and gearhead in each wheel, carried by the strut tip, with the output end as far toward the cone apex as the cone's inner radius allows (|x| = 127.35 mm) less a shaft-and-hub pad, and the tail running inboard.
+`hardware/drivetrain/motor_clearance.py` (needs `.venv`, run after `body.py`): the 10 x 12 x 25 mm motor sits with its tail at |x| = 77.25 (the inboard face of strut A's plate) and its front at 102.25, inside the wheel.
 
-| Shaft pad | Tail at |x| | Tail to body face (casting rim at 69.94 mm) | Tail inboard of the wheel's inner face |
-|---|---|---|---|
-| 0 mm | 82.35 | 12.4 mm | 2.9 mm |
-| 3 mm | 79.35 | 9.4 mm | 5.9 mm |
-| 6 mm | 76.35 | 6.4 mm | 8.9 mm |
-
-- **The struts and wheels still clear the body.** The tail stays at least 6 mm from the body face even with a 6 mm pad. The wheels and struts hang outside the body faces and never meet the body (the wheel is 15 mm outboard of the casting); only the stud flange and nuts are near the hub.
-- **No new strut collisions.** One strut's motor against the other strut alone gives 0 of 144 angle pairs (30 degree steps). With both motors included `strut.py` finds the same 12 equal-angle pairs as before, where two wheels would be in the same place (the struts cannot swap places, as before).
-- **Not covered:** the motor's flexprint cable at the tail (about 4 mm), a finer angle step than 30 degrees, the strut's real tip mounting (a 10 mm bore in the 18 mm tip boss leaves 4 mm of wall), and the thin-wall wheel's end plate. The motor is a plain cylinder.
+- **The struts and wheels clear the body.** The tail is **7.3 mm from the body face** (casting rim at 69.94 mm) and 8.0 mm inboard of the wheel's inner face; the wheels sit 15 mm outboard of the casting.
+- **No strut collisions from the motors:** one strut's motor against the other strut gives 0 of 144 angle pairs (30 degree steps). `strut.py` with both motors included finds the same 12 equal-angle pairs as before (two wheels in the same place, impossible anyway).
+- **Not covered:** a finer angle step, the wheel's bearings, the shaft coupling, the cable.
+- (The earlier maxon motor, 10 mm x 45 mm with its tail 9.5 mm from the body, is superseded.)
 
 ## Idea: motors in the body, belts to the wheels (NPO-20057)
 
@@ -153,6 +148,101 @@ The belt, pulley, bearing and friction-disc masses are my assumptions (11 g per 
 - **3** is the lightest and holds pose for free, but: (a) it works only with the motor **at the strut tip**, because the strut must be turned by the reaction torque of its own motor; a body motor with a belt along the strut gives no moment about the pivot; (b) the motor must deliver the friction torque, so each tip motor is a 16 mm class unit (EC-max 16 5 W with GP 16 C 4-stage 370:1, 69 g, 54.4 mm overall, 0.50 N.m continuous, 0.75 intermittent), which fits inside the wheel only just: with its front at the cone's 8 mm inner radius (|x| = 126.3) the tail reaches |x| = 71.9, **2.0 mm from the body face**; (c) with the wheels forced to scrub, lifting needs friction torque T (0.35 N.m, 2.0 x the worst static load) + the one-pair push (0.34) + scrub (0.09) = **0.78 N.m against the gearhead's 0.75 N.m intermittent: 5 % short**. A 5-stage gearhead (0.90 N.m) would pass but drives the wheels at only 3.5 rpm (11 mm/s), against about 40 mm/s seen in the videos. Without the scrub (wheels free to roll) it would pass with 0.69 N.m. Driving at the step load (0.138 N.m) does not slip the pivot (0.138 < 0.18).
 
 **Assessment.** Layout 3 saves 37 g over C but is marginal on Earth and needs the 2 mm fit; layout 2b is dominated; layout 2a costs 44 g over C and buys a free wheel interior. **C remains the simplest layout that meets the requirement, 2a is the alternative if the wheel interior is wanted, and 3 is a lighter option only for a rover that can scrub (low gravity or low friction).** The choice does not change the strut motors' sizing in C and 2a.
+
+## Motor cost (2026-11-11, open)
+
+The owner found the maxon motors to be **over $200 each** on maxon's website (not checked by me), so eight would be $1,600 or more. `hardware/drivetrain/motor_options.py` compares hobby-grade parts against the same loads. Sources and the assumed items are listed at its top.
+
+| Role | Option | Mass | Price each | Capability against the 1.0 kg loads |
+|---|---|---|---|---|
+| Strut | maxon EC-max 16 5 W + GP 16 C 1621:1 (now) | 73 g | over $200 (owner) | 0.90 N.m intermittent, 0.60 continuous: 2.6 x the 0.34 N.m push |
+| Strut | **Feetech ST3215, 12 V** (bus servo, 345:1 metal gears, 360 degree 12-bit magnetic encoder, continuous mode) | 55 to 69 g (sources differ) | about $17 to $28 (other sellers up to $49) | 30 kg.cm locked rotor = 2.9 N.m, 10 kg.cm rated (retailer): 8.6 x peak, 2.9 x rated |
+| Strut | Feetech ST3215, 7.4 V version | same | same | 19.5 kg.cm = 1.9 N.m: 5.6 x peak, 1.9 x rated |
+| Wheel | maxon ECX SPEED 10 M + GPX 10 A 256:1 (now) | 20.2 g | not looked up, expected high | 0.15 / 0.20 N.m |
+| Wheel | **Pololu 1000:1 micro metal gearmotor HPCB 12 V (#3046)** | 10.5 g | $37.95 | stall 10 kg.cm; 2.1 kg.cm (0.21 N.m) at best efficiency, 25 %; at 0.138 N.m about 30 rpm (102 mm/s) at 12 V, so run it at about 35 % duty for the 40 mm/s design speed |
+
+What it says:
+- **The cheap set meets every load.** Four ST3215 and four Pololu motors cost about **$220 to $264** (4 x $17 to $28 plus 4 x $37.95) against $1,600 or more, and weigh less: drivetrain 542 g against 597 g, leaving 458 g of the 1.0 kg instead of 403 g. Controllers, drivers, a servo bus adapter and wiring are **not priced**.
+- **Holding costs more than with the maxon gearing but stays small:** at the 25 degree stance a strut holds 0.156 N.m, which is about 0.09 W of copper loss per strut (12 V version, from the servo's stall current and kt; 0.12 W for the 7.4 V version) against 0.03 W for the 1621:1 maxon. Four struts are about 0.4 W, plus the servos' idle current (not found). That matters for the solar goal but is not prohibitive.
+- **Fit changes:** the Pololu motor is 10 x 12 mm and 28.5 mm long (the page also gives 29.5 mm plus a 10 mm shaft; check the diagram), which fits inside the wheel with room to spare (no tail past the inner face), but the strut-tip bore must become about 15.8 mm across (the diagonal) in an 18 mm boss, leaving 1.1 mm of wall, so the tip boss would grow to about 22 mm or the motor would be held in a bracket. The ST3215 is 45.2 x 24.7 x 35 mm with its shaft off-centre; two of them per hub in the body still need the coaxial shaft design.
+- **Unchecked:** the servo's mass and its rated torque (sources differ), whether it backdrives when unpowered, the lifetime of an HPCB micro metal gearbox under a 0.1 N.m continuous load (Pololu gives no continuous rating), and what the maxon wheel motor costs.
+
+### Pololu #3068 against #3046 for the wheels (owner's question, 2026-11-11)
+
+Read from Pololu's spec and FAQ pages: **#3068, 250:1 HPCB 6 V: 10 x 12 x 25 mm (plus a 10 mm shaft), 9.5 g, 130 rpm at 6 V, 0.15 A no load, stall 3.2 kg.cm (0.314 N.m) at 1.5 A (theoretical), best efficiency 0.66 kg.cm at 100 rpm (29 %), $26.45 each** ($24.33 for 5, $22.39 for 25). The page gives no continuous torque limit; Pololu's FAQ says to keep continuous loads at about 25 % of stall or less, which is 0.078 N.m here (and 0.245 N.m for the #3046). Stalling can damage the gears or windings within seconds.
+
+| Load (1.0 kg) | N.m | % of #3068 stall | % of #3046 stall |
+|---|---|---|---|
+| 20 degree slope | 0.027 | 9 % | 3 % |
+| slope with margin x2 | 0.054 | 17 % | 6 % |
+| 0.1 N.m (the earlier design load) | 0.100 | **32 %: over the 25 % guideline** | 10 % |
+| half-radius step | 0.138 | **44 %: over** | 14 % |
+
+- **The #3068 is lighter (9.5 g against 10.5 g) and cheaper ($26.45 against $37.95, saving $46 for four) and handles the realistic wheel loads:** flat driving needs only about 0.002 to 0.004 N.m (rolling resistance, my estimate), a 20 degree slope is 9 % of stall and a slope with margin 17 %. At 12 rpm (about 40 mm/s) it needs about 18 to 26 % duty on those loads.
+- **It is marginal only for the loads I set as design margin:** 0.1 N.m (32 %) and the step (44 %), which are above the guideline for continuous use. Steps are meant to be taken by the struts lifting the front wheels, so the wheels should rarely see them, and a brief excursion is not the continuous rating. The #3046 has about 3 times the headroom (all four loads within 14 % of stall) for $11.50 more each, and it would last longer under repeated load.
+- **Fit:** the same 10 x 12 mm profile, 3 mm shaft and a slightly shorter body (25 mm against 28.5 mm); the strut-tip slot is the same.
+- **Totals with the Feetech ST3215 struts:** #3068 about **$174 to $218**, 538 g drivetrain, 462 g left of 1 kg; #3046 about $220 to $264, 542 g, 458 g left. Controllers, drivers and wiring are not priced.
+- **Recommendation: the #3068, with the rule that the wheels never push the rover against a step or stall, and a limit in firmware on motor current (about 0.5 A at 6 V, which is about a third of stall).** If a first test shows the gearbox warm or noisy at the 0.1 N.m load, swap to the #3046; the two are drop-in for each other apart from supply voltage (6 V against 12 V).
+
+### Heating, and the struts and wheels as heat sinks (owner's question, 2026-11-11)
+
+**What "lasts longer" means.** Pololu does not say what its 25 % of stall guideline protects. Load wears three things at once: the **windings** (heating, set by the copper loss I^2 R), the **brushes** (wear grows with current), and the **gear teeth** (stress grows with torque, and nothing but a stronger gearbox helps). A heat sink only helps the first. The #3046 spreads the same load over a gearbox rated for about three times the torque, so it is better on all three; the #3068 is limited mainly by gear stress and heat together.
+
+**Copper loss (my estimate from the Pololu no-load and stall figures, I = I0 + (load/stall)(I stall - I0), R = V / I stall):**
+
+| Load | #3068 (6 V) | #3046 (12 V) |
+|---|---|---|
+| flat driving (0.003 N.m) | 0.11 W | 0.11 W |
+| 20 degree slope (0.027) | 0.28 W | 0.16 W |
+| slope with margin x2 (0.054) | 0.58 W | 0.22 W |
+| 0.1 N.m | 1.35 W | 0.35 W |
+| half-radius step (0.138) | 2.2 W | 0.49 W |
+
+**Heat paths (all my rough estimates: natural convection h = 10 W/m2K, 6061 aluminium, stainless stud; no measurement).**
+- The motor alone in still air inside the closed wheel: about 75 K/W from its can area. At 0.6 W that is about 48 K above ambient on the can, with the winding hotter, and at 1.35 W about 100 K. That is why the guideline exists.
+- **The strut is a good heat sink.** The motor is clamped in a bore in the aluminium strut tip. From there the arm conducts about 7 K/W to the hub and loses heat by convection from both faces (about 30 K/W to air); the pivot (a 12 mm stainless stud) adds about 8 K/W to the body. Together about **10 K/W, roughly 7 times better**: 0.6 W gives about 6 K on the can, 1.35 W about 14 K. The winding runs hotter than the can by an amount I could not find (the motor's internal thermal resistance).
+- **The wheel is not a usable sink.** The only solid path from the motor to the wheel is the 3 mm steel output shaft, about 34 K/W (the wheel and motor rotate relative to each other, so a large contact is not possible). The wheel's large outer surface would cool well, but the heat cannot get there.
+- **Design consequences:** keep the strut tips aluminium (not plastic), fit the motor into the bore with thermal paste or adhesive (about 0.05 mm of clearance now), keep the arm plate wide near the tip, and note that the body is a poor extra sink if the redesigned body is plastic. In vacuum only conduction counts, which the strut still provides; this is a feature of putting the motor on the strut tip.
+- **Struts' own servos:** holding at the stance costs about 0.09 W of copper loss per servo (earlier section) and a one-pair push about 0.44 W briefly, so heating is not the issue for them; stalling is (the servo has overload protection, not checked).
+
+### Brushed 130-size hobby motors for the wheels (owner's question, 2026-11-11)
+
+Data: only third-party listings were found, no Mabuchi datasheet. RF-130 (6 V): 8,100 rpm no load, 36 mA no load, 0.70 A stall, starting torque 42 g.cm (4.1 mN.m, my conversion), 18 g. The can is about 20 x 15 x 25 mm (**my recollection, not found**). The Tamiya FA-130 on Pololu's page is a different motor (3 V). No sourced 130-size gearbox was found.
+
+Estimate (my arithmetic, for a gearbox I assume at 250:1 and 40 to 50 % efficient, or 500:1 at 30 %): a 0.1 N.m wheel load needs about 0.7 to 1.0 mN.m at the motor, which is a quarter of its stall torque, about 0.2 A and 0.2 to 0.3 W of copper loss; the wheel then turns 14 to 26 rpm (46 to 89 mm/s), so the 12 rpm design speed is reached at reduced voltage. A half-radius step (0.138 N.m) needs 0.9 to 1.4 mN.m and 0.3 to 0.6 W: briefly acceptable, above what a 130 motor is usually rated to run continuously (not checked).
+
+| | RF-130 + 250:1 plastic or metal gearbox | Pololu #3046 (10.5 g gearmotor) |
+|---|---|---|
+| Cost | motor about $1 to $3 (not looked up), a gearbox $5 to $15 (not looked up): roughly $10 to $15 | $37.95 |
+| Mass | 18 g + gearbox about 20 to 30 g = about 40 to 50 g | 10.5 g |
+| Four wheels | about 160 to 200 g | 42 g |
+| Size | about 20 x 15 mm, 25 mm plus the gearbox, so about 50 mm or more long | 10 x 12 x 28.5 mm |
+| Risk | gearbox must be found or built; plastic gears at 250:1 are noisy, loose (backlash) and wear | gearbox included |
+
+Conclusion: a 130 motor can drive the wheels, but only with a gearbox of about 250:1 that I could not source, and it **saves roughly $100 for all four wheels at the cost of about 120 to 160 g** of the 1.0 kg budget (leaving about 300 g instead of 458 g) and a bigger bore (about 21 mm across) in the strut tip. The Pololu gearmotor is smaller, lighter and complete. The 130 route is worth it only if the cost per wheel motor must be under about $15. A cheaper Pololu part in the same family (for example the 250:1 HPCB 6 V, #3068, 9.5 g, 130 rpm at 6 V, stall 3.2 kg.cm = 0.31 N.m) would also reach the 0.1 N.m load (a third of its stall torque); its price was not looked up.
+
+### Custom PCB-stator motor (owner's idea, 2026-11-11)
+
+Measured data found: one research motor (Carnegie Mellon and Microbot, arXiv 2509.23561): 19 mm outside diameter, 6 mm thick, a **48-layer** stator of stacked HDI boards **with a steel core**, reported at 30.7 mN.m at 2000 rpm (whether that is peak or continuous was not clear from the snippets). A hobby 4-layer board cannot reproduce that, and the paper itself says low copper fill (under 35 %) gives high resistance and poor continuous torque. No measured data for an ordinary 4-layer board was found.
+
+**My own first-principles estimate (order of magnitude, plus or minus a factor of 3; every input assumed):** a double-rotor, coreless stator of 50 mm outside and 20 mm inside diameter in the wheel (it fits the 57 mm interior), 4 layers of 1 oz copper, 12 coils of 8 turns per layer, 0.15 mm traces, N52 magnets of about 3 mm with steel back plates (0.4 T in the gap), 10 A/mm2 continuous. Result: Kt about 43 mN.m/A, about 33 ohm, about 52 mA and **about 2.3 mN.m continuous** (0.09 W of copper loss), no-load speed about 2,700 rpm at 12 V. The wheel's 0.1 N.m load then needs a reduction of about 100:1 (0.14 N.m continuous at 60 % efficiency); the struts' 0.34 to 0.69 N.m would need about 300:1 and a bigger or thicker stator.
+
+| | PCB motor + about 100:1 reduction (wheel) | Pololu #3046 |
+|---|---|---|
+| Mass | about 70 g (board 6 g, 24 magnets 15 g, two 1 mm steel back plates about 26 g, shaft and bearings 5 g, printed reduction about 18 g); about 40 g with no back iron but half the torque | 10.5 g |
+| Cost | board, magnets, bearings about $10 to $20; plus a three-phase driver (about $10 to $20) and sensing | $37.95 complete |
+| Effort | motor design, windings, magnet fixture, reduction gear, commutation firmware | none |
+
+Conclusion: **it does not beat the bought gearmotor on mass, cost or effort**, because a PCB stator is a low-torque, high-speed motor and the missing torque has to come from a custom reduction gear, which is where the mass and work go. Its real advantages are integration (Hall sensors and the driver on the same board) and being a custom, open, printable part. It is a reasonable later R&D project for the wheels, not the way to build the first drivetrain; for the struts it is not realistic.
+
+## Isogrid on the struts and other thermal levers (2026-11-11)
+
+The owner asked whether isogrid pockets on the hidden faces of the struts could improve heat sinking and free mass. Result (`strut.py` `ISOGRID`, `isogrid_study.py`; details in `strut-spec.md`): **no, at this size.** The arm plate is 3 mm thick and about 24 mm wide, so pockets 1.8 mm deep remove only 2.2 g from the four struts (2 %), leave arm conduction unchanged (3.6 to 3.8 K/W) and add little convective area (the pockets face the body or the other strut, with almost no air flow), while the out-of-plane stiffness drops to 16 % and the safety factor for a 5 N sideways knock from 25 to 3 (my assumed load). Isogrid pays off on large thin panels, not on a 70 mm arm.
+
+Better thermal levers (my estimates, same assumptions as the heating section: strut path about 0.099 W/K, 10 K/W):
+- **Black anodising the struts:** bare aluminium has an emissivity of about 0.05 to 0.1, black anodising about 0.8, which adds about 5 W/m2K of radiation to the 10 W/m2K of convection, raising the arm's air path from 0.034 to 0.051 W/K and the total by about **17 %**.
+- **The pivot is the weak link:** the 12 mm stainless stud is about 8 K/W against about 7 K/W for the arm itself. A path through aluminium instead (an aluminium hub, or a copper or aluminium braid or shim across the pivot) would cut it below 1 K/W and raise the total by up to about **60 %**, but the stud is stainless for the O-ring seal and corrosion, so this is a hub design question.
+- **Mass:** better places to take it out are the pivot bosses (about 11 g of each strut's 23 g, 4 mm of each boss is a plain disc), the wheels (33 g each) and above all the body (954 g).
 
 ## Hub sizing
 

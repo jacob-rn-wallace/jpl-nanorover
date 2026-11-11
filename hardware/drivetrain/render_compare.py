@@ -6,8 +6,8 @@
 Run after strut.py (struts.step) with the .venv.  Needs numpy, matplotlib, trimesh.  The body is a plain 140 x 140 x 60 mm box (no Hammond geometry), so the picture contains only our own parts.  Cutaway column: the wheels are cut at axle height (mesh slice) and the upper half removed; the motors are shown whole.
 
 Before : wheel preset "v1" (2.5 mm wall, 12 mm hub tube on a 6 mm axle, 78 g each) with the struts in TIP_MODE "axle".
-C      : wheel preset "thin" (1.0 mm wall, 0.8 mm cone and blades, no hub tube, 34 g each) with the struts in TIP_MODE "motor": a 10 mm x 44.9 mm motor and gearhead
-         (ECX SPEED 10 M + GPX 10 A 4-stage) carried by the strut tip, tail poking inboard (strut.py has its dimensions).
+C      : wheel preset "thin" (1.0 mm wall, 0.8 mm cone and blades, no hub tube, 33 g each) with the struts in TIP_MODE "motor": a Pololu #3068 gearmotor (10 x 12 x 25 mm box
+         plus a placeholder output rod) clamped in a slot in the strut tip (strut.py has its dimensions).
 """
 import sys
 import tempfile

@@ -50,7 +50,7 @@ PRESETS = {
 }
 PRESET = "thin"
 HUB_D = 12.0                      # hub tube around the axle (v1 only)
-HOLE_D = 12.0                     # hole in the inboard end plate for the wheel motor, 10 mm (thin only; 1 mm clearance all round)
+HOLE_D = 16.5                     # hole in the inboard end plate for the wheel motor (10 x 12 mm, 15.6 mm across the diagonal; thin only)
 SHAFT_BORE = S.SHAFT_D + 0.1      # bore in the apex boss and collar for the motor's output shaft (diameter assumed in strut.py)
 BOSS_IN = 4.0                     # boss under the cone apex that the output shaft drives (thin only)
 SERR_PITCH = 3.0                  # axial pitch of the serrations along each crest

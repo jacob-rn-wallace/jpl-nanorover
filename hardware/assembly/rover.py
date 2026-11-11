@@ -25,7 +25,7 @@ PARTS = [  # (label, file, material density g/cm3 as used by the individual scri
     ("hub studs", HW / "body/out/hub_studs.step", 7.9),
     ("hub O-rings and nuts", HW / "body/out/hub_orings_and_nuts.step", 7.9),
     ("struts", HW / "strut/out/struts.step", 2.70),
-    ("wheel motors (ECX 10 + GPX 10)", HW / "strut/out/wheel_motors.step", 20.2 / 3.616),   # catalogue 20.2 g each over the 3.616 cm3 envelope
+    ("wheel motors (Pololu 3068)", HW / "strut/out/wheel_motors.step", None),   # catalogue 9.5 g each (the model includes a placeholder rod)
     ("wheels", HW / "wheel/out/wheels.step", 2.70),
 ]
 
@@ -37,7 +37,7 @@ def main():
         if not path.exists():
             sys.exit(f"missing {path}: run hardware/body/body.py, hardware/strut/strut.py and hardware/wheel/wheel.py first")
         s = import_step(path)
-        m = s.volume * rho * 1e-3
+        m = 4 * 9.5 if rho is None else s.volume * rho * 1e-3
         total += m
         shapes.append(s)
         print(f"{label:<24} {m:7.0f} g")

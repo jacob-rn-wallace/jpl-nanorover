@@ -1,10 +1,10 @@
-"""Clearance of the wheel motor (layout C) against the body and the other strut of the same hub, for several shaft pads.
+"""Clearance of the wheel motor (layout C, Pololu #3068) against the body and the other strut of the same hub.
 
     .venv/bin/python hardware/drivetrain/motor_clearance.py        (after hardware/body/body.py)
 
-The motor, its size and its position come from hardware/strut/strut.py (S.motor, S.MOTOR_*): 10 mm x 44.9 mm (ECX SPEED 10 M + GPX 10 A 4-stage), output end as far
-toward the cone apex as the cone's inner radius allows less MOTOR_PAD.  Reports where the tail ends and tests one strut's motor against the other strut of the same hub at every
-pair of angles (30 degree steps; strut.py's own check at the default pad).  The flexprint cable (about 4 mm at the tail) is not modelled.
+The motor, its size and its position come from hardware/strut/strut.py (S.motor, S.MOTOR_*): a 10 x 12 x 25 mm box with its tail at |x| = S.MOTOR_TAIL (the inboard
+face of strut A's plate) and a placeholder 3 mm output rod to the wheel collar.  Reports how far the tail is from the body face and tests one strut's motor against the
+other strut of the same hub at every pair of angles (30 degree steps).
 """
 import sys
 from pathlib import Path
@@ -24,23 +24,20 @@ def main():
     axis = Axis((0, 0, E.HUB_Z), (1, 0, 0))
     angles = range(0, 360, 30)
     print(f"body half-width (casting rim) {face:.2f} mm; wheel {S.WHEEL_X[0]:.2f} to {S.WHEEL_X[1]:.2f}")
-    for pad in (0.0, 3.0, 6.0):
-        S.MOTOR_PAD = pad
-        S.MOTOR_FRONT = S.WHEEL_X[1] - S.CONE_T - S.CONE_H * (S.MOTOR_D / 2) / S.CONE_R - pad
-        S.MOTOR_TAIL = S.MOTOR_FRONT - S.MOTOR_L
-        print(f"\nSHAFT_PAD {pad:.0f} mm: motor from |x| = {S.MOTOR_TAIL:.2f} (tail) to {S.MOTOR_FRONT:.2f}; tail is {S.MOTOR_TAIL - face:+.2f} mm from the body face, "
-              f"{S.WHEEL_X[0] - S.MOTOR_TAIL:.2f} mm inboard of the wheel's inner face")
-        sa = S.strut(S.A_BOSS, S.A_PLATE, S.WHEEL_X[0], +1)
-        sb = S.strut(S.B_BOSS, S.B_PLATE, S.WHEEL_X[0], +1)
-        m = S.motor(+1)
-        bad_a = bad_b = 0
-        for a in angles:
-            for b in angles:
-                h = m.rotate(axis, a) & sb.rotate(axis, b)       # A's motor against B's strut
-                bad_a += bool(h and h.volume > 1e-3)
-                h = m.rotate(axis, b) & sa.rotate(axis, a)       # B's motor against A's strut
-                bad_b += bool(h and h.volume > 1e-3)
-        print(f"   A's motor hits strut B at {bad_a} of {len(angles)**2} angle pairs; B's motor hits strut A at {bad_b}")
+    print(f"motor {S.MOTOR_W:.0f} x {S.MOTOR_H:.0f} x {S.MOTOR_L:.0f} mm from |x| = {S.MOTOR_TAIL:.2f} to {S.MOTOR_FRONT:.2f}; tail is {S.MOTOR_TAIL - face:+.2f} mm from the body face, "
+          f"{S.WHEEL_X[0] - S.MOTOR_TAIL:.2f} mm inboard of the wheel's inner face")
+    sa = S.strut(S.A_BOSS, S.A_PLATE, S.WHEEL_X[0], +1)
+    sb = S.strut(S.B_BOSS, S.B_PLATE, S.WHEEL_X[0], +1)
+    m = S.motor(+1)
+    bad_a = bad_b = 0
+    for a in angles:
+        for b in angles:
+            h = m.rotate(axis, a) & sb.rotate(axis, b)       # A's motor against B's strut
+            bad_a += bool(h and h.volume > 1e-3)
+            h = m.rotate(axis, b) & sa.rotate(axis, a)       # B's motor against A's strut
+            bad_b += bool(h and h.volume > 1e-3)
+    print(f"A's motor hits strut B at {bad_a} of {len(angles)**2} angle pairs; B's motor hits strut A at {bad_b}")
+    print("(B's motor tail lies in strut A's layer, so it meets strut A when the two point within about 15 degrees of each other; the wheels collide well before that.)")
 
 
 if __name__ == "__main__":
