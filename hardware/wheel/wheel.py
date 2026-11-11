@@ -50,7 +50,7 @@ PRESETS = {
 }
 PRESET = "thin"
 HUB_D = 12.0                      # hub tube around the axle (v1 only)
-HOLE_D = 16.5                     # hole in the inboard end plate for the wheel motor (10 x 12 mm, 15.6 mm across the diagonal; thin only)
+HOLE_D = 20.5                     # hole in the inboard end plate around the 19 mm spindle tube (0.75 mm clearance all round; thin only)
 SHAFT_BORE = S.SHAFT_D + 0.1      # bore in the apex boss and collar for the motor's output shaft (diameter assumed in strut.py)
 BOSS_IN = 4.0                     # boss under the cone apex that the output shaft drives (thin only)
 SERR_PITCH = 3.0                  # axial pitch of the serrations along each crest
@@ -153,6 +153,9 @@ def main():
              "struts": import_step(STRUT_OUT / "struts.step"), "lid plate": import_step(BODY_OUT / "lid_plate.step")}
     if (STRUT_OUT / "wheel_motors.step").exists() and not HUB_TUBE:
         parts["motors"] = import_step(STRUT_OUT / "wheel_motors.step")
+        for nm_, f_ in (("spindles", "wheel_spindles.step"), ("bearings", "wheel_bearings.step")):
+            if (STRUT_OUT / f_).exists():
+                parts[nm_] = import_step(STRUT_OUT / f_)
     for nm, shp in parts.items():
         assert shp.volume > 0, f"{nm} imported with zero volume; re-run its script"
         hit = WH & shp

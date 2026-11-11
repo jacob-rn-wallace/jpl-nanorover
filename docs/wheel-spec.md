@@ -68,10 +68,10 @@ The scale factor 65 / 59 is applied to every measured length so the diameter ove
 |---|---|---|
 | Cylinder wall | 2.5 mm | 1.0 mm |
 | End plate / cone shell / blades | 2.0 / 1.5 / 1.2 mm | 1.0 / 0.8 / 0.8 mm |
-| Hub | 12 mm tube on a 6 mm axle | none: a 16.5 mm hole in the end plate for the 10 x 12 mm motor (15.6 mm across its diagonal); an 8 mm boss under the cone apex and the collar, bored 3.1 mm for the motor's output rod (placeholder: the wheel will need its own bearings, see `strut-spec.md`) |
+| Hub | 12 mm tube on a 6 mm axle | none: a 20.5 mm hole in the end plate around the 19 mm spindle tube; an 8 mm boss under the cone apex and the collar, bored 3.1 mm for the 3 mm stub shaft; the wheel runs on two bearings on the spindle (see `strut-spec.md`, "Wheel support") |
 | Mass (aluminium) | 78 g | 33 g |
 
-The outline, grousers, serrations and cone are identical, so the wheel looks the same from outside. In `thin` the wheel motor (`strut/out/wheel_motors.step`, see `strut-spec.md`) sits inside, fixed to the strut tip, and drives the wheel through its output shaft at the cone apex. The checks show no overlap between the wheels and the body, studs, struts, lid plate or motors, and the STEP re-imports with the same volume. **Not decided:** how a 0.8 mm-walled aluminium wheel with helical serrated grousers is made (CNC, multi-part, metal printing), how the wheel is fixed to the shaft, the shaft diameter, and the stiffness of the thin shell (no analysis).
+The outline, grousers, serrations and cone are identical, so the wheel looks the same from outside. In `thin` the wheel motor sits inside a spindle tube fixed to the strut tip, and the wheel is carried on two small bearings on that spindle and driven by a stub shaft at the cone apex (`strut/out/wheel_motors.step`, `wheel_spindles.step`, `wheel_bearings.step`; see `strut-spec.md`). The checks show no overlap between the wheels and the body, studs, struts, lid plate, motors, spindles or bearings, and the STEP re-imports with the same volume. **Not decided:** how a 0.8 mm-walled aluminium wheel with helical serrated grousers is made (CNC, multi-part, metal printing), how the wheel is fixed to the stub shaft, and the stiffness of the thin shell (no analysis).
 
 ## Caveats
 

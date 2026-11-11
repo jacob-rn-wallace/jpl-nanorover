@@ -16,6 +16,8 @@ HERE = Path(__file__).resolve().parent
 HW = HERE.parent
 OUT = HERE / "out"
 
+MASS_FIXED = {"wheel drive (3068, coupler, rod)": 4 * (9.5 + 1.0 + 1.9), "wheel bearings (693 size)": 8 * 0.6}
+
 PARTS = [  # (label, file, material density g/cm3 as used by the individual scripts)
     ("box (die-cast, cut)", HW / "body/out/body_hammond.step", 2.70),
     ("lid plate with rib", HW / "body/out/lid_plate.step", 2.70),
@@ -25,7 +27,9 @@ PARTS = [  # (label, file, material density g/cm3 as used by the individual scri
     ("hub studs", HW / "body/out/hub_studs.step", 7.9),
     ("hub O-rings and nuts", HW / "body/out/hub_orings_and_nuts.step", 7.9),
     ("struts", HW / "strut/out/struts.step", 2.70),
-    ("wheel motors (Pololu 3068)", HW / "strut/out/wheel_motors.step", None),   # catalogue 9.5 g each (the model includes a placeholder rod)
+    ("wheel drive (3068, coupler, rod)", HW / "strut/out/wheel_motors.step", None),   # 9.5 g catalogue + 1.0 g coupler (assumed) + 1.9 g stub shaft, each
+    ("wheel spindles (tube, cap, barrel)", HW / "strut/out/wheel_spindles.step", 2.70),
+    ("wheel bearings (693 size)", HW / "strut/out/wheel_bearings.step", None),    # 0.6 g each (typical, not looked up)
     ("wheels", HW / "wheel/out/wheels.step", 2.70),
 ]
 
@@ -37,13 +41,13 @@ def main():
         if not path.exists():
             sys.exit(f"missing {path}: run hardware/body/body.py, hardware/strut/strut.py and hardware/wheel/wheel.py first")
         s = import_step(path)
-        m = 4 * 9.5 if rho is None else s.volume * rho * 1e-3
+        m = MASS_FIXED[label] if rho is None else s.volume * rho * 1e-3
         total += m
         shapes.append(s)
         print(f"{label:<24} {m:7.0f} g")
     asm = Compound(shapes)
     bb = asm.bounding_box()
-    print(f"{'total (wheel motors in; no strut motors, wiring, electronics)':<24} {total:7.0f} g   [MUSES-CN rover: 1300 g]")
+    print(f"{'total (wheel drive in; no strut motors, wiring, electronics)':<24} {total:7.0f} g   [MUSES-CN rover: 1300 g]")
     print(f"default stance: {bb.size.X:.1f} wide x {bb.size.Y:.1f} long x {bb.size.Z:.1f} high; body floor {-bb.min.Z:.1f} mm above the wheel bottoms")
     export_step(asm, str(OUT / "rover_full.step"))
     print("wrote", OUT / "rover_full.step")

@@ -6,8 +6,8 @@
 Run after strut.py (struts.step) with the .venv.  Needs numpy, matplotlib, trimesh.  The body is a plain 140 x 140 x 60 mm box (no Hammond geometry), so the picture contains only our own parts.  Cutaway column: the wheels are cut at axle height (mesh slice) and the upper half removed; the motors are shown whole.
 
 Before : wheel preset "v1" (2.5 mm wall, 12 mm hub tube on a 6 mm axle, 78 g each) with the struts in TIP_MODE "axle".
-C      : wheel preset "thin" (1.0 mm wall, 0.8 mm cone and blades, no hub tube, 33 g each) with the struts in TIP_MODE "motor": a Pololu #3068 gearmotor (10 x 12 x 25 mm box
-         plus a placeholder output rod) clamped in a slot in the strut tip (strut.py has its dimensions).
+C      : wheel preset "thin" (1.0 mm wall, 0.8 mm cone and blades, no hub tube, 33 g each) with the struts in TIP_MODE "motor": a Pololu #3068 gearmotor (10 x 12 x 25 mm box)
+         inside a spindle tube clamped in the strut tip; the wheel runs on two small bearings on a stub shaft driven through a coupling (strut.py has the dimensions).
 """
 import sys
 import tempfile
@@ -31,7 +31,7 @@ import body as E  # noqa: E402
 import strut as S  # noqa: E402
 import wheel as Wh  # noqa: E402
 
-ALU, GEAR = "#cfd3d8", "#3f64b0"
+ALU, GEAR = "#cfd3d8", "#3f64b0"   # motor drive in blue, spindle tube grey-blue, bearings dark
 
 
 def struts_posed():
@@ -44,12 +44,14 @@ def struts_posed():
     return Compound(out)
 
 
-def motors_posed():
-    out = []
+def support_posed():
+    """Posed wheel drive (motor, coupler, stub shaft), spindle tubes and bearings for all four struts."""
+    out = ([], [], [])
     for side in (1, -1):
         for d in (+1, -1):
-            m = S.posed(S.motor(d), d, S.POSE_DEG)
-            out.append(m.mirror(Plane.YZ) if side < 0 else m)
+            for lst, f in zip(out, (S.motor, S.spindle, S.bearings)):
+                m = S.posed(f(d), d, S.POSE_DEG)
+                lst.append(m.mirror(Plane.YZ) if side < 0 else m)
     return out
 
 
@@ -119,8 +121,8 @@ def main(out_png):
     w_c = Wh.wheel_local()
     wc = Compound(placed(w_c))
     st_c = struts_posed()
-    mot = motors_posed()
-    print(f"wheel mass (aluminium): before {w_before.volume * 2.7e-3:.0f} g, C {w_c.volume * 2.7e-3:.0f} g; motor tail {S.MOTOR_TAIL:.1f} mm |x|")
+    mot, spi, brg = support_posed()
+    print(f"wheel mass (aluminium): before {w_before.volume * 2.7e-3:.0f} g, C {w_c.volume * 2.7e-3:.0f} g; spindle and motor tail from |x| {S.MOTOR_TAIL:.1f} mm")
     with tempfile.TemporaryDirectory() as tmp:
         M = lambda s_, n: mesh_of(s_, tmp, n)
         base_m = [(M(box[0], "box"), box[1])]
@@ -129,7 +131,7 @@ def main(out_png):
         wb_cut, wc_cut = mesh_cut(wb_full, zc), mesh_cut(wc_full, zc)
         sb_m, sc_m = (M(st_before, "sb"), "#c9a46a"), (M(st_c, "sc"), "#c9a46a")
         # motors: body (dark) and gearhead (bright) as one piece here; cut nothing, shown whole
-        mot_m = [(M(Compound(mot), "mot"), GEAR)]
+        mot_m = [(M(Compound(mot), "mot"), GEAR), (M(Compound(spi), "spi"), "#8d9bb0"), (M(Compound(brg), "brg"), "#222a35")]
         rows = [("Before (as modelled)", sb_m, [(wb_full, ALU)], [(wb_cut, ALU)]),
                 ("Option C (thin wheel, motor inside)", sc_m, [(wc_full, ALU)], [(wc_cut, ALU)] + mot_m)]
         fig, axs = plt.subplots(2, 3, figsize=(16, 9.5))
