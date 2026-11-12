@@ -271,6 +271,36 @@ Surplus of one lit face (W): in full sun A +2.55, B +2.45, **C +1.30, D -0.34, E
 - **A cheaper way to locate the servos than four tubs:** the four servos could sit between two or three bulkhead plates (so the cost is a plate, not a box around each servo); the block can be re-cut with the bulkheads as surfaces to test this.
 - **For the tub chassis:** the four walls and two lids form one set; the servo group, the camera group and the antenna pivot become small tubs bonded into the frame. **For the forged unibody:** the cores are the interior void plus the pockets; the mould is a pair of cores in a cavity, with the same wall rule.
 
+### Design process and material lean (owner, 2026-11-12)
+
+**Process (owner), in order:** (1) component placement; (2) component attachment points; (3) inter-component cavities (wiring, optical paths and so on); (4) access points to the components (for example, removing the material between components and the lids); (5) **topology optimisation for loads, as the penultimate step**; (6) a final refinement so the design can be fabricated. `block.py` covers steps 1 and part of 3 so far (placeholders). Steps 2, 4, 5 and 6 are not started.
+
+**Material lean (owner): forged carbon**, for an aesthetic reason: the random chopped-fibre surface texture resembles the Widmanstatten pattern of iron meteorites, a space connection. This is a lean, not the end of the decision: the woven-plates recommendation above (crisp edges, wall thickness) is still on the table, and the choice stays open until the interior has real parts.
+
+**Precedents found (2026-11-12, web search, not verified in depth):** topology-optimisation tools start from a solid design space and subtract void and fixed (non-design) regions, with loads applied to the non-design regions (Altair Inspire, Hexagon); skeleton-model top-down CAD; CubeSat structures machined from billet, which the industry has partly moved away from (thin sheet-metal chassis, Pumpkin); the Mars Exploration Rover warm electronics box (carbon skins on aluminium honeycomb, electronics isolated on tubes); soluble and fusible cores for hollow composite parts. No source found that derives both a bonded-tub chassis and a forged unibody from one block.
+
+**Notes (mine, not decisions):**
+- Forged carbon is closer to isotropic than woven laminate, which suits the isotropic material model of standard density-based topology optimisation; the vendor strength figures are untested (see above).
+- The loads are small (0.2 to 4 MPa at the hubs on a 1 mm wall), so the optimiser will mostly return "remove everything"; the result will be set by constraints (minimum wall of about 1.5 mm for forged, mass budget, hub stiffness, lid clamping, drop and righting-roll impacts), so the load cases and constraints need writing down first.
+- **Mouldability belongs inside step 5, not only step 6:** enclosed cavities cannot be cored out of a pressed forged part without soluble or fusible cores, so a draw direction (and draft) constraint in the optimisation is the usual remedy. The z = 30 symmetry suggests two identical half-shells bonded at the midplane (one mould), which would split the hub bores; to be tested, not chosen.
+- **Texture is visible only where cells are not:** the cells cover 311 cm2 of about 728 cm2 of outer face (about 43%), so the texture shows on the hub faces, the gaps and the edges. A clear coat and the chip size (finer or coarser flakes) decide how much it reads as Widmanstatten; its real pattern is families of straight bands at fixed angles, so the likeness is loose (a metallic, crystalline glint) rather than exact.
+
+### Fabrication route: mould, then machine the outside only (owner, 2026-11-12)
+
+**Owner's idea:** press the forged-carbon body in mould(s) as a near-net form, then **machine only the outside**, which has to reach a specific form and finish; **the inside stays as moulded, so long as everything fits.** The outside stays rectilinear (owner). The outer envelope, cell faces, lid seating faces, hub bores and window are fixed (non-design) surfaces for the optimisation; only the skin thickness and the structure behind them are free.
+
+**Why it helps (mine; from general knowledge, not searched):** the cutter, not the press, makes the crisp outer edges and flat cell and lid faces (the crisp-edge objection to forged carbon shrinks, though the thin-wall problem remains); located features (hub bores, bearing seats, lid seats, window) are cut from the outside and can be finish-machined to position; machining stock is left only on the outside; and nothing inside needs tool access, so the cores only have to give a shape that fits. Forged carbon is sold as machinable stock (Rock West forged blocks, cited above).
+
+**What it adds to the process (mine, to be worked out):**
+- A **machining allowance** on the outside (a few tenths of a millimetre is my guess, unchecked), carried in the CAD as moulded-oversize versus final surfaces, marked face by face.
+- **Wall thickness after machining** = moulded wall minus allowance, plus or minus the core's shift relative to the mould. The minimum wall of about 1.5 mm for forged carbon has to hold after both, so the practical minimum may be higher.
+- A **datum for the first cut**: the outside must end up in the right place relative to the servo and hub positions, so a moulded-in datum or an accurately moulded interior or hub feature is needed, plus fixturing for a thin hollow part (it will chatter; a soluble or wax fill is one option).
+- An **interior clearance rule**: generous margins around servos, boards and battery for core shift, shrink, warp and flash.
+- **Interior surface**: as-moulded forged carbon can shed fibres or have resin-poor patches; conductive fibres near boards are a short-circuit risk, so the inside needs sealing or an insulating coat (with the insulation under cells and boards already noted).
+- **Dust and tooling**: carbon dust is conductive and a health hazard (extraction, clean-down before electronics go in); carbon wears cutters fast (diamond-coated or PCD tools, an assumption); cut edges expose fibre ends and need sealing against moisture and against galvanic contact with the aluminium hub parts.
+- **Texture:** a cut face shows a section through the chips and looks different from a moulded face (nearer to a cut and etched meteorite slice); how it looks is unknown until tried, and it needs a clear coat.
+- Mouldability (draw direction, draft, core extraction) is a constraint in the optimisation step, with the machining allowance and datums in the final refinement step.
+
 ### Not done yet
 - The wiring channels and connectors (not specified), the lid split and its joint, the keys, the screws and insert bosses, the cells' surface, and the lamp beam's exact path are not cut. The pockets are boxes and discs, not the real part shapes.
 - Nothing is derived into a tub or unibody design yet; it waits until the components are specified.
