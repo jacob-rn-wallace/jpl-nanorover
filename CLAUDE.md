@@ -3,7 +3,7 @@
 An open replica of the JPL nanorover, the small four-wheeled asteroid rover designed for the Japanese MUSES-C (Hayabusa) mission and cancelled
 by NASA in November 2000. A hobby build in the spirit of the sibling project `maha-rover` (same layout, same licence model).
 
-**Picking the project back up: read `docs/handover.md` first** (status as of 2026-11-10, open decisions, next steps). The owner decided to defer the body and work on the drivetrain next.
+**Picking the project back up: read `docs/handover.md` first** (status as of 2026-11-11 evening: sections 11 to 13 are the newest; open decisions, next steps). The drivetrain is designed and modelled; **the body is being redesigned in carbon (`docs/body-redesign.md`, handover section 13), at the stage of placeholders and a solid-block-with-cavities model; the current assembly CAD still contains the old Hammond box.**
 
 ## Scope (owner's decisions)
 - **Goal:** a replica that matches the original's appearance and dimensions and performs most, if not all, of its non-science functions: driving on
@@ -27,6 +27,7 @@ by NASA in November 2000. A hobby build in the spirit of the sibling project `ma
 ## Repo layout
 - `docs/`: `design-comparison.md` sets the published design and the two photographed units side by side (read it first when the question is what to replicate). `jpl-nanorover-literature.md` is the annotated bibliography and the table of sourced dimensions with a verification level for each. `body-spec.md`,
   `strut-spec.md`, `wheel-spec.md`, `drivetrain-spec.md` (torque and mass budget, motor choices, layout study, coaxial hub; scripts in `hardware/drivetrain/`), `chassis-simulation.md` (planar quasi-static simulation: stances, tipping, strut torque, self-righting) record the CAD design decisions and checks. `photo-measurements.md` records what was measured from the two JPL photographs.
+- Body redesign scripts in `hardware/body/` (no Hammond geometry, tracked): `cf_budget.py`, `cf_compare.py`, `cf_cost.py`, `power_budget.py` (plain python3 numbers), `layout.py` (keep-in volume, placements, mass and balance; needs the venv), `block.py` (the solid block with cavities, exports `out/body_block.step`; imports `layout.py`). Run `layout.py` before `block.py`.
 - `hardware/`: CAD, parametric (build123d, `hardware/requirements.txt`). Each part has a script and a `out/` folder of STEP files:
   `body/body.py` (Hammond 1590Z090 box cut down, lid plate with O-ring groove and rib, thread inserts, hub studs for the earlier stud hub), `hub/hub.py` (coaxial hub, servos, gears), `strut/strut.py`, `wheel/wheel.py`,
   and `assembly/rover.py` (full assembly and mass summary), `assembly/preview.py` (rough render to `docs/images/rover-preview.png`).
@@ -57,7 +58,7 @@ by NASA in November 2000. A hobby build in the spirit of the sibling project `ma
 - `hardware/` scripts print their own checks (fits, overlaps, masses). Read them rather than assuming.
 
 ## Design status
-- Body 140 x 140 x 60 mm; total modelled mass about 1.5 kg (1459 g) before motors and electronics (target 1.3 kg: the cast box is the heavy part).
+- **Body (superseded for the redesign, see `docs/body-redesign.md`): the CAD still models the Hammond box below; the carbon body is not modelled yet except as the cavity block (`hardware/body/block.py`).** Body 140 x 140 x 60 mm; total modelled mass about 1.5 kg (1459 g) before motors and electronics (target 1.3 kg: the cast box is the heavy part).
 - Struts: 70 mm pivot to axle, two per side on concentric shafts driven by Feetech STS3215 servos in the body (`hardware/hub/hub.py`; `HUB_MODE`), bored at the tip for the wheel support (layout C; `TIP_MODE`). Wheels: 65 mm over the teeth, thin-walled aluminium (preset `thin`, 33 g; `v1` is the first model), a conical outer disk on a smooth hollow cylinder with 16 helical grousers (thin radial blades with serrated edges), fitted to the second JPL photo (`docs/wheel-spec.md`).
 - Wheel drive (layout C): a Pololu #3068 gearmotor (10 x 12 x 25 mm box) inside a 19 mm spindle tube clamped in a bore in each strut tip, starting flush with that strut's plate (the strut is its heat sink), the wheel on two 3 x 8 x 4 mm bearings on a 3 mm stub shaft driven through an assumed coupling (`docs/strut-spec.md`, "Wheel support"). Not modelled: retention of the wheel and tube; for the hub, gear teeth, servo mounting, seals and retention (`docs/drivetrain-spec.md`). Motor choice follows cost: maxon motors are over $200 each (owner).
 - Not yet modelled: the headlamp (a sealed-beam light beside the window, tilted toward the window's field of view), antenna, wiring feedthroughs, the camera and optics behind the window (the 26 mm window itself is modelled), the strut and wheel motors, the lid screws and O-ring washers, finish.

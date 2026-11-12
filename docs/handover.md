@@ -1,4 +1,4 @@
-# Handover: where the project stands (end of the first working session, 2026-11-10)
+# Handover: where the project stands (sections 1 to 10: end of the first session, 2026-11-10; sections 11 to 13: 2026-11-11)
 
 Written so a new session (or the owner, later) can pick the project up cold. It summarises, and points to, the other documents; where they disagree with this page, the more specific document wins. Read `CLAUDE.md` first for the working rules.
 
@@ -57,7 +57,7 @@ Flat lathe-finished wheel disk -> a real cone. Stack of saw-blade discs, then a 
 2. Wheel diameter (59 measured, 65 papers) and strut length (76 to 78 measured, 70 papers): both parameters; papers are the defaults under the rule.
 3. Window shape, the headlamp, and whether to copy the black unit's look.
 4. Purpose: a faithful display or working replica; a fun drivable rover (a camera-equipped toy-grade build: a Plantraco Desktop Rover plus camera cost about $180 in 2002; see the discussion of a possible pivot); or an open design others can build cheaply. A proposed two-stage path: a cheap working proof of concept first, the faithful build after.
-5. The body is deferred; the drivetrain work of 2026-11-11 is in sections 11 and 12, and the body redesign is the next big job.
+5. The drivetrain work of 2026-11-11 is in sections 11 and 12; **the body redesign is under way in section 13** (carbon; layout and cavity model done, parts and derivation not).
 
 ## 9. Next steps (drivetrain first; superseded by sections 11 and 12)
 
@@ -90,7 +90,7 @@ The owner's account of each unit's role (and the KTLA segment's unit) is taken o
 
 ## 12. Open items and next steps after the drivetrain session
 
-1. **The body redesign** (deferred by the owner; the next big job). Requirements it now has to meet: a mass of about 386 g with electronics and cells, the hub holes opened to 24.2 mm, room for four servos (45.2 x 24.7 x 32 mm, positions in `hub.py`) and the batteryless electronics, the centre of mass near the hub axis (the simulation's tip-over numbers assume it).
+1. **The body redesign** (started late on 2026-11-11: see section 13). Requirements it now has to meet: a mass of about 386 g with electronics and cells, the hub holes opened to 24.2 mm, room for four servos (45.2 x 24.7 x 32 mm, positions in `hub.py`) and the batteryless electronics, the centre of mass near the hub axis (the simulation's tip-over numbers assume it).
 2. **Servo dimensions (checked 2026-11-11):** measured on the Feetech page 6 drawing, the shaft is 10.2 mm from the end of the long side (was 10.7 by eye; `hub.py` updated) and the 32 mm body height is a printed dimension. Still from a drawing, not a part.
 3. **Smaller strut servos:** the load is low enough (0.17 N.m maximum hold) that a 3 to 5 kg.cm class servo could do; none was chosen. Dynamic loads are not simulated, so test before shrinking.
 4. **Details not modelled:** gear teeth and backlash, how the pinion, the horn adapter, the wheel and the spindle tubes are fixed, a coupling of the right length (7.5 mm is tight), seals against dust on every shaft, strut stops, wiring, the shaft retainers, and the thermal paste or adhesive in the strut bores.
@@ -98,3 +98,49 @@ The owner's account of each unit's role (and the KTLA segment's unit) is taken o
 6. **Tests to do on a first print or prototype:** whether the STS3215 holds its position unpowered and how warm it runs at the hold torque; the #3068's temperature at the slope load; the wheel's stiffness at 0.8 mm walls; the gear mesh with printed against metal gears.
 7. Older open items still stand: which unit to replicate, the banded-wheel option, the headlamp and window, the lid screws, and the research leads in section 9.
 8. **Not verified:** the maxon price (owner's report), bearing masses and ratings (typical values), the servo's overload protection and torque limit register, prices and stock of every part, and every figure that comes from the planar simulation (see its limits).
+
+## 13. The body redesign session, 2026-11-11 evening (what was decided, built and found)
+
+**Where to start:** read `docs/body-redesign.md` (the long record, with sources and caveats), then run `hardware/body/layout.py` and `hardware/body/block.py` (venv; `layout.py` first). The old Hammond-box body (`hardware/body/body.py`, `docs/body-spec.md`) is untouched and still what `hardware/assembly/rover.py` builds.
+
+**Small closed items from the same session**
+- **Wheel handedness (owner, from the photos, confirmed on the side-by-side `photo_compare.py` render):** front and rear wheels on a side are opposite, the other side mirrored (`wheel-spec.md`; the CAD does this). My own read of the black unit's front-right wheel disagreed; treated as a misread, not resolved by the silver-photo render.
+- **STS3215 dimensions:** the shaft is **10.2 mm** from the chamfered end of the long side (measured in pixels on Feetech's page 6 drawing against the 45.23 mm label, checked against the 12.5 mm label; the earlier by-eye 10.7 was 0.5 mm off); the 32 mm body height is a printed dimension. `hub.py` uses 10.2. The drawing is stretched about 1.18 times along the long side, so only that axis was used. Still a drawing, not a part.
+
+**Owner's decisions (all in `CLAUDE.md`)**
+1. **Body material: carbon fibre or forged carbon, 140 x 140 x 60 mm** (papers' size; reference unit still undecided). **The woven-versus-forged choice is deferred** until the interior has real parts in it.
+2. **Edges: consumer-product crispness**, about 0.5 to 1 mm radius, "completely rectilinear".
+3. **Top and bottom faces are identical removable lids carrying solar cells** (upside-down operation); cells also on both end faces; none on the hub faces. **The body is symmetric about the transverse (z = 30) plane.**
+4. **Camera window** centred on a 60 x 60 mm square at one end of an end face (x = +40, z = 30 on the +y face); **camera and lamp share one window through a beamsplitter**; **antenna on the opposite end face at the diagonally opposite position (x = -40, z = 30 on the -y face)**, a whip standing up in the plane of the face from a **gravity-oriented pivot with a counterweight**. These depart on purpose from all three descriptions of the original.
+5. **Design method: the body as a solid block with cavities cut out** (`block.py`); both a bonded-tub chassis and a forged unibody are to be derived from it once the components are specified.
+6. **Purchasing is deferred indefinitely**, so no bench tests.
+
+**What was found (sources, assumptions and caveats are in `body-redesign.md`)**
+- **Woven versus forged (sourced from vendor pages, untested data):** strength and heat do not decide it: the hub loads on a 1 mm wall are 0.2 to 4 MPa against about 190 MPa for even standard forged carbon, and servo heat is about a 1.6 K rise. Standard forged needs about 16% more wall for the same panel stiffness. Easy Composites calls 1.5 mm "very much towards the lower limit" for forged. A deep 1 mm tub is the hard case for forged; layup over a plug leaves 1.5 to 3 mm corners, which fails the crisp-edge requirement.
+- **Recommendation so far (mine, not the owner's decision): six woven 1.0 mm plates bonded into a box** (four walls plus two identical lids), edges hand-broken to 0.5 to 1 mm, cut edges sealed, bonded keys at the edges (about 28 g with adhesive, estimated). Forged is worth revisiting only for integral bosses or the lid, if a proper mould becomes available. **Cost (printed-mould forged against plates):** for one body the ranges overlap ($173 to $531 plates, $137 to $1,173 forged); forged wins only from about 4 to 5 bodies; the assumptions that drive it (mould life, scrap, press, cutting price) are mine.
+- **Power** (`power_budget.py`): one lit face gives about **2.5 W in full sun, 0.26 W in thin overcast, about 1 to 1.3 mW indoors** (the indoor figures come from a search summary and are unconfirmed). The controller with its radio idle uses 0.105 W, camera plus radio plus lamp 1.26 W, driving 2.9 W, posing a strut 4.5 W. So the cells charge or run the camera and radio outdoors only; indoors they can run just a micro-power keep-alive. Suggested architecture (mine): a keep-alive controller on the cells, the battery behind a load switch, cells topping up outdoors. **Servo hold current (6 to 60 mA each by source) is the biggest unknown and lever**; whether the STS3215 holds a pose unpowered is still untested.
+- **Layout** (`layout.py`, placeholders): keep-in volume = the envelope pulled in 2.5 mm, minus 6 mm edge strips; 818 cm3 free around the servos and hub, **placeholders use 14%: volume is not the constraint, mass is.** The 386 g budget: shell 141 g (plates) or 164 g (forged 1.5 mm) + rings and screws 32 + seal 15 + electronics 100 (boards, battery, camera, beamsplitter plate, lamp, antenna pivot, wiring) + cells 47 to 109 g (**no cell chosen; this is the biggest unknown**). Plates fit unless cells are heavy; **forged at 1.5 mm is 3 g over at middle cell weight.** Centre of mass: x +0.3, z 30.0 mm; whole-rover y about -1.7 mm (the simulation had -2.9; shifting the boards about 10 mm toward +y would centre it). **The chassis simulation has not been re-run with these changes.**
+- **Cells:** top and bottom use the black unit's measured layout (10 large 39.6 x 23.5 mm, 4 centre 19.6 x 44 mm: 127.6 cm2 per face); each end face fits three cells standing in the 80 x 60 mm beside the window or antenna (27.9 cm2, my choice); 311 cm2 in all.
+- **Block** (`block.py`): 33 cavities cut as CAD; 867 cm3 remains (about 1.34 kg if solid). Almost everything is 11 to 24 mm from the outside, so a lined cavity needs its own skin. **Lining every cavity does not fit the budget** (441 to 503 g total at 1.0 mm woven; forged 1.5 mm is worse); lining only the outside plus the servo group, camera group and antenna pivot gives 378 to 440 g. The rule for deriving the part decides the mass.
+
+**Problems found, none a blocker (details in `body-redesign.md`)**
+- *Antenna pendulum:* the counterweight must over-balance the whip (a balanced pivot stays where left); it only corrects roll about its own axis (the y-axis), not body pitch; it needs a rotary RF joint or a limited-turn cable, some damping, and the whip must survive the end-over-end righting rolls. The antenna may be a dummy.
+- *Beamsplitter:* a 50/50 plate costs about one stop of ambient light and about double the lamp power, and **lamp light reflecting off the window pane goes straight back into the camera** (the biggest optical risk, untested): crossed polarisers, anti-reflection glass, a baffle and a wedged plate are the remedies. A plate is about 3 g; a 25 mm cube about 39 g (my estimate).
+- *Two lids:* a removed lid takes its board with it, so a board-to-board link and connector at a shared lid joint are needed; lid screws and gaskets double; cells on carbon need an insulating layer.
+- *Carbon in general:* it blocks RF and conducts (antenna window, insulation under cells and boards), and touching aluminium it corrodes the aluminium (insulating washers at the hub rings).
+
+**Open decisions (owner)**
+1. Woven plates or forged (deferred on purpose); layup tub ruled out by the crisp-edge requirement unless corners of 1.5 to 3 mm are accepted.
+2. **Which cavities become structural linings or tubs** (mine: only the servo group, the camera and window group and the antenna pivot) and **whether to test servo mounting on two or three bulkhead plates** instead of pockets.
+3. The cells (type, mass per cm2, indoor or outdoor use), the battery and voltage, the boards, the camera, the lamp and the radio: all placeholders now.
+4. The lid joint (which faces are shared, the connector), the antenna (real or a dummy), and the old items still open (reference unit, banded wheel, purpose).
+
+**Next steps (in order)**
+1. Choose or specify the placeholder components (cells first, since they swing the mass by 62 g); replace the placeholders in `layout.py`.
+2. Re-cut `block.py` with the specified parts, the wiring channels, the lid joint and the bulkhead variant; derive the tub chassis (walls, lids, small tubs) and the forged unibody (cores and mould) from it; re-run the cost and mass comparisons (`cf_cost.py`, `cf_compare.py`, `layout.py`) with real wall thickness, mount count and mass.
+3. Re-run the chassis simulation (`hardware/drivetrain/chassis_sim.py`) with the new mass distribution (it assumes a 386 g lump at the centre).
+4. Prototype tests, when purchasing resumes: servo hold unpowered, servo and wheel-motor temperatures, the beamsplitter glare, one pressed forged corner or lid.
+
+**Not verified:** every price, density and efficiency from a vendor or search page (listed in `body-redesign.md`); the forged-carbon strength figures (a vendor's untested comparison); the indoor cell output figures; the radio, camera and lamp power; all component sizes and masses in `layout.py`; the 1 mm voxel analyses (coarse); and the cost model, which is dominated by assumptions.
+
+**Working conventions this session:** left and right are the viewer's (the top-view picture in `body-redesign.md` says which way it is drawn); commits end with the attribution lines; push only when the owner asks; nothing from the private repo is copied here.
