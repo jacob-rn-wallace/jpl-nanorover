@@ -25,6 +25,9 @@ Every figure is marked with how well it is sourced, and conflicting figures are 
 | [`docs/design-comparison.md`](docs/design-comparison.md) | The three designs in the sources (the published design and the two photographed units), side by side, with what the CAD is today and what choosing would change |
 | [`docs/toy-version-notes.md`](docs/toy-version-notes.md) | A side discussion: could a stripped nanorover have been a toy around 2000, and should the project pivot (with sources) |
 | [`docs/smaller-than-nanorover.md`](docs/smaller-than-nanorover.md) | A side question: what the sources say about rovers smaller than the nanorover (the 10 to 100 g task goal, widget boards) |
+| [`docs/era-of-robotics.md`](docs/era-of-robotics.md) | Research on the late 1990s to early 2000s robotics scene (Handy Board, Rug Warrior, Stamp, RCX, BEAM, CMUcam, Brooks): what the "spirit" is, how today differs, candidate design rules |
+| [`docs/electronics-concept.md`](docs/electronics-concept.md) | The electronics principle (the spirit of the Handy Board and CMUcam era), what was found for the processor and the camera, and the open decisions |
+| [`docs/sim-spec.md`](docs/sim-spec.md), [`sim/`](sim/) | A browser simulation of the operator console (three.js, Vite, TypeScript, modelled on maha-rover's): a fun test of driving the rover through a low-fidelity 3D map with photographs on request; spec, findings and how to run it |
 | [`docs/photo-measurements.md`](docs/photo-measurements.md) | Camera solution and measurements (solar cell sizes, wheel) taken from the JPL prototype photograph |
 | [`hardware/`](hardware/) | Parametric CAD (build123d, STEP output): [body](hardware/body/body.py), [struts](hardware/strut/strut.py), [wheels](hardware/wheel/wheel.py), [assembly](hardware/assembly/rover.py) |
 
