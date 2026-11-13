@@ -39,6 +39,7 @@ loads = {
     "one servo moving at no load (180 mA at 12 V, SRC)": 0.180 * V_SERVO,
     "one servo holding or standby (6 mA datasheet to 60 mA other listings, at 12 V, SRC; sources disagree)": 0.030 * V_SERVO,
     "four wheel motors driving flat at 40 mm/s (ASM: about 0.1 W each; no-load 0.15 A at 6 V, SRC)": 0.4,
+    "ranging sensor VL53L5CX ranging continuously (SRC: DS13754 rev 2 table 13, 313 mW at 3.3 V; 11 mW at 8x8 1 Hz autonomous)": 0.313,
 }
 print("\nloads (W):")
 for n, w in loads.items():
@@ -47,9 +48,9 @@ L = list(loads.values())
 scen = {
     "A keep-alive (RTC, wake input)":                         L[0],
     "B controller + radio idle":                              L[1],
-    "C camera + radio streaming + lamp":                      L[1] + L[2] + L[3] + L[4],
-    "D driving: wheels + controller + radio + camera, servos holding": L[7] + L[1] + L[2] + L[3] + 4 * L[6],
-    "E posing one strut: 1 servo moving, 3 holding, + C":     L[5] + 3 * L[6] + L[1] + L[2] + L[3] + L[4],
+    "C camera + radio streaming + lamp + ranging":            L[1] + L[2] + L[3] + L[4] + L[8],
+    "D driving: wheels + controller + radio + camera + ranging, servos holding": L[7] + L[1] + L[2] + L[3] + L[8] + 4 * L[6],
+    "E posing one strut: 1 servo moving, 3 holding, + C":     L[5] + 3 * L[6] + L[1] + L[2] + L[3] + L[4] + L[8],
 }
 print("\nscenarios (W), the servos holding at 30 mA each (the 6 mA and 60 mA cases move D and E by -0.3 and +0.7 W):")
 for n, w in scen.items():
@@ -62,10 +63,10 @@ for n, p in solar.items():
 
 # ---- battery ----
 BATT_WH = 1.0 * 3.7           # a 1000 mAh single cell, 3.7 V (Overlander SKU 2809 class, docs/hardware-spec.md section 4)
-print(f"\nbattery {BATT_WH:.2f} Wh (1000 mAh at 3.7 V; about 28.5 g): runtime on D {BATT_WH / scen['D driving: wheels + controller + radio + camera, servos holding'] * 60:.0f} min, on C {BATT_WH / scen['C camera + radio streaming + lamp'] * 60:.0f} min, "
+print(f"\nbattery {BATT_WH:.2f} Wh (1000 mAh at 3.7 V; about 28.5 g): runtime on D {BATT_WH / scen['D driving: wheels + controller + radio + camera + ranging, servos holding'] * 60:.0f} min, on C {BATT_WH / scen['C camera + radio streaming + lamp + ranging'] * 60:.0f} min, "
       f"on B {BATT_WH / scen['B controller + radio idle']:.0f} h")
 ind = solar["indoors, 500 lux LED, a-Si (10 uW/cm2)"]
 print(f"indoors the lit face gives {ind * 1000:.2f} mW: that is {ind / scen['B controller + radio idle'] * 100:.1f}% of scenario B and {ind * 24:.3f} Wh a day ({ind * 24 / BATT_WH * 100:.1f}% of the battery).")
 sun = solar["full sun, panel square to it"]
-print(f"in full sun it gives {sun:.2f} W: scenario C runs from the panel ({sun - scen['C camera + radio streaming + lamp']:+.2f} W) and the battery charges at about {max(sun - scen['B controller + radio idle'], 0):.1f} W when idle, "
+print(f"in full sun it gives {sun:.2f} W: scenario C runs from the panel ({sun - scen['C camera + radio streaming + lamp + ranging']:+.2f} W) and the battery charges at about {max(sun - scen['B controller + radio idle'], 0):.1f} W when idle, "
       f"so about {BATT_WH / max(sun - scen['B controller + radio idle'], 1e-9) * 60:.0f} min from empty.")
