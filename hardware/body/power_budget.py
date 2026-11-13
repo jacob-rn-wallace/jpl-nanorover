@@ -61,8 +61,8 @@ for n, p in solar.items():
     print(f"  {n:44s}" + "".join(f"{p - w:9.3f}" for w in scen.values()))
 
 # ---- battery ----
-BATT_WH = 0.5 * 3.7           # a 500 mAh single cell, ASM
-print(f"\nbattery {BATT_WH:.2f} Wh (500 mAh at 3.7 V, ASM; about 12 g): runtime on D {BATT_WH / scen['D driving: wheels + controller + radio + camera, servos holding'] * 60:.0f} min, on C {BATT_WH / scen['C camera + radio streaming + lamp'] * 60:.0f} min, "
+BATT_WH = 1.0 * 3.7           # a 1000 mAh single cell, 3.7 V (Overlander SKU 2809 class, docs/hardware-spec.md section 4)
+print(f"\nbattery {BATT_WH:.2f} Wh (1000 mAh at 3.7 V; about 28.5 g): runtime on D {BATT_WH / scen['D driving: wheels + controller + radio + camera, servos holding'] * 60:.0f} min, on C {BATT_WH / scen['C camera + radio streaming + lamp'] * 60:.0f} min, "
       f"on B {BATT_WH / scen['B controller + radio idle']:.0f} h")
 ind = solar["indoors, 500 lux LED, a-Si (10 uW/cm2)"]
 print(f"indoors the lit face gives {ind * 1000:.2f} mW: that is {ind / scen['B controller + radio idle'] * 100:.1f}% of scenario B and {ind * 24:.3f} Wh a day ({ind * 24 / BATT_WH * 100:.1f}% of the battery).")

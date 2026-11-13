@@ -28,7 +28,7 @@ export const TOF = {                          // VL53L5CX class (ST datasheet vi
 };
 
 export const POWER = {                        // W, from hardware/body/power_budget.py (SRC) unless marked ASM
-  batteryWh: 1.85,                            // 500 mAh at 3.7 V ASM
+  batteryWh: 3.70,                            // 1000 mAh at 3.7 V (docs/hardware-spec.md section 4)
   idle: 0.1155,                               // PIC32 awake (20 mA ASM) + XBee 3 receiving (15 mA SRC Digi) at 3.3 V; was 0.105 from an ESP32-class dev board (docs/electronics-concept.md)
   hold: 1.44,                                 // four servos holding at 30 mA and 12 V SRC (sources disagree 6 to 60 mA)
   wheels: 0.4,                                // four wheel motors at full drive ASM

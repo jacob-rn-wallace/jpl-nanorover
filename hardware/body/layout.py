@@ -124,7 +124,7 @@ END_CELL_X = 70.0 - (2 * END_GAP + END_HOLE_D + END_POCKET_W / 2)   # body x of 
 comps = {  # name: (mass g, (x0, x1, y0, y1, z0, z1), note, optional (x, y, z) of the centre of mass if not the box centre)
     "processor board (lower lid module)":   (20.0, (-35, 35, -6, 62, 4, 11.6),      "70 x 68 x 7.6 mm placeholder, rides on the bottom lid", None),
     "power + motor-driver board (upper lid module)": (20.0, (-35, 35, -6, 62, 48.4, 56.0), "mirror of the lower board about z = 30, rides on the top lid", None),
-    "battery (500 mAh class, 1S)":          (12.0, (-2.5, 2.5, -15, 15, 18, 42),    "in the 16 mm gap between the servo pairs; the servos and wheel motors need 12 V and 6 V rails (boost) or a 2S pack", None),
+    "battery (1S 1000 mAh, 25C class)":     (28.5, (-5.0, 5.0, -25.5, 25.5, 14.5, 45.5), "Overlander SKU 2809 class pouch, about 50 x 31 x 9 mm and 28 to 28.5 g (retailer listings differ), lying in the 16 mm gap between the servo pairs, thickness along x; no protection circuit assumed (it goes on the power board); docs/hardware-spec.md section 4", None),
     "camera module":                        (12.0, (WIN_X - 12.5, WIN_X + 12.5, 36.5, 45.5, WIN_Z - 12, WIN_Z + 12), "25 x 24 x 9 mm, looking +y through the beamsplitter", None),
     "beamsplitter plate, 45 degrees":       (3.0,  (WIN_X - 10, WIN_X + 10, 47, 67, WIN_Z - 12, WIN_Z + 12), "28 x 24 x 1.5 mm glass plate at 45 degrees; box is its bounding volume. A 25 mm cube would be about 39 g (my estimate)", None),
     "lamp (LED and lens), shines +x onto the plate": (5.0, (14, 28, 51, 63, WIN_Z - 6, WIN_Z + 6), "on the body-centre side of the plate, which reflects it toward +y and out of the window", None),
