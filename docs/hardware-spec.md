@@ -113,3 +113,5 @@ The range in the x1 column is the servo idle current, which the sources disagree
 6. PIC32 pin and peripheral allocation (UART for the servo bus, UART for the radio, I2C for the sensors, PWM and ADC for the drivers).
 7. Mechanical: wheel and spindle-tube retention, hub gear teeth and servo mounting, seals, O-rings and lid screws, wiring feedthroughs.
 8. Optional: the Lighthouse receiver amplifier (needs the SM940K09L cell layout from Anysolar, `docs/positioning.md`).
+
+- Mechanical details (wheel fixing, tube clamp, coupling, seals, hub adapters, wire passage, strut stops, lid joint): `docs/mechanical-spec.md` (2026-11-13).
