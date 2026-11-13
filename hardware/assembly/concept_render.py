@@ -94,10 +94,11 @@ def end_cells(face):
     return [slab(face, start + 21.8 * k, start + 21.8 * k + 21.5, 7.75, 52.25) for k in range(4)]
 
 
-BIAS = {"cells": 1.5, "bezel": 1.8, "glass": 2.0, "plug": 1.5}     # mm toward the viewer: the thin overlays on the body faces must sort after the body
+BIAS = {"cells": 1.5, "bezel": 1.8, "glass": 2.0, "plug": 1.5, "cam": 2.3, "tof": 2.6}     # mm toward the viewer: the thin overlays on the body faces must sort after the body
 
 
 TEX = {}
+UNIT = {"glass", "bezel", "cam", "tof"}      # overlays on the window: sorted as one unit each, so coplanar discs do not interleave
 
 
 def render(ax, meshes, el, az, title, lims=None):
@@ -111,7 +112,7 @@ def render(ax, meshes, el, az, title, lims=None):
             if nrm @ d < -0.05:
                 continue
             t = m.vertices[f]
-            polys.append(np.c_[t @ r, t @ u]); depth.append((t @ d).mean() + bias)
+            polys.append(np.c_[t @ r, t @ u]); depth.append(((t @ d).mean() if path.stem not in UNIT else (m.vertices @ d).mean()) + bias)
             cols.append(tuple(np.clip(base * (0.45 + 0.55 * max(0, nrm @ light)) * (1.0 if gains is None else gains[k]), 0, 1)))
     order = np.argsort(depth)
     ax.add_collection(matplotlib.collections.PolyCollection([polys[i] for i in order], facecolors=[cols[i] for i in order], edgecolors=[cols[i] for i in order], linewidths=0.3))
@@ -131,19 +132,23 @@ def main():
         struts = pv.mesh_of(HW / "strut/out/struts.step", tmp)
         wheels = pv.mesh_of(HW / "wheel/out/wheels.step", tmp)
     cells = fine(trimesh.util.concatenate(lid_cells("+z") + lid_cells("-z") + end_cells("+y") + end_cells("-y")))
-    glass = fine(disc("+y", 70 - (GAP + 13), 30, 13))
-    bezel = fine(disc("+y", 70 - (GAP + 13), 30, 14.6)); bezel.apply_translation((0, -0.12, 0))
+    wx = 70 - (GAP + 13)
+    glass = fine(disc("+y", wx, 30, 18.0))                                   # the shared cover glass: 36 mm across (the enlarged window, docs/hardware-spec.md section 5)
+    bezel = fine(disc("+y", wx, 30, 19.6)); bezel.apply_translation((0, -0.12, 0))
+    cam = fine(disc("+y", wx, 30, 13.0))                                      # the camera and lamp's own 26 mm view, behind the glass
+    tof = fine(slab("+y", wx + 14 - 3.2, wx + 14 + 3.2, 30 - 1.5, 30 + 1.5))  # the ranging sensor (6.4 x 3.0 mm), seen through the glass on the +x side
     plug = fine(slab("-y", -(70 - (GAP + 13)) - 13.5, -(70 - (GAP + 13)) + 13.5, 30 - 13.5, 30 + 13.5))
     parts = [(Path("body.step"), "#34383e", 0), (Path("struts.step"), "#b9b4aa", 0), (Path("wheels.step"), "#cdd1d6", 0),
-             (Path("cells.step"), "#233a86", 0), (Path("bezel.step"), "#7a7f86", 0), (Path("glass.step"), "#06080c", 0), (Path("plug.step"), "#3f4a46", 0)]
+             (Path("cells.step"), "#161a22", 0), (Path("bezel.step"), "#7a7f86", 0), (Path("glass.step"), "#0b0e13", 0), (Path("plug.step"), "#3f4a46", 0),
+             (Path("cam.step"), "#020304", 0), (Path("tof.step"), "#4a5262", 0)]
     pv.PARTS = parts
-    meshes = [body, struts, wheels, cells, bezel, glass, plug]
+    meshes = [body, struts, wheels, cells, bezel, glass, plug, cam, tof]
     TEX["body"] = forged_texture(body)
     fig, axs = plt.subplots(2, 2, figsize=(14, 10.5))
     render(axs[0, 0], meshes, 24, 38, title="camera end (+y), +x hub side, top lid")
     render(axs[0, 1], meshes, 24, 218, title="comms end (-y), -x hub side")
     render(axs[1, 0], meshes, 89.9, -90, title="top lid: IXOLAR cells in one pocket, camera end up")
-    render(axs[1, 1], meshes, 0, 90, title="from +y: the camera window and the end-face cells, struts at 25 deg")
+    render(axs[1, 1], meshes, 0, 90, title="from +y: the 36 mm window (camera centre, ranging sensor right of it) and the end-face cells")
     for a in axs.flat: a.set_facecolor("#e9ecef")
     fig.patch.set_facecolor("#e9ecef")
     plt.tight_layout()
@@ -151,8 +156,16 @@ def main():
     r, u, d = pv.view(24, 38)
     ctr = np.array([55.0, 70.0, 45.0])
     cx, cy = ctr @ r, ctr @ u
-    render(a2, meshes, 24, 38, "close-up: forged-carbon body (chopped chips, about 15 x 5 mm), IXOLAR cells, 26 mm camera window", lims=(cx - 62, cx + 62, cy - 40, cy + 40))
+    render(a2, meshes, 24, 38, "close-up: forged-carbon body (chopped chips, about 15 x 5 mm), IXOLAR cells, 36 mm window (camera and lamp in the 26 mm centre, ranging sensor at its +x edge)", lims=(cx - 62, cx + 62, cy - 40, cy + 40))
     f2.savefig(HW.parent / "docs" / "images" / "rover-concept-detail.png", dpi=110, facecolor=f2.get_facecolor())
+    f3, a3 = plt.subplots(figsize=(9, 7)); f3.patch.set_facecolor("#e9ecef"); a3.set_facecolor("#e9ecef")
+    r3, u3, d3 = pv.view(0, 90)
+    wp = np.array([wx, 70.0, 30.0]); cxx, cyy = wp @ r3, wp @ u3
+    render(a3, meshes, 0, 90, "the 36 mm window from +y: camera and lamp in the 26 mm centre, ranging sensor at the +x edge (viewer's left)", lims=(cxx - 42, cxx + 42, cyy - 30, cyy + 30))
+    sp = np.array([wx + 14.0, 70.0, 30.0]); a3.annotate("ranging sensor\n(VL53L5CX, 6.4 x 3 mm)", (sp @ r3, sp @ u3), (cxx - 26, cyy + 25), fontsize=9, arrowprops=dict(arrowstyle="->"), ha="center", bbox=dict(boxstyle="round,pad=0.25", fc="white", ec="0.5", alpha=0.92))
+    cp = np.array([wx, 70.0, 30.0 - 8]); a3.annotate("camera + lamp view\n(26 mm)", (cp @ r3, cp @ u3), (cxx, cyy - 25), fontsize=9, arrowprops=dict(arrowstyle="->"), ha="center", bbox=dict(boxstyle="round,pad=0.25", fc="white", ec="0.5", alpha=0.92))
+    gp = np.array([wx - 18.0 * 0.7, 70.0, 30.0 + 18.0 * 0.7]); a3.annotate("shared cover glass\n(36 mm)", (gp @ r3, gp @ u3), (cxx + 22, cyy + 25), fontsize=9, arrowprops=dict(arrowstyle="->"), ha="center", bbox=dict(boxstyle="round,pad=0.25", fc="white", ec="0.5", alpha=0.92))
+    f3.savefig(HW.parent / "docs" / "images" / "rover-concept-window.png", dpi=110, facecolor=f3.get_facecolor())
     out = HW.parent / "docs" / "images" / "rover-concept.png"
     fig.savefig(out, dpi=80, facecolor=fig.get_facecolor())
     print("wrote", out)
