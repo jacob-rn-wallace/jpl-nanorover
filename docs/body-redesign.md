@@ -432,6 +432,10 @@ Surplus of one lit face (W): in full sun A +2.55, B +2.45, **C +1.30, D -0.34, E
 1. For the derived designs, **which cavities become structural linings** (tubs, or in the forged case moulded pockets) versus open interior or bulkheads: my suggestion above is the servo group, the camera group and the antenna pivot only.
 2. Whether to **test servo mounting on bulkhead plates** instead of pockets (cheaper in mass, by the area figures above).
 
+## Antennas, 2026-11-13 (owner; supersedes the gravity-oriented whip, its counterweight and the 38 mm swing disc in the sections above)
+
+No whip, no pendulum and no counterweight. The -y end face keeps the 26 mm circle at x = -48.07, z = 30, now an RF-transparent window with a 2.4 GHz patch behind it; GNSS uses one patch per lid in a 25 mm cell-free window plus a receiver module on the plane z = 30. `layout.py` and `block.py` are updated (10 placements clear, 38 cavities, 859 cm3 left); the body contents are 437 g against 386 g (over by 51 g, the GNSS patches at an assumed 8 g each). Rationale, open items (the cell layout has no window for the lid patches, a second comms patch, RF unsimulated) and numbers: `docs/positioning.md`, section 6. The earlier sections' antenna details (the pendulum, the rotary joint, the swing disc and its edge-strip limit) are historical.
+
 ## Open decisions (owner)
 1. **Woven laminate or forged carbon** (revised recommendation: woven plates bonded into a box, for the crisp edges), and the manufacturing route (a mould from a printed plug, CNC-cut plate bonded into a box, or a bought moulded part).
 2. **Closed shell or open frame:** a sealed box is not required by the scope (no spaceflight), but dust and water tolerance would need deciding.

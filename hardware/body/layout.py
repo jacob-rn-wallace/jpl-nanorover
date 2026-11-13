@@ -105,8 +105,12 @@ for n, (x0, x1, y0, y1, z0, z1) in bays.items():
 
 # ---------------- components (PLACEHOLDERS: sizes and masses are assumptions, no parts chosen) ----------------
 # Owner's decisions (2026-11-11): top and bottom faces are identical lids carrying cells; the body is kept symmetric about the transverse (z = 30) plane;
-# one window shared by camera and lamp through a beamsplitter; the antenna on the opposite end face at the diagonally opposite position (a 180 degree turn about z carries
-# the camera's position onto the antenna's), on a gravity-oriented pivot with a counterweight.
+# one window shared by camera and lamp through a beamsplitter; the comms antenna on the opposite end face at the diagonally opposite position (a 180 degree turn about z carries
+# the camera's position onto the antenna's).
+# Antennas (owner, 2026-11-13, supersedes the gravity-oriented whip with a counterweight): outdoor use is a goal and a modern GNSS (RTK) module is acceptable; the radio is 2.4 GHz.
+# The comms antenna is a 2.4 GHz ceramic patch polarised along z behind an RF-transparent 26 mm window in the -y wall (the identical-look circle); upright and inverted are a 180 degree
+# turn about y, which keeps the polarisation vertical, so nothing has to orient itself. GNSS needs the sky, so there is one GNSS patch per lid (the rover works inverted), flush in a
+# cell-free window of each lid, and one RTK receiver module on the plane z = 30. Sizes and masses are assumptions; see docs/positioning.md.
 # End faces (owner, 2026-11-12, hardware/body/cell_endface.py; supersedes the 60 x 60 mm square at x = +-40): no panel; along the 140 mm of the end face the hole (window, 26 mm),
 # the cell pocket (four SM940K09L standing, worst case 87.2 mm) and the face edges are separated by three EQUAL gaps, (140 - 26 - 87.2) / 3 = 8.933 mm.
 # Seen from outside the +y face the hole is on the viewer's left (+x), so the window is at x = 70 - (gap + 13) = +48.07, the antenna at x = -48.07 on the -y face, z = 30.
@@ -115,7 +119,8 @@ END_POCKET_W = 4 * 21.5 + 4 * 0.3
 END_GAP = (140.0 - END_HOLE_D - END_POCKET_W) / 3
 WIN_X, WIN_Z = 70.0 - (END_GAP + END_HOLE_D / 2), 30.0
 ANT_X, ANT_Z = -WIN_X, 30.0
-ANT_R = 19.0            # swing disc 38 mm across: with no edge strips the limit is the 2.5 mm inset, radius <= 19.43 mm at x = 48.07 (the plates route's 6 mm strip had forced 31 mm)
+ANT_WIN_R = 13.0        # the -y end face's 26 mm RF-transparent circle, the same as the camera window
+GNSS_Y = -32.5          # y of both lid GNSS patches (clear of the boards, which span y = -6 to 62)
 END_CELL_X = 70.0 - (2 * END_GAP + END_HOLE_D + END_POCKET_W / 2)   # body x of the end pocket's centre on the +y face (-17.47); on the -y face it is +17.47
 comps = {  # name: (mass g, (x0, x1, y0, y1, z0, z1), note, optional (x, y, z) of the centre of mass if not the box centre)
     "processor board (lower lid module)":   (20.0, (-35, 35, -6, 62, 4, 11.6),      "70 x 68 x 7.6 mm placeholder, rides on the bottom lid", None),
@@ -124,11 +129,12 @@ comps = {  # name: (mass g, (x0, x1, y0, y1, z0, z1), note, optional (x, y, z) o
     "camera module":                        (12.0, (WIN_X - 12.5, WIN_X + 12.5, 36.5, 45.5, WIN_Z - 12, WIN_Z + 12), "25 x 24 x 9 mm, looking +y through the beamsplitter", None),
     "beamsplitter plate, 45 degrees":       (3.0,  (WIN_X - 10, WIN_X + 10, 47, 67, WIN_Z - 12, WIN_Z + 12), "28 x 24 x 1.5 mm glass plate at 45 degrees; box is its bounding volume. A 25 mm cube would be about 39 g (my estimate)", None),
     "lamp (LED and lens), shines +x onto the plate": (5.0, (14, 28, 51, 63, WIN_Z - 6, WIN_Z + 6), "on the body-centre side of the plate, which reflects it toward +y and out of the window", None),
-    "antenna pivot: bearing, rotary RF joint, counterweight disc": (10.0, (ANT_X - ANT_R, ANT_X + ANT_R, -67.5, -59.5, ANT_Z - ANT_R, ANT_Z + ANT_R), "swing disc 38 mm across, 8 mm deep, behind the -y wall; clear of servo A", None),
+    "comms patch (2.4 GHz) on its ground board": (4.0, (ANT_X - 15, ANT_X + 15, -67.5, -62.5, ANT_Z - 15, ANT_Z + 15), "15 x 15 x 4 mm ceramic patch on a 30 x 30 mm board behind the 26 mm RF window in the -y wall (assumed; mass ASM)", None),
+    "GNSS patch, bottom lid": (9.0, (-12.5, 12.5, GNSS_Y - 12.5, GNSS_Y + 12.5, 2.5, 7.5), "25 x 25 x 4 mm ceramic patch (about 8 g at 3.5 g/cm3, ASM) on a ground board; sky side is a cell-free window in the lid", None),
+    "GNSS patch, top lid": (9.0, (-12.5, 12.5, GNSS_Y - 12.5, GNSS_Y + 12.5, 52.5, 57.5), "mirror of the bottom one about z = 30", None),
+    "GNSS RTK receiver module": (3.0, (-2.5, 2.5, 20, 42, 21, 39), "22 x 17 x 3 mm module standing in the centre gap on the plane z = 30 (ZED-F9P class, size and mass from memory, unchecked)", None),
 }
-OUT_COMPS = {  # outside the envelope, counted for mass and balance only
-    "antenna whip, bend and stub (outside the -y face)": (3.0, (ANT_X, -76.0, ANT_Z)),
-}
+OUT_COMPS = {}  # outside the envelope, counted for mass and balance only (the whip is gone: the antennas are inside the body behind RF windows)
 extra_mass = {"wiring, connectors, board-to-board links": (15.0, (0.0, 0.0, HZ))}
 # cells (owner, 2026-11-12): Anysolar IXOLAR SolarMD parts; top and bottom faces identical (6 x SM940K09L 44.5 x 21.5, 2 x SM401K08TF 90 x 40, 1 x SM531K08TFS 89 x 52 in one pocket),
 # both end faces 4 x SM940K09L standing; none on the hub faces (the struts are there). Masses: SM940K09L 3.3 g and SM531K08TFS 9.4 g from their datasheets (Rev. 2025/2026,
@@ -164,7 +170,7 @@ print("  all placements clear" if ok_all else "  PROBLEMS above")
 used = sum(m.sum() for m in placed.values()) * vox
 print(f"  placed components take {used:.0f} cm3 of the {free.sum() * vox:.0f} cm3 free ({used / (free.sum() * vox):.0%})")
 print(f"  cells: top and bottom {FACE_TB:.1f} cm2 each ({CELL_MASS_TB:.1f} g), end faces {FACE_END:.1f} cm2 each ({CELL_MASS_END:.1f} g), total {CELL_AREA_CM2:.0f} cm2, {CELL_MASS_G:.0f} g")
-print(f"  window at x = {WIN_X:+.2f}, antenna at x = {ANT_X:+.2f} (end gaps {END_GAP:.3f} mm), antenna disc {2 * ANT_R:.0f} mm")
+print(f"  window at x = {WIN_X:+.2f}, antenna at x = {ANT_X:+.2f} (end gaps {END_GAP:.3f} mm), RF-window circle {2 * ANT_WIN_R:.0f} mm")
 
 # ---------------- mass and centre of mass ----------------
 print("\nmass of the body contents (grams) against the 386 g left of 1.0 kg:")
@@ -197,7 +203,7 @@ M = sum(l[0] for l in lumps)
 cx, cy, cz = (sum(l[0] * l[k] for l in lumps) / M for k in (1, 2, 3))
 print(f"\nbody contents + servos + hub (forged shell, IXOLAR cells): {M:.0f} g, centre of mass x = {cx:+.1f}, y = {cy:+.1f}, z = {cz:.1f} mm (hub axis at x = 0, y = 0, z = 30)")
 top = sum(l[0] for l in lumps if l[3] > HZ + 0.01); bot = sum(l[0] for l in lumps if l[3] < HZ - 0.01)
-print(f"mass above z = 30: {top:.0f} g, below: {bot:.0f} g (a transverse-plane-symmetric body has these equal; the camera, antenna and battery sit on the plane)")
+print(f"mass above z = 30: {top:.0f} g, below: {bot:.0f} g (a transverse-plane-symmetric body has these equal; the camera, comms patch, GNSS module and battery sit on the plane)")
 # struts, wheels and supports: add their roughly symmetric lumps (320 g) to get the whole-rover y
 import chassis_sim as C  # noqa: E402
 struts = C.M_STRUT + C.M_WHEEL + C.M_SUPPORT
@@ -212,7 +218,7 @@ try:
     import matplotlib.pyplot as plt
     from matplotlib.patches import Rectangle
     fig, ax = plt.subplots(1, 2, figsize=(12.5, 6))
-    pal = ["#4c78a8", "#f58518", "#e9c46a", "#54a24b", "#2a9d8f", "#e45756", "#b279a2"]
+    pal = ["#4c78a8", "#f58518", "#e9c46a", "#54a24b", "#2a9d8f", "#e45756", "#b279a2", "#9d755d", "#bab0ac", "#76b7b2", "#ff9da6"]
 
     def draw(a, ia, ib, xl, yl, title):
         a.add_patch(Rectangle((-70, 0) if ib == 2 else (-70, -70), 140, 60 if ib == 2 else 140, fill=False, lw=1.5, ec="k"))
@@ -228,9 +234,9 @@ try:
         a.plot([0], [0 if ib == 1 else HZ], "r+", ms=10)
         a.set_xlim(-76, 76); a.set_ylim((-4, 64) if ib == 2 else (-84, 88)); a.set_aspect("equal")
         a.set_xlabel(xl); a.set_ylabel(yl); a.set_title(title, fontsize=9.5)
-    draw(ax[0], 0, 1, "x (mm); +x is the page's right", "y (mm); the camera window is at +y (top), the antenna at -y", "Top view: servos grey, components coloured; dashed = keep-in inset")
+    draw(ax[0], 0, 1, "x (mm); +x is the page's right", "y (mm); the camera window is at +y (top), the comms patch at -y", "Top view: servos grey, components coloured; dashed = keep-in inset")
     ax[0].plot([WIN_X], [70], "ks", ms=7, mfc="none"); ax[0].annotate(f"camera window\n(x={WIN_X:+.1f})", (WIN_X, 70), (WIN_X - 4, 77), fontsize=7, ha="center")
-    ax[0].plot([ANT_X], [-70], "k^", ms=7, mfc="none"); ax[0].annotate(f"antenna pivot\n(x={ANT_X:+.1f})", (ANT_X, -70), (ANT_X + 5, -79), fontsize=7, ha="center")
+    ax[0].plot([ANT_X], [-70], "k^", ms=7, mfc="none"); ax[0].annotate(f"comms patch window\n(x={ANT_X:+.1f})", (ANT_X, -70), (ANT_X + 5, -79), fontsize=7, ha="center")
     ax[0].legend(fontsize=6.5, loc="upper center", bbox_to_anchor=(0.5, -0.1), ncol=2)
     draw(ax[1], 1, 2, "y (mm); +y (camera end) to the right", "z (mm)", "Side view from +x: hub axis (red +) at y = 0, z = 30; boards mirror about z = 30")
     ax[1].set_xlim(-82, 76)

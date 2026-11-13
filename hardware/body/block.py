@@ -91,9 +91,8 @@ for n, (m, bb, note, _c) in LY.comps.items():
         add("boards (ride on the lids)", bx(*bb), area_box(*bb))
     elif n.startswith("battery"):
         add("battery", bx(*bb), area_box(*bb))
-    elif n.startswith("antenna pivot"):
-        r = LY.ANT_R
-        add("antenna pivot", cyl("y", LY.ANT_X, LY.ANT_Z, r, y0, y1), area_cyl(r, y1 - y0))
+    elif n.startswith("comms patch") or n.startswith("GNSS"):
+        add("antennas and GNSS module", bx(*bb), area_box(*bb))
     else:
         add("camera, beamsplitter and lamp", bx(*bb), area_box(*bb))
 
@@ -104,7 +103,10 @@ frustum_len = 69.0 - 46.5                                                 # lens
 cone = Cone(0.5, r_win, frustum_len, align=(Align.CENTER, Align.CENTER, Align.MIN)).rotate(Axis.X, -90).moved(Location((LY.WIN_X, 46.5, LY.WIN_Z)))
 add("camera, beamsplitter and lamp", cone, math.pi * (0.5 + r_win) * math.hypot(r_win - 0.5, frustum_len))     # the view: 60 degree full angle at 26 mm
 add("camera, beamsplitter and lamp", cyl("x", 57.0, LY.WIN_Z, 6.0, 28.0, LY.WIN_X), area_cyl(6.0, LY.WIN_X - 28.0))   # lamp beam to the plate
-add("antenna pivot", cyl("y", LY.ANT_X, LY.ANT_Z, 2.5, -70.0, -67.5), area_cyl(2.5, 2.5))              # shaft hole through the -y wall
+add("antennas and GNSS module", cyl("y", LY.ANT_X, LY.ANT_Z, LY.ANT_WIN_R, -70.0, -67.5), area_cyl(LY.ANT_WIN_R, 2.5))   # 26 mm RF-transparent window through the -y wall
+for z0, z1 in ((57.5, 60.0), (0.0, 2.5)):                                  # 25 mm GNSS windows through each lid's skin and cell layer (cells omitted there)
+    w = (-12.5, 12.5, LY.GNSS_Y - 12.5, LY.GNSS_Y + 12.5, z0, z1)
+    add("antennas and GNSS module", bx(*w), area_box(*w))
 
 block = Box(140, 140, 60, align=(Align.CENTER, Align.CENTER, Align.MIN))
 volume_block = block.volume
@@ -126,14 +128,14 @@ from scipy.ndimage import distance_transform_edt  # noqa: E402
 solid = ~LY.occ & np.ones_like(LY.occ)
 for n, bm in LY.placed.items():
     solid &= ~bm
-# add the window, frustum, lamp beam and antenna holes to the voxel copy
+# add the window, frustum, lamp beam and antenna window holes to the voxel copy
 X, Y, Z = LY.X, LY.Y, LY.Z
 solid &= ~((Y >= 60) & ((X - LY.WIN_X) ** 2 + (Z - LY.WIN_Z) ** 2 <= r_win ** 2))
 tt = np.clip((Y - 46.5) / frustum_len, 0, 1)
 solid &= ~((Y >= 46.5) & (Y <= 69) & ((X - LY.WIN_X) ** 2 + (Z - LY.WIN_Z) ** 2 <= (0.5 + tt * (r_win - 0.5)) ** 2))
 solid &= ~((X >= 28) & (X <= LY.WIN_X) & ((Y - 57.0) ** 2 + (Z - LY.WIN_Z) ** 2 <= 36.0))
-solid &= ~((Y <= -67.5) & ((X - LY.ANT_X) ** 2 + (Z - LY.ANT_Z) ** 2 <= 2.5 ** 2))
-solid &= ~(((X - LY.ANT_X) ** 2 + (Z - LY.ANT_Z) ** 2 <= LY.ANT_R ** 2) & (Y >= -67.5) & (Y <= -59.5))
+solid &= ~((Y <= -67.5) & ((X - LY.ANT_X) ** 2 + (Z - LY.ANT_Z) ** 2 <= LY.ANT_WIN_R ** 2))
+solid &= ~(((Z >= 57.5) | (Z <= 2.5)) & (np.abs(X) <= 12.5) & (np.abs(Y - LY.GNSS_Y) <= 12.5))
 pad = np.pad(solid, 1, constant_values=False)
 d = distance_transform_edt(pad)[1:-1, 1:-1, 1:-1] * LY.RES
 vox = LY.vox

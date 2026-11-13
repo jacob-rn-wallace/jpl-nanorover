@@ -165,3 +165,7 @@ Settled 2026-11-12: the operator's console does the SLAM and shows a 3D model; t
 5. **The console software:** the SLAM and the 3D view on the operator's PC (not designed), and the protocol between rover and console.
 6. The battery and voltage rails, and the power switching.
 7. (Withdrawn: the era's software spirit does not apply, the spirit is for parts selection only.)
+
+## Decision: 2.4 GHz serial radio and GNSS (owner, 2026-11-13; supersedes the 900 MHz radio of the sections above)
+
+Outdoor use is a goal, a modern GNSS (RTK) module is acceptable, and the radio is a **2.4 GHz serial module (802.15.4 class, such as an XBee-style part; not Wi-Fi)** in place of the 900 MHz modem. Reasons (mine, arithmetic and memory, unchecked): a quarter-wave whip is 31 mm against 82 mm and a 140 mm body is 1.1 wavelength at 2.4 GHz (0.42 at 900 MHz), so patch antennas on the body behave; 2.4 GHz is licence-free worldwide while 902 to 928 MHz is US-only; 250 kbit/s modules carry RTK corrections and cut the still from about 28 s to a few seconds; the cost is about 8.4 dB more free-space loss and a busier band, which is irrelevant at room scale (about 90 dB of margin at 2 to 5 m) and leaves a few hundred metres outdoors. The era argument still holds (Nomad and the MPRS used 2.4 GHz). The module, its current and the operator-side modem are not yet chosen (item 4 of the open list above stays open). The antennas and GNSS, the body consequences and the open items are in `docs/positioning.md`, section 6.
