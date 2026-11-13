@@ -168,3 +168,11 @@ The owner's account of each unit's role (and the KTLA segment's unit) is taken o
 3. **Then feed the findings back into the sim** as sensor options (a beacon fix, a landmark fix, a flow sensor) and measure the map again with `npm run map`.
 
 **State of the code:** `sim/` builds and its 21 checks pass (`npm run check`); `npm run map` prints the map-quality measure. **First step tomorrow:** run `cd sim; npm run dev`, look at the redraw (V changes the view, G cycles the spectator), then start the positioning research.
+
+## 16. The 2026-11-13 session: the redraw looked at, and the positioning research started
+
+**Redraw:** screenshotted for the first time (Playwright core with the system Chrome; the sim renders, no page errors; the panels overlap the map at 1280 x 800, not fixed). `npm run check` passes (21 checks).
+
+**Finding (`docs/positioning.md`, section 1):** in the sim only the gyro bias drifts the pose (the distance noise is white and averages out), and the q switch also turns on a 0.5 deg white noise on the tilt sensor that degrades the map more than the pose does (precision 56% at q = 0, 31% at q = 0.03). **Recommendation:** calibrate the gyro at every stop and fuse the tilt (firmware only), then one absolute fix, ultrasonic beacons on the radio's time sync (Cricket pattern), with coloured markers in stills and a table-edge fix as cheap extras. The real-part figures in that document are from memory and unchecked. **Open for the owner:** are beacon posts acceptable, and where do the 40 kHz capsules go on a body whose lids and end faces are allocated.
+
+**Next:** split the q switch (pose drift vs tilt noise), add gyro calibration at stops and the beacon and edge fixes to the sim, measure over a longer route; read the sources and replace the unchecked figures.
