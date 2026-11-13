@@ -106,6 +106,9 @@ add("camera, beamsplitter and lamp", cyl("x", 57.0, LY.WIN_Z, 6.0, 28.0, LY.WIN_
 w = (LY.ANT_X - LY.ANT_WIN_HALF, LY.ANT_X + LY.ANT_WIN_HALF, -70.0, -67.5, LY.ANT_Z - LY.ANT_WIN_HALF, LY.ANT_Z + LY.ANT_WIN_HALF)
 add("comms antenna", bx(*w), area_box(*w))   # 27 mm square RF-transparent window through the -y wall, flush with the face
 
+w = (LY.RNG_X - LY.RNG_WIN_HALF_X, LY.RNG_X + LY.RNG_WIN_HALF_X, 67.5, 70.0, LY.RNG_Z - LY.RNG_WIN_HALF_Z, LY.RNG_Z + LY.RNG_WIN_HALF_Z)
+add("ranging sensor", bx(*w), area_box(*w))   # 8 x 10 mm window through the +y wall for the ranging sensor, above the camera window
+
 block = Box(140, 140, 60, align=(Align.CENTER, Align.CENTER, Align.MIN))
 volume_block = block.volume
 cut = block
@@ -132,6 +135,7 @@ solid &= ~((Y >= 60) & ((X - LY.WIN_X) ** 2 + (Z - LY.WIN_Z) ** 2 <= r_win ** 2)
 tt = np.clip((Y - 46.5) / frustum_len, 0, 1)
 solid &= ~((Y >= 46.5) & (Y <= 69) & ((X - LY.WIN_X) ** 2 + (Z - LY.WIN_Z) ** 2 <= (0.5 + tt * (r_win - 0.5)) ** 2))
 solid &= ~((X >= 28) & (X <= LY.WIN_X) & ((Y - 57.0) ** 2 + (Z - LY.WIN_Z) ** 2 <= 36.0))
+solid &= ~((Y >= 67.5) & (np.abs(X - LY.RNG_X) <= LY.RNG_WIN_HALF_X) & (np.abs(Z - LY.RNG_Z) <= LY.RNG_WIN_HALF_Z))
 solid &= ~((Y <= -67.5) & (np.abs(X - LY.ANT_X) <= LY.ANT_WIN_HALF) & (np.abs(Z - LY.ANT_Z) <= LY.ANT_WIN_HALF))
 pad = np.pad(solid, 1, constant_values=False)
 d = distance_transform_edt(pad)[1:-1, 1:-1, 1:-1] * LY.RES
