@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>nanorover operator console (simulation)</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #0b0f14; color: #d7dee6; font: 13px/1.4 system-ui, sans-serif; overflow: hidden; }
+  canvas#c { display: block; width: 100%; height: 100%; }
+  .box { position: fixed; background: rgba(8,12,18,.78); border: 1px solid #1f2b38; border-radius: 6px; padding: 8px 10px; }
+  .box b { color: #fff; }
+  #hud { left: 12px; top: 12px; width: 340px; white-space: pre-wrap; font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
+  #photoBox { right: 12px; top: 12px; width: 320px; }
+  #photo { width: 320px; height: 240px; background: #111; display: block; margin-bottom: 4px; }
+  #log { right: 12px; top: 330px; width: 320px; height: 150px; overflow: hidden; font-family: ui-monospace, Menlo, monospace; font-size: 11px; white-space: pre-wrap; color: #9fb2c4; }
+  #panel { left: 12px; bottom: 12px; width: 560px; }
+  #panel button { margin: 2px 2px 2px 0; padding: 3px 8px; background: #16222f; color: #d7dee6; border: 1px solid #2a3a4c; border-radius: 4px; cursor: pointer; font: inherit; }
+  #panel button:hover { background: #1f3246; }
+  #panel .help { color: #7f93a6; font-size: 11px; margin-top: 4px; }
+  #warn { left: 50%; top: 12px; transform: translateX(-50%); color: #ffb454; font-weight: 600; display: none; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud" class="box">loading...</div>
+<div id="warn" class="box"></div>
+<div id="photoBox" class="box"><canvas id="photo" width="320" height="240"></canvas><div id="photoText">no photo yet</div></div>
+<div id="log" class="box"></div>
+<div id="panel" class="box">
+  <div>
+    <button id="bPilot">1 pilot</button><button id="bMission">2 mission</button>
+    <button id="bRiskDn">Q risk -</button><button id="bRiskUp">E risk +</button>
+    <button id="bClear">C clear goals</button><button id="bRecover">X self-recover</button>
+    <button id="bRight">F right the rover</button>
+  </div>
+  <div>
+    <button id="bPhotoS">photo S 320x240</button><button id="bPhotoM">P photo M 640x480</button><button id="bPhotoL">photo L 1024x768</button>
+    <button id="bLamp">L lamp</button>
+  </div>
+  <div>
+    <button id="bView">V view</button><button id="bGhost">G spectator</button><button id="bLink">[ ] link rate</button>
+    <button id="bWarp">T time warp</button><button id="bSlam">N dead-reckoning error</button><button id="bReset">Backspace reset</button>
+  </div>
+  <div class="help">pilot: W A S D or arrows drive (Shift overrides the safety stop). mission: click the map to send a waypoint, Shift-click adds one. Drag to orbit, wheel to zoom.<br>
+  The rover reports only what its range sensor sees and where it thinks it is; the three coloured markers appear only in photographs. Photograph all three.</div>
+</div>
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>

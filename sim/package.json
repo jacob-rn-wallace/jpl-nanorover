@@ -1,0 +1,23 @@
+{
+  "name": "nanorover-sim",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "license": "Apache-2.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "check": "esbuild tests/sim-check.ts --bundle --platform=node --format=esm --outfile=.check/sim-check.mjs --log-level=warning && node .check/sim-check.mjs"
+  },
+  "dependencies": {
+    "three": "^0.170.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@types/three": "^0.170.0",
+    "esbuild": "^0.24.2",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.7"
+  }
+}
