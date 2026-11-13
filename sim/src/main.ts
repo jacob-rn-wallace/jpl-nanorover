@@ -15,7 +15,7 @@ const wv = new WorldView(sim.world);
 sim.captureHook = (_size, w, h, lamp) => wv.capture(renderer, sim.rover, w, h, lamp);
 const cv = new ConsoleView(() => sim.map, canvas);
 (window as unknown as { __sim: Sim }).__sim = sim;
-let spectator = q.get("spectator") === "1", ghost = false, warpIdx = 0, photoSize = "M";
+let spectator = q.get("spectator") === "1", specLarge = false, ghost = false, warpIdx = 0, photoSize = "M";
 const WARPS = [1, 2, 4, 8];
 if (q.get("view") === "top") cv.setView("top");
 
@@ -40,7 +40,7 @@ function act(k: string): void {
     case "p": sim.requestPhoto(photoSize); break;
     case "l": sim.toggleLamp(); break;
     case "v": cv.toggleView(); break;
-    case "g": spectator = !spectator; ghost = spectator; break;
+    case "g": if (!spectator) { spectator = true; specLarge = false; } else if (!specLarge) specLarge = true; else { spectator = false; specLarge = false; } ghost = spectator; break;
     case "[": sim.setLinkRate(LINK.rates.indexOf(sim.link.rate) - 1); break;
     case "]": sim.setLinkRate(LINK.rates.indexOf(sim.link.rate) + 1); break;
     case "t": warpIdx = (warpIdx + 1) % WARPS.length; sim.timeScale = WARPS[warpIdx]; break;
@@ -134,7 +134,7 @@ function frame(now: number): void {
   cv.update(sim.rover, ghost);
   renderer.setScissorTest(false); renderer.setViewport(0, 0, W, H); renderer.render(cv.scene, cv.camera);
   if (spectator) {
-    const pw = 300, ph = 225, x = W - pw - 12, y = 12;
+    const ph = specLarge ? Math.round(H * 0.5) : 225, pw = Math.round(ph * 4 / 3), x = W - pw - 12, y = 12;
     renderer.setScissorTest(true); renderer.setViewport(x, y, pw, ph); renderer.setScissor(x, y, pw, ph);
     wv.camera.aspect = pw / ph; wv.camera.updateProjectionMatrix(); wv.syncRover(sim.rover, sim.lampIsOn); renderer.render(wv.scene, wv.camera);
     renderer.setScissorTest(false);

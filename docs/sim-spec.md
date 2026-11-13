@@ -45,6 +45,23 @@ The sensor against known distances; no false hazards on a flat floor over many n
 7. **A photo blinds the map:** at 9.6 kbit/s a 640 x 480 photograph (about 25 KB) takes 28 s and the map drops to one frame a second while it transfers; telemetry alone uses 74% of a 9.6 kbit/s link.
 8. **The energy balance:** idling costs about 2 W (the servos holding alone are 1.44 W), so the 1.85 Wh battery lasts about 55 minutes and the sunlit patch gives a net 0.5 W; the stakes are real, and the servos' hold current (6 to 60 mA by source) is the largest unknown.
 
+## First play-test and the map problem (2026-11-12, evening)
+**Owner's verdict after playing:** "it works pretty well for being a first pass"; **the map was the weak point**: the owner had to rely on the spectator view, "which kinda defeats the purpose". A screenshot (seed 1, drift off, after about 570 s) shows why: a crumpled grey-green floor in which no rock is recognisable, tall orange walls of drop-off spikes around the whole table edge (the x3 height exaggeration), a trail tangled over the whole map, and a spectator thumbnail too small to compare against. **The default dead-reckoning drift is too harsh as well**: with it on, the rover's estimated position is on a different part of the map within minutes, so the owner turned it off to get a map at all.
+
+**Measured (`npm run map`, `tests/map-check.ts`; 3 seeds, a mission to the sun patch; the console's map compared with the true world within 30 cm of the path; run as a measure, not yet a pass/fail check):**
+
+| odometry drift | before: recall / precision | after: recall / precision |
+|---|---|---|
+| none (x0) | 49% / 72% | 61% / 64% |
+| x0.5 | 19% / 38% | 27% / 55% |
+| x1 (the default) | 32% / 23% | 47% / 22% |
+
+Recall is the share of truly hazardous cells that the map shows as hazardous; precision is the share of shown hazards that are real. **Findings:** (1) drift is not the main cause: even with a perfect pose the old map showed under half of the real hazards; (2) the cause was how the map was built: each sample overwrote the cell's hazard flag, so a flat-looking sample cleared a rock, and an 8 x 8 frame samples a rock every 4 cm on a 2 cm grid, so rocks were scattered dots; (3) with a perfect pose about half of the false alarms are smear next to real hazards and about half are phantoms far from anything (mostly drop-offs and rocks), which are sensor-analysis false alarms (suspect: the missing-return rule); (4) at full drift the phantoms multiply (433 cells on average), because the same obstacle lands in different places on different passes and the map keeps both.
+
+**Changed in `consoleMap.ts` (uncommitted until this note; now committed):** hazards persist with an evidence score (two hits to show, clear floor lowers it slowly), gaps between hazard samples are filled, and a scan-matching pose correction (`align`) was added. **The scan matching made no clear difference** (the arena is mostly flat floor, which does not constrain a match), so it is not a fix. **Changed in `consoleView.ts` and `main.ts` (rendered but not yet looked at by anyone; the Chrome extension was not connected, so no screenshot was taken):** height exaggeration 3 to 1.5; the floor drawn smoothed (3 x 3 mean) and pale; drop-offs flat orange marks, not walls; rocks red plateaus; a sensor field-of-view cone ahead of the rover; the trail fades with age; G cycles the spectator view off, small, large (half the window height).
+
+**Next (in order):** the owner tests the redraw; the default drift gets much gentler; find where the phantom drop-offs come from; make the pose correction use the rover's own motion. **The owner's larger aim for the next session: the hardware.** See handover section 15.
+
 ## Not done (later phases)
 Rapier physics and the CAD-exported model (struts that pose and push, wheels with motors), the real strut and wheel torques, the cell model by face, a loop-closure or scan-matching map correction, outdoor terrain, an asteroid-gravity mode, firmware shared with the PIC32 as portable C compiled to WebAssembly. **Everything numeric marked ASM is mine and untested against a real rover.**
 
