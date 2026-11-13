@@ -32,8 +32,8 @@ for n, d in (("indoors, 500 lux LED, poly-Si (8 uW/cm2)", 8e-6), ("indoors, 500 
 V_SERVO = 12.0
 loads = {
     "keep-alive: MCU deep sleep + RTC + wake input (ASM 0.1 mW; the chip alone is 7-8 uA, SRC)": 0.0001,
-    "controller awake, radio connected but idle (31.7 mA at 3.3 V, SRC dev-board measurement)": 0.105,
-    "radio transmitting (ASM, typical ESP32-class 0.5-0.8 W; not checked)": 0.65,
+    "controller awake + radio receiving (PIC32MX250F128B about 0.5 mA/MHz x 40 MHz = 20 mA, a family-datasheet summary scaled by me, ASM; XBee 3 802.15.4 receive 15 mA, Digi page; both at 3.3 V)": (0.020 + 0.015) * 3.3,
+    "radio transmitting, ABOVE the receiving figure (XBee 3 802.15.4 non-PRO 40 mA at +8 dBm, a manual snippet via distributors, less the 15 mA already counted; at 3.3 V)": (0.040 - 0.015) * 3.3,
     "camera streaming (ASM 0.3 W)": 0.3,
     "lamp on, through the 50/50 beamsplitter (ASM 0.2 W)": 0.2,
     "one servo moving at no load (180 mA at 12 V, SRC)": 0.180 * V_SERVO,

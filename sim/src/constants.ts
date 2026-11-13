@@ -29,12 +29,12 @@ export const TOF = {                          // VL53L5CX class (ST datasheet vi
 
 export const POWER = {                        // W, from hardware/body/power_budget.py (SRC) unless marked ASM
   batteryWh: 1.85,                            // 500 mAh at 3.7 V ASM
-  idle: 0.105,                                // controller with the radio idle SRC
+  idle: 0.1155,                               // PIC32 awake (20 mA ASM) + XBee 3 receiving (15 mA SRC Digi) at 3.3 V; was 0.105 from an ESP32-class dev board (docs/electronics-concept.md)
   hold: 1.44,                                 // four servos holding at 30 mA and 12 V SRC (sources disagree 6 to 60 mA)
   wheels: 0.4,                                // four wheel motors at full drive ASM
   lamp: 0.2,                                  // ASM
   camera: 0.3,                                // while capturing ASM
-  radioTx: 0.65,                              // at full link utilisation ASM
+  radioTx: 0.0825,                            // W above the receiving figure at full link utilisation: XBee 3 802.15.4 non-PRO 40 mA at +8 dBm less 15 mA, at 3.3 V (manual snippet via distributors); was 0.65 ASM
   righting: 2.0,                              // servos moving ASM
   sun: 2.5,                                   // one lit face in full sun SRC power_budget.py (2.55 W)
   wake: 0.05,                                 // fraction of the battery at which a flat rover restarts

@@ -103,7 +103,7 @@ for (let r = 0; r < 3; r++) {
   const s = new Sim(1); place(s, -0.6, 0.0, 0); s.rover.energyWh = 1.0;
   for (let i = 0; i < 3000; i++) s.step();                              // 60 s idle in the dark
   const used = 1.0 - s.rover.energyWh;
-  check("energy: idling in the dark costs about 2 W", used > 0.03 && used < 0.045, `${(used * 1000).toFixed(1)} mWh in 60 s = ${(used * 3600 / 60).toFixed(2)} W`);
+  check("energy: idling in the dark costs about 1.6 W (servos holding 1.44 W, PIC32 + XBee receiving 0.12 W, the telemetry transmitting about 0.06 W)", used > 0.024 && used < 0.030, `${(used * 1000).toFixed(1)} mWh in 60 s = ${(used * 3600 / 60).toFixed(2)} W`);
   const u = new Sim(1); place(u, u.world.sun.x, u.world.sun.y, 0); u.rover.energyWh = 1.0;
   for (let i = 0; i < 3000; i++) u.step();
   check("energy: idling in the sunlit patch gains charge", u.rover.energyWh > 1.0, `${((u.rover.energyWh - 1.0) * 1000).toFixed(1)} mWh in 60 s`);
