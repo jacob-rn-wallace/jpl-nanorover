@@ -184,3 +184,31 @@ The owner's account of each unit's role (and the KTLA segment's unit) is taken o
 **Done:** `layout.py` and `block.py` updated and run (the venv `.venv` was created on this machine from `hardware/requirements.txt` plus scipy): 10 placements clear, 38 cavities, STEP re-imports as one solid; `docs/positioning.md` section 6, `docs/electronics-concept.md` (new decision section), `docs/body-redesign.md` (antennas note), `CLAUDE.md` (radio and body decision (5)). **Mass is worse, not better: 437 g against 386 g (over by 51 g)** because two 25 mm ceramic patches are heavy (assumed).
 
 **Open:** the cell layout needs a 25 mm window per lid (drop an SM940K09L or use an 18 mm L1-only patch); a second comms patch or one end only; RF effects of the carbon lid, wheels and struts, and GNSS desense, unsimulated; RTK corrections need the faster link and the sim's link model (9600 bit/s) is out of date; part numbers for the radio and GNSS receiver not looked up. **Not done:** the sim was not changed (beacon, edge and RTK fixes, the split of the q switch, the 2.4 GHz link rate); the earlier next steps in section 16 stand.
+
+## 18. Where the 2026-11-13 session stopped (read this to resume)
+
+Sections 16 and 17 above and `docs/positioning.md` (sections 1 to 7) hold the detail; this section is the checklist. Everything below is committed (`360fe73`, `93eecff`, `ed1e9f1`, plus the commit that adds this section); **nothing is pushed** (`main` is ahead of `origin/main`); the owner pushes when they ask.
+
+**Decided by the owner this session:**
+1. Outdoor use is a goal. 2. A modern GNSS (RTK) module is acceptable under the era rule (bent on purpose). 3. The radio is a 2.4 GHz serial module (802.15.4 class, not Wi-Fi), replacing 900 MHz. 4. The gravity-oriented whip, counterweight and pendulum are dropped: a 2.4 GHz patch polarised along z behind an RF-transparent 26 mm window at x = -48.07, z = 30 on the -y face; one GNSS patch per lid in a cell-free window; an RTK receiver on the plane z = 30. (Direction finding on the rover was analysed and not adopted.)
+
+**Findings that matter (all in `docs/positioning.md`):**
+- In the sim only gyro bias drifts the pose; the quality switch also adds 0.5 deg tilt noise that hurts the map more than the pose (section 1). The map metric is noisy (6 seeds, one short route), so no tuning conclusion yet.
+- **Ultrasonic beacon accuracy is 3 to 5 cm, not 1 cm** (Active Bat about 3 cm; Marvelmind claims 2 cm but an independent 2026 test got 4.7 to 10 cm RMS). The earlier "about 1 cm" was from memory and is corrected in the document (section 7). The "0.3 deg heading from two ultrasonic receivers" is unchecked arithmetic.
+- Closest precedent: Eurobot (Pierlot and Van Droogenbroeck 2009): three IR beacons, a rotating-turret receiver (8 x 8 x 8 cm, PIC), 0.1 deg angle precision, about 1 cm position error on a 2.1 x 3 m table, heading for free. Cricket Compass (ultrasonic orientation) is confirmed in design but its accuracy was not found. Section 7 lists what was and was not confirmed.
+
+**Open, in the order a new session should take them:**
+1. **Owner's question, unanswered:** keep ultrasonic beacons as the working assumption, or compare an IR angle-based system (Eurobot style) with ultrasonic ranging in the sim before choosing? Also still open: are operator-placed beacon posts acceptable, and where do receivers go (the lids and end faces are allocated; the receiver turret of the Eurobot design is large).
+2. Cell layout: each lid needs a 25 mm cell-free window for the GNSS patch and the symmetric IXOLAR layout has none (drop an SM940K09L per lid, whose 21.5 mm width fits an 18 mm L1-only patch but not a 25 mm one).
+3. A second comms patch (+y end has no room) or accept one end; RF behaviour (carbon lid as ground plane, wheels and struts, GNSS desense) is unsimulated.
+4. The link: RTK corrections need roughly 500 to 1000 bytes per second (memory); the sim still models 9600 bit/s. Part numbers, current draw and lifecycle for the 2.4 GHz module and the GNSS receiver have not been looked up. Mass: body contents 437 g against 386 g (over by 51 g; the GNSS patches are assumed 8 g each).
+5. **Sim work, not started** (`sim/` is unchanged this session): split the quality switch into pose drift and tilt noise; add gyro calibration at stops; add beacon, table-edge and RTK fixes; set the link rate to the 2.4 GHz module's; rerun `npm run map` on a longer route with more seeds. The map redraw was screenshotted once (it renders; the HUD panels overlap the map at 1280 x 800, not fixed).
+
+**Machine and tooling notes (this machine, the owner's):**
+- `.venv` was created this session from `hardware/requirements.txt` plus scipy (gitignored); `layout.py` then `block.py` run from the repository root with `.venv/bin/python hardware/body/<script>.py`. `sim/` needs `npm install` (done; do not commit the `package-lock.json` change it produced, it was reverted).
+- Git identity: there was none here. The owner had it set globally this session: `jacob-rn-wallace <65923888+jacob-rn-wallace@users.noreply.github.com>` in `~/.gitconfig`, matching every earlier commit; test commits in seven other repos were made and undone. Commits end with the Co-Authored-By line.
+- Screenshots: Playwright is not installed globally here; `playwright-core` with `/usr/bin/google-chrome` worked from the scratchpad (`shot.js` there).
+- The owner's global `~/.claude/RTK.md` condenses command output (the hook `rtk`); if a result looks truncated or unhelpful, re-run it as `rtk bypass <cmd>`. (Unrelated to the RTK of GNSS.)
+- Web search was used for section 7 (standard mode). The private repo `../jpl-nanorover-private` was not touched.
+
+**Working conventions unchanged:** left and right are the viewer's; mark assumptions and unchecked figures; push only when asked; nothing from the private repo is copied here.
