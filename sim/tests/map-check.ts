@@ -8,6 +8,9 @@ import { Sim } from "../src/sim";
 function run(quality: number, seed: number, goals: { x: number; y: number }[]) {
   const s = new Sim(seed);
   while (s.slamQuality !== quality) s.cycleSlam();
+  if (process.env.BEACON) s.odo.beacons = true;
+  if (process.env.NOCAL) s.odo.calibrate = false;
+  if (process.env.NOTILT) s.odo.tiltSigma = 0;
   s.setRisk(1); s.setMode("mission"); s.setGoals(goals);
   const path: { x: number; y: number }[] = []; let t = 0, k = 0;
   while (t < 900 && !s.rover.fallen && !s.rover.stuck && !s.rover.tipped) {

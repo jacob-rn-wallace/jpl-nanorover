@@ -41,7 +41,7 @@ export const POWER = {                        // W, from hardware/body/power_bud
 };
 
 export const LINK = {
-  rates: [4800, 9600, 38400, 100000],         // bit/s (4800 was the original's planned radio, SRC docs/design-comparison.md)
+  rates: [4800, 9600, 38400, 100000, 250000],        // bit/s (4800 was the original's planned radio, SRC docs/design-comparison.md)
   overhead: 0.10,                             // framing ASM
   latency: 0.05,                              // s ASM
   tofBytes: 140,                              // 4 header + 64 x 2 B ranges + status ASM
@@ -63,3 +63,30 @@ export const RISK = [
   { name: "3 bold",     rock: 0.040, slope: 0.160, tilt: deg(33), drop: 0.060 },     // overshoots: it will try rocks the wheels cannot climb
 ];
 export const SLAM_QUALITY = [0, 0.5, 1, 2];   // 0 perfect; 1 a typical dead-reckoning drift ASM
+
+/** ultrasonic beacon fix (Cricket pattern; owner decision 2026-11-13). The radio packet gives the time sync, so each post's range is a time of flight.
+ *  Figures: sigma 4 cm is the middle of the 3 to 5 cm plan (docs/positioning.md section 7); the rest are ASM. */
+export const BEACON = {
+  posts: [{ x: -0.85, y: 0.65 }, { x: 0.85, y: 0.65 }, { x: 0.0, y: -0.65 }],   // m, three posts just off the table edge ASM
+  period: 0.5,                 // s between fixes ASM
+  sigma: 0.04,                 // m, range noise
+  echo: 0.05, echoBias: 0.15,  // probability a range is an echo, and how much longer it reads ASM
+  maxRange: 2.5,               // m, a 40 kHz capsule's usable range ASM
+  gate: 0.25,                  // m, a fix further than this from the dead-reckoned position is rejected as an echo
+  gain: 0.3,                   // fraction of the innovation applied per fix ASM
+  headingSigma: 0.05,          // rad (about 3 degrees), deliberately worse than the unchecked 0.3 degrees from two receivers
+  headingGain: 0.1,
+};
+
+/** Lighthouse 1.0 base stations received by solar cells on the up-facing lid (owner decision 2026-11-13; docs/positioning.md sections 9 and 10).
+ *  Two stations sweep a laser plane at 60 rev/s; a sensor timing a sweep against the sync flash gets one angle. Everything below is ASM unless marked. */
+export const LIGHTHOUSE = {
+  stations: [{ x: -1.0, y: 0.8, z: 1.6 }, { x: 1.0, y: -0.8, z: 1.6 }],   // m, diagonal corners of the table, 1.6 m up ASM
+  rate: 60,                    // rev/s SRC (Vishay-independent: Bitcraze system overview and the paper it links, docs/positioning.md section 9)
+  period: 1 / 30,              // s between pose fixes: four sweeps (two stations, two axes) fit about two frames ASM
+  sigmaT: 3e-6,                // s, timing error of a threshold crossing, from a ~1 us rise time and amplitude walk ASM (section 10)
+  lidH: 0.092,                 // m, the lid's height above the ground: 32 mm body floor above the wheel bottoms + 60 mm SRC (CAD, assembly)
+  sensors: [[-0.0445, 0.056], [0.0445, 0.056], [-0.0445, -0.056], [0.0445, -0.056], [0, 0]],   // m, five cell centres on the lid, one capture channel each ASM
+  detect: 1,                   // probability a sweep pulse is detected per sensor: 1 = the cells work like BPW34s; section 10 says a series string may lose a sweep (layout unknown)
+  gate: 0.15, gain: 0.25,      // m, innovation gate; fraction applied per fix ASM
+};
