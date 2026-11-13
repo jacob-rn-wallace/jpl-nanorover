@@ -92,7 +92,7 @@ for n, (m, bb, note, _c) in LY.comps.items():
     elif n.startswith("battery"):
         add("battery", bx(*bb), area_box(*bb))
     elif n.startswith("antenna pivot"):
-        r = 20.0
+        r = LY.ANT_R
         add("antenna pivot", cyl("y", LY.ANT_X, LY.ANT_Z, r, y0, y1), area_cyl(r, y1 - y0))
     else:
         add("camera, beamsplitter and lamp", bx(*bb), area_box(*bb))
@@ -103,7 +103,7 @@ add("camera, beamsplitter and lamp", cyl("y", LY.WIN_X, LY.WIN_Z, r_win, 60.0, 7
 frustum_len = 69.0 - 46.5                                                 # lens front to the window plane
 cone = Cone(0.5, r_win, frustum_len, align=(Align.CENTER, Align.CENTER, Align.MIN)).rotate(Axis.X, -90).moved(Location((LY.WIN_X, 46.5, LY.WIN_Z)))
 add("camera, beamsplitter and lamp", cone, math.pi * (0.5 + r_win) * math.hypot(r_win - 0.5, frustum_len))     # the view: 60 degree full angle at 26 mm
-add("camera, beamsplitter and lamp", cyl("x", 57.0, LY.WIN_Z, 6.0, 28.0, 40.0), area_cyl(6.0, 12.0))   # lamp beam to the plate
+add("camera, beamsplitter and lamp", cyl("x", 57.0, LY.WIN_Z, 6.0, 28.0, LY.WIN_X), area_cyl(6.0, LY.WIN_X - 28.0))   # lamp beam to the plate
 add("antenna pivot", cyl("y", LY.ANT_X, LY.ANT_Z, 2.5, -70.0, -67.5), area_cyl(2.5, 2.5))              # shaft hole through the -y wall
 
 block = Box(140, 140, 60, align=(Align.CENTER, Align.CENTER, Align.MIN))
@@ -131,9 +131,9 @@ X, Y, Z = LY.X, LY.Y, LY.Z
 solid &= ~((Y >= 60) & ((X - LY.WIN_X) ** 2 + (Z - LY.WIN_Z) ** 2 <= r_win ** 2))
 tt = np.clip((Y - 46.5) / frustum_len, 0, 1)
 solid &= ~((Y >= 46.5) & (Y <= 69) & ((X - LY.WIN_X) ** 2 + (Z - LY.WIN_Z) ** 2 <= (0.5 + tt * (r_win - 0.5)) ** 2))
-solid &= ~((X >= 28) & (X <= 40) & ((Y - 57.0) ** 2 + (Z - LY.WIN_Z) ** 2 <= 36.0))
+solid &= ~((X >= 28) & (X <= LY.WIN_X) & ((Y - 57.0) ** 2 + (Z - LY.WIN_Z) ** 2 <= 36.0))
 solid &= ~((Y <= -67.5) & ((X - LY.ANT_X) ** 2 + (Z - LY.ANT_Z) ** 2 <= 2.5 ** 2))
-solid &= ~(((X - LY.ANT_X) ** 2 + (Z - LY.ANT_Z) ** 2 <= 400.0) & (Y >= -67.5) & (Y <= -59.5))
+solid &= ~(((X - LY.ANT_X) ** 2 + (Z - LY.ANT_Z) ** 2 <= LY.ANT_R ** 2) & (Y >= -67.5) & (Y <= -59.5))
 pad = np.pad(solid, 1, constant_values=False)
 d = distance_transform_edt(pad)[1:-1, 1:-1, 1:-1] * LY.RES
 vox = LY.vox
@@ -153,7 +153,7 @@ for g, items in groups.items():
     tot_a += a
     print(f"  {g:34s} {a:9.0f} {a * 0.1 * 1.55:15.0f} {a * 0.15 * 1.45:16.0f}")
 print(f"  {'all groups':34s} {tot_a:9.0f} {tot_a * 0.1 * 1.55:15.0f} {tot_a * 0.15 * 1.45:16.0f}")
-print(f"\nbudget for the whole body contents is 386 g; the outside shell is 113 g (woven 1.0 mm) to 164 g (forged 1.5 mm), the electronics and cells about 180 to 245 g.")
+print(f"\nbudget for the whole body contents is 386 g; the forged shell is 164 g (1.5 mm), the electronics etc {LY.elec:.0f} g and the cells {LY.CELL_MASS_G:.0f} g (IXOLAR parts, layout.py).")
 
 # which cavities come within a skin of the outside (share the outside's skin) and which are far from it
 print("\ngap from each cavity group's bounding box to the nearest outer face (mm; a gap under 2 mm means it shares the outer skin or breaches it):")

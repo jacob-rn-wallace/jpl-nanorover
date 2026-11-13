@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="560" viewBox="0 0 140.0 140.0"><rect width="140.0" height="140.0" fill="#3a3a3a"/>
+<rect x="6.50" y="71.50" width="89.00" height="67.00" fill="#0f1b3a"/>
+<text x="51.0" y="105.0" font-size="3.2" fill="#8aa" text-anchor="middle" dominant-baseline="middle">89x67</text>
+<rect x="6.50" y="1.50" width="89.00" height="67.00" fill="#0f1b3a"/>
+<text x="51.0" y="35.0" font-size="3.2" fill="#8aa" text-anchor="middle" dominant-baseline="middle">89x67</text>
+<rect x="98.50" y="96.50" width="35.00" height="42.00" fill="#0f1b3a"/>
+<text x="116.0" y="117.5" font-size="3.2" fill="#8aa" text-anchor="middle" dominant-baseline="middle">35x42</text>
+<rect x="98.50" y="51.50" width="35.00" height="42.00" fill="#0f1b3a"/>
+<text x="116.0" y="72.5" font-size="3.2" fill="#8aa" text-anchor="middle" dominant-baseline="middle">35x42</text>
+<rect x="98.50" y="26.50" width="35.00" height="22.00" fill="#0f1b3a"/>
+<text x="116.0" y="37.5" font-size="3.2" fill="#8aa" text-anchor="middle" dominant-baseline="middle">35x22</text>
+<rect x="98.50" y="1.50" width="35.00" height="22.00" fill="#0f1b3a"/>
+<text x="116.0" y="12.5" font-size="3.2" fill="#8aa" text-anchor="middle" dominant-baseline="middle">35x22</text>
+</svg>

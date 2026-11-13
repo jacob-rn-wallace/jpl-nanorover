@@ -1,10 +1,10 @@
-"""Interior layout of the body, independent of the shell material (woven plates, layup or forged carbon).
+"""Interior layout of the body. The body is FORGED carbon (owner, 2026-11-12: assumed from now on, no longer a competition with woven plates or layup).
 
 Run: .venv/bin/python hardware/body/layout.py    (needs the venv for numpy, matplotlib and hub.py's build123d import; no CAD is exported)
 
 What it does
   1. Defines the KEEP-IN volume: the 140 x 140 x 60 mm envelope pulled in 2.5 mm from every outer face (a 1.5 mm forged wall plus 1 mm of draft and
-     tolerance; a 1.0 mm plate wall fits inside it with room to spare), minus a 6 mm strip along every edge (room for the plate box's bonded keys).
+     tolerance). No edge strips: a forged body has no bonded keys at its edges (the plates route needed a 6 mm strip for them).
   2. Marks what the hub already occupies (the four STS3215 servos and the hub parts of hub.py, with 1 mm clearance) and reports the free bays.
   3. Places the remaining components as boxes (PLACEHOLDER sizes and masses, marked ASM: no parts are chosen) and checks that each lies in the
      keep-in volume, clear of the servos and hub, and clear of the others.
@@ -27,7 +27,7 @@ import hub as H  # noqa: E402
 L = 140.0
 HZ = 30.0
 OFF = 2.5                 # keep-in inset from every outer face
-STRIP = 6.0               # edge strip kept clear for bonded keys
+STRIP = 0.0               # edge strip kept clear: none for a forged body (the 6 mm strip was room for the bonded keys of the plates route)
 CLR = 1.0                 # clearance round servos and hub parts
 RES = 1.0                 # voxel size, mm
 
@@ -77,7 +77,7 @@ for side in (+1, -1):
 free = keep_in & ~occ
 
 vox = RES ** 3 / 1000.0   # cm3 per voxel
-print(f"envelope {L:.0f} x {L:.0f} x 60 mm; keep-in (inset {OFF} mm, {STRIP:.0f} mm edge strips clear) {keep_in.sum() * vox:.0f} cm3; "
+print(f"envelope {L:.0f} x {L:.0f} x 60 mm; keep-in (inset {OFF} mm, no edge strips: forged) {keep_in.sum() * vox:.0f} cm3; "
       f"servos and hub with {CLR:.0f} mm clearance take {(keep_in & occ).sum() * vox:.0f} cm3; free {free.sum() * vox:.0f} cm3")
 
 # ---------------- the bays ----------------
@@ -105,11 +105,18 @@ for n, (x0, x1, y0, y1, z0, z1) in bays.items():
 
 # ---------------- components (PLACEHOLDERS: sizes and masses are assumptions, no parts chosen) ----------------
 # Owner's decisions (2026-11-11): top and bottom faces are identical lids carrying cells; the body is kept symmetric about the transverse (z = 30) plane;
-# the camera window is centred on a 60 x 60 mm square at one end of an end face (30 mm from the top, bottom and side edges): x = +40, z = 30 on the +y face;
-# one window shared by camera and lamp through a beamsplitter; the antenna on the opposite end face at the diagonally opposite position, x = -40, z = 30 on the -y face
-# (a 180 degree turn about z carries the camera's square onto the antenna's), on a gravity-oriented pivot with a counterweight.
-WIN_X, WIN_Z = 40.0, 30.0
-ANT_X, ANT_Z = -40.0, 30.0
+# one window shared by camera and lamp through a beamsplitter; the antenna on the opposite end face at the diagonally opposite position (a 180 degree turn about z carries
+# the camera's position onto the antenna's), on a gravity-oriented pivot with a counterweight.
+# End faces (owner, 2026-11-12, hardware/body/cell_endface.py; supersedes the 60 x 60 mm square at x = +-40): no panel; along the 140 mm of the end face the hole (window, 26 mm),
+# the cell pocket (four SM940K09L standing, worst case 87.2 mm) and the face edges are separated by three EQUAL gaps, (140 - 26 - 87.2) / 3 = 8.933 mm.
+# Seen from outside the +y face the hole is on the viewer's left (+x), so the window is at x = 70 - (gap + 13) = +48.07, the antenna at x = -48.07 on the -y face, z = 30.
+END_HOLE_D = 26.0
+END_POCKET_W = 4 * 21.5 + 4 * 0.3
+END_GAP = (140.0 - END_HOLE_D - END_POCKET_W) / 3
+WIN_X, WIN_Z = 70.0 - (END_GAP + END_HOLE_D / 2), 30.0
+ANT_X, ANT_Z = -WIN_X, 30.0
+ANT_R = 19.0            # swing disc 38 mm across: with no edge strips the limit is the 2.5 mm inset, radius <= 19.43 mm at x = 48.07 (the plates route's 6 mm strip had forced 31 mm)
+END_CELL_X = 70.0 - (2 * END_GAP + END_HOLE_D + END_POCKET_W / 2)   # body x of the end pocket's centre on the +y face (-17.47); on the -y face it is +17.47
 comps = {  # name: (mass g, (x0, x1, y0, y1, z0, z1), note, optional (x, y, z) of the centre of mass if not the box centre)
     "processor board (lower lid module)":   (20.0, (-35, 35, -6, 62, 4, 11.6),      "70 x 68 x 7.6 mm placeholder, rides on the bottom lid", None),
     "power + motor-driver board (upper lid module)": (20.0, (-35, 35, -6, 62, 48.4, 56.0), "mirror of the lower board about z = 30, rides on the top lid", None),
@@ -117,17 +124,23 @@ comps = {  # name: (mass g, (x0, x1, y0, y1, z0, z1), note, optional (x, y, z) o
     "camera module":                        (12.0, (WIN_X - 12.5, WIN_X + 12.5, 36.5, 45.5, WIN_Z - 12, WIN_Z + 12), "25 x 24 x 9 mm, looking +y through the beamsplitter", None),
     "beamsplitter plate, 45 degrees":       (3.0,  (WIN_X - 10, WIN_X + 10, 47, 67, WIN_Z - 12, WIN_Z + 12), "28 x 24 x 1.5 mm glass plate at 45 degrees; box is its bounding volume. A 25 mm cube would be about 39 g (my estimate)", None),
     "lamp (LED and lens), shines +x onto the plate": (5.0, (14, 28, 51, 63, WIN_Z - 6, WIN_Z + 6), "on the body-centre side of the plate, which reflects it toward +y and out of the window", None),
-    "antenna pivot: bearing, rotary RF joint, counterweight disc": (10.0, (ANT_X - 20, ANT_X + 20, -67.5, -59.5, ANT_Z - 20, ANT_Z + 20), "swing disc 40 mm across, 8 mm deep, behind the -y wall; 2 mm clear of servo A", None),
+    "antenna pivot: bearing, rotary RF joint, counterweight disc": (10.0, (ANT_X - ANT_R, ANT_X + ANT_R, -67.5, -59.5, ANT_Z - ANT_R, ANT_Z + ANT_R), "swing disc 38 mm across, 8 mm deep, behind the -y wall; clear of servo A", None),
 }
 OUT_COMPS = {  # outside the envelope, counted for mass and balance only
     "antenna whip, bend and stub (outside the -y face)": (3.0, (ANT_X, -76.0, ANT_Z)),
 }
 extra_mass = {"wiring, connectors, board-to-board links": (15.0, (0.0, 0.0, HZ))}
-# cells: owner's rule = top and bottom (identical), plus both end faces; none on the hub faces (the struts are there)
-FACE_TB = 10 * (39.6 * 23.5) / 100 + 4 * (19.6 * 44.0) / 100       # cm2: black unit's top face layout (photo-measurements.md)
-FACE_END = 3 * (23.5 * 39.6) / 100                                  # cm2: three cells standing in the 80 x 60 mm beside the window or antenna square
+# cells (owner, 2026-11-12): Anysolar IXOLAR SolarMD parts; top and bottom faces identical (6 x SM940K09L 44.5 x 21.5, 2 x SM401K08TF 90 x 40, 1 x SM531K08TFS 89 x 52 in one pocket),
+# both end faces 4 x SM940K09L standing; none on the hub faces (the struts are there). Masses: SM940K09L 3.3 g and SM531K08TFS 9.4 g from their datasheets (Rev. 2025/2026,
+# preliminary), SM401K08TF scaled by area from the SM531 (not read). See docs/body-redesign.md and cell_pocket.py, cell_endface.py.
+SM940_G, SM531_G, SM401_G = 3.3, 9.4, 9.4 * 40 / 52
+FACE_TB = (6 * 44.5 * 21.5 + 89 * 52 + 2 * 90 * 40) / 100          # cm2: 175.7
+FACE_END = 4 * 44.5 * 21.5 / 100                                    # cm2: 38.3
+CELL_MASS_TB = 6 * SM940_G + SM531_G + 2 * SM401_G                  # g per top or bottom face
+CELL_MASS_END = 4 * SM940_G                                         # g per end face
 CELL_AREA_CM2 = 2 * FACE_TB + 2 * FACE_END
-CELL_G_PER_CM2 = (0.15, 0.25, 0.35)                                # ASM: no cell chosen
+CELL_MASS_G = 2 * CELL_MASS_TB + 2 * CELL_MASS_END
+CELL_G_PER_CM2 = (CELL_MASS_G / CELL_AREA_CM2,)                     # one effective value now that parts are chosen (about 0.26 g/cm2)
 
 print("\nplacement checks (box inside the keep-in volume, clear of servos and hub, clear of each other):")
 ok_all = True
@@ -150,11 +163,12 @@ for i in range(len(names)):
 print("  all placements clear" if ok_all else "  PROBLEMS above")
 used = sum(m.sum() for m in placed.values()) * vox
 print(f"  placed components take {used:.0f} cm3 of the {free.sum() * vox:.0f} cm3 free ({used / (free.sum() * vox):.0%})")
-print(f"  cells: top and bottom {FACE_TB:.1f} cm2 each, end faces {FACE_END:.1f} cm2 each, total {CELL_AREA_CM2:.0f} cm2")
+print(f"  cells: top and bottom {FACE_TB:.1f} cm2 each ({CELL_MASS_TB:.1f} g), end faces {FACE_END:.1f} cm2 each ({CELL_MASS_END:.1f} g), total {CELL_AREA_CM2:.0f} cm2, {CELL_MASS_G:.0f} g")
+print(f"  window at x = {WIN_X:+.2f}, antenna at x = {ANT_X:+.2f} (end gaps {END_GAP:.3f} mm), antenna disc {2 * ANT_R:.0f} mm")
 
 # ---------------- mass and centre of mass ----------------
 print("\nmass of the body contents (grams) against the 386 g left of 1.0 kg:")
-SHELL = {"woven plates, 1.0 mm": 113.0 + 28.0, "forged, 1.5 mm": 164.0}      # budget table in docs/body-redesign.md (plates plus about 28 g of keys and adhesive)
+SHELL = {"forged, 1.5 mm": 164.0}                                              # forged shell, budget table in docs/body-redesign.md (the plates option, 141 g with keys, is dropped)
 ALLOW = 4 * 6.0 + 4 * 2.0                                                      # bore rings, screws and inserts
 SEAL = 15.0
 elec = sum(m for m, _, _, _ in comps.values()) + sum(m for m, _ in OUT_COMPS.values()) + extra_mass["wiring, connectors, board-to-board links"][0]
@@ -165,12 +179,11 @@ for shell_name, shell_g in SHELL.items():
         print(f"  {shell_name:22s} cells {cg:.2f} g/cm2 ({cells:3.0f} g): shell {shell_g:3.0f} + rings/screws {ALLOW:2.0f} + seal {SEAL:.0f} + electronics etc {elec:3.0f} + cells {cells:3.0f} = {total:4.0f} g  ({'over by' if total > 386 else 'under by'} {abs(total - 386):.0f} g)")
 
 lumps = []   # (mass, x, y, z)
-shell_g = SHELL["woven plates, 1.0 mm"]
-cells_g = CELL_AREA_CM2 * CELL_G_PER_CM2[1]
-# cells: top and bottom equal and opposite in z; end cells sit in the x ranges not taken by the window or the antenna
-cell_each = lambda a: a * CELL_G_PER_CM2[1]
-lumps += [(cell_each(FACE_TB), 0.0, 0.0, 60.0), (cell_each(FACE_TB), 0.0, 0.0, 0.0),
-          (cell_each(FACE_END), -30.0, 70.0, HZ), (cell_each(FACE_END), 30.0, -70.0, HZ)]      # front cells at x -67..7, back cells at x -7..67 (centroids about -30 and +30)
+shell_g = SHELL["forged, 1.5 mm"]
+cells_g = CELL_MASS_G
+# cells: top and bottom equal and opposite in z; the end pockets sit on the side away from the window or antenna (centres at x = -17.47 on +y and +17.47 on -y)
+lumps += [(CELL_MASS_TB, 0.0, 0.0, 60.0), (CELL_MASS_TB, 0.0, 0.0, 0.0),
+          (CELL_MASS_END, END_CELL_X, 70.0, HZ), (CELL_MASS_END, -END_CELL_X, -70.0, HZ)]
 lumps += [(shell_g + ALLOW + SEAL, 0.0, 0.0, HZ), (extra_mass["wiring, connectors, board-to-board links"][0], 0.0, 0.0, HZ)]
 for n, (m, (x0, x1, y0, y1, z0, z1), _, c) in comps.items():
     lumps.append((m, *(c if c else ((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2))))
@@ -182,7 +195,7 @@ for (tag, side), s_ in servos.items():
 lumps.append((74.0, 0.0, -5.0, HZ))
 M = sum(l[0] for l in lumps)
 cx, cy, cz = (sum(l[0] * l[k] for l in lumps) / M for k in (1, 2, 3))
-print(f"\nbody contents + servos + hub (plates, mid cells): {M:.0f} g, centre of mass x = {cx:+.1f}, y = {cy:+.1f}, z = {cz:.1f} mm (hub axis at x = 0, y = 0, z = 30)")
+print(f"\nbody contents + servos + hub (forged shell, IXOLAR cells): {M:.0f} g, centre of mass x = {cx:+.1f}, y = {cy:+.1f}, z = {cz:.1f} mm (hub axis at x = 0, y = 0, z = 30)")
 top = sum(l[0] for l in lumps if l[3] > HZ + 0.01); bot = sum(l[0] for l in lumps if l[3] < HZ - 0.01)
 print(f"mass above z = 30: {top:.0f} g, below: {bot:.0f} g (a transverse-plane-symmetric body has these equal; the camera, antenna and battery sit on the plane)")
 # struts, wheels and supports: add their roughly symmetric lumps (320 g) to get the whole-rover y
@@ -216,8 +229,8 @@ try:
         a.set_xlim(-76, 76); a.set_ylim((-4, 64) if ib == 2 else (-84, 88)); a.set_aspect("equal")
         a.set_xlabel(xl); a.set_ylabel(yl); a.set_title(title, fontsize=9.5)
     draw(ax[0], 0, 1, "x (mm); +x is the page's right", "y (mm); the camera window is at +y (top), the antenna at -y", "Top view: servos grey, components coloured; dashed = keep-in inset")
-    ax[0].plot([WIN_X], [70], "ks", ms=7, mfc="none"); ax[0].annotate("camera window\n(x=+40)", (WIN_X, 70), (WIN_X - 4, 77), fontsize=7, ha="center")
-    ax[0].plot([ANT_X], [-70], "k^", ms=7, mfc="none"); ax[0].annotate("antenna pivot\n(x=-40)", (ANT_X, -70), (ANT_X + 5, -79), fontsize=7, ha="center")
+    ax[0].plot([WIN_X], [70], "ks", ms=7, mfc="none"); ax[0].annotate(f"camera window\n(x={WIN_X:+.1f})", (WIN_X, 70), (WIN_X - 4, 77), fontsize=7, ha="center")
+    ax[0].plot([ANT_X], [-70], "k^", ms=7, mfc="none"); ax[0].annotate(f"antenna pivot\n(x={ANT_X:+.1f})", (ANT_X, -70), (ANT_X + 5, -79), fontsize=7, ha="center")
     ax[0].legend(fontsize=6.5, loc="upper center", bbox_to_anchor=(0.5, -0.1), ncol=2)
     draw(ax[1], 1, 2, "y (mm); +y (camera end) to the right", "z (mm)", "Side view from +x: hub axis (red +) at y = 0, z = 30; boards mirror about z = 30")
     ax[1].set_xlim(-82, 76)

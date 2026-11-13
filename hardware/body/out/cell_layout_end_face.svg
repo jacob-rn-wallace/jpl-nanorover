@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="240" viewBox="0 0 140 60">
+<rect width="140" height="60" fill="#3a3a3a"/>
+<rect x="2.00" y="2.00" width="38.00" height="56.00" fill="#0f1b3a"/>
+<text x="21.0" y="30.0" font-size="4" fill="#8aa" text-anchor="middle" dominant-baseline="middle">38x56</text>
+<rect x="42.00" y="2.00" width="38.00" height="56.00" fill="#0f1b3a"/>
+<text x="61.0" y="30.0" font-size="4" fill="#8aa" text-anchor="middle" dominant-baseline="middle">38x56</text>
+<rect x="82.00" y="2.00" width="56.00" height="56.00" fill="#555"/>
+<text x="110.0" y="30.0" font-size="4" fill="#ddd" text-anchor="middle" dominant-baseline="middle">window panel</text>
+</svg>
