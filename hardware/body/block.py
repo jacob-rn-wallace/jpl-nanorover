@@ -106,10 +106,8 @@ add("camera, beamsplitter and lamp", cyl("x", 57.0, LY.WIN_Z, 6.0, 28.0, LY.WIN_
 w = (LY.ANT_X - LY.ANT_WIN_HALF, LY.ANT_X + LY.ANT_WIN_HALF, -70.0, -67.5, LY.ANT_Z - LY.ANT_WIN_HALF, LY.ANT_Z + LY.ANT_WIN_HALF)
 add("comms antenna", bx(*w), area_box(*w))   # 27 mm square RF-transparent window through the -y wall, flush with the face
 
-# the window is a stadium: the 26 mm circle plus an extension upward (the ranging sensor sits in it, behind the same cover glass)
-add("ranging sensor", cyl("y", LY.WIN_X, LY.WIN_Z + LY.WIN_EXT, r_win, 60.0, 70.0), area_cyl(r_win, 10.0))
-w = (LY.WIN_X - r_win, LY.WIN_X + r_win, 60.0, 70.0, LY.WIN_Z, LY.WIN_Z + LY.WIN_EXT)
-add("ranging sensor", bx(*w), area_box(*w))
+# the through-wall opening for the shared cover glass is a circle of radius WIN_R_GLASS on the same centre (the ranging sensor sits in its ring)
+add("ranging sensor", cyl("y", LY.WIN_X, LY.WIN_Z, LY.WIN_R_GLASS, 60.0, 70.0), area_cyl(LY.WIN_R_GLASS, 10.0))
 
 block = Box(140, 140, 60, align=(Align.CENTER, Align.CENTER, Align.MIN))
 volume_block = block.volume
@@ -137,8 +135,7 @@ solid &= ~((Y >= 60) & ((X - LY.WIN_X) ** 2 + (Z - LY.WIN_Z) ** 2 <= r_win ** 2)
 tt = np.clip((Y - 46.5) / frustum_len, 0, 1)
 solid &= ~((Y >= 46.5) & (Y <= 69) & ((X - LY.WIN_X) ** 2 + (Z - LY.WIN_Z) ** 2 <= (0.5 + tt * (r_win - 0.5)) ** 2))
 solid &= ~((X >= 28) & (X <= LY.WIN_X) & ((Y - 57.0) ** 2 + (Z - LY.WIN_Z) ** 2 <= 36.0))
-solid &= ~((Y >= 60) & ((X - LY.WIN_X) ** 2 + (Z - LY.WIN_Z - LY.WIN_EXT) ** 2 <= r_win ** 2))
-solid &= ~((Y >= 60) & (np.abs(X - LY.WIN_X) <= r_win) & (Z >= LY.WIN_Z) & (Z <= LY.WIN_Z + LY.WIN_EXT))
+solid &= ~((Y >= 60) & ((X - LY.WIN_X) ** 2 + (Z - LY.WIN_Z) ** 2 <= LY.WIN_R_GLASS ** 2))
 solid &= ~((Y <= -67.5) & (np.abs(X - LY.ANT_X) <= LY.ANT_WIN_HALF) & (np.abs(Z - LY.ANT_Z) <= LY.ANT_WIN_HALF))
 pad = np.pad(solid, 1, constant_values=False)
 d = distance_transform_edt(pad)[1:-1, 1:-1, 1:-1] * LY.RES
