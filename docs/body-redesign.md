@@ -434,7 +434,7 @@ Surplus of one lit face (W): in full sun A +2.55, B +2.45, **C +1.30, D -0.34, E
 
 ## Antennas, 2026-11-13 (owner; supersedes the gravity-oriented whip, its counterweight and the 38 mm swing disc in the sections above)
 
-No whip, no pendulum and no counterweight. The -y end face keeps the 26 mm circle at x = -48.07, z = 30, now an RF-transparent window with a 2.4 GHz patch behind it; GNSS uses one patch per lid in a 25 mm cell-free window plus a receiver module on the plane z = 30. `layout.py` and `block.py` are updated (10 placements clear, 38 cavities, 859 cm3 left); the body contents are 437 g against 386 g (over by 51 g, the GNSS patches at an assumed 8 g each). Rationale, open items (the cell layout has no window for the lid patches, a second comms patch, RF unsimulated) and numbers: `docs/positioning.md`, section 6. The earlier sections' antenna details (the pendulum, the rotary joint, the swing disc and its edge-strip limit) are historical.
+No whip, no pendulum and no counterweight. The -y end face keeps the 26 mm circle at x = -48.07, z = 30, now an RF-transparent window with a 2.4 GHz patch behind it. (GNSS patches, receiver and lid windows were added and then removed the same day; `docs/positioning.md`, section 12.) `layout.py` and `block.py` are current: 7 placements clear, 33 cavities, 871 cm3 left; the body contents are 416 g against 386 g (over by 30 g). Rationale, open items (the cell layout has no window for the lid patches, a second comms patch, RF unsimulated) and numbers: `docs/positioning.md`, section 6. The earlier sections' antenna details (the pendulum, the rotary joint, the swing disc and its edge-strip limit) are historical.
 
 ## Open decisions (owner)
 1. **Woven laminate or forged carbon** (revised recommendation: woven plates bonded into a box, for the crisp edges), and the manufacturing route (a mould from a printed plug, CNC-cut plate bonded into a box, or a bought moulded part).
@@ -445,3 +445,8 @@ No whip, no pendulum and no counterweight. The -y end face keeps the 26 mm circl
 1. Choose between woven and forged, and the route.
 2. A parametric CAD shell (`hardware/body/`) at 140 x 140 x 60 mm with the hub bores, servo clearance from `hub.py`, a lid flange and a window, and a mass check against the budget above.
 3. Place the electronics, cells and camera, and check the centre of mass.
+
+
+## Comms window, 2026-11-13 (owner): a flush 27 mm square
+
+The -y end face's window for the 2.4 GHz patch is now a 27 mm square, flush with the face, with the Taoglas WPC.25A.07.0150C (25 x 25 x 5.5 mm, its own ground board) directly behind it (`docs/electronics-concept.md`, last two sections). `layout.py` and `block.py` rerun: 7 placements clear, 33 cavities, 871 cm3 left, the STEP re-imports as one solid; body contents 421 g against 386 g (over by 35 g, with an assumed 9 g patch). The camera window on the +y face stays a 26 mm circle.
