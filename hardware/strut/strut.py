@@ -63,6 +63,11 @@ BARREL_OD, BRG_OD, BRG_ID, BRG_W = 11.0, 8.0, 3.0, 4.0
 TUBE_END = 116.25                      # |x| of the outer face of the cap (the same for both struts)
 BRG_X = (116.25, 120.25)               # |x| of the inboard face of each bearing: side by side, no spacer (centres 118.25 and 122.25)
 BARREL_END = 124.5                     # |x| where the barrel ends (the wheel's apex boss starts at 125.05)
+# Tip clamp (docs/mechanical-spec.md item 2, hand check hardware/strut/pivot_checks.py): the 3 mm plate alone is too short a clamp (a 0.1 mm slip fit tilts the tube 1.9 degrees),
+# so the tip boss gets a COLLAR_IN mm collar on its inboard side (toward the body wall at |x| = 70), the tube starts as far inboard, a 0.6 mm slit runs from the bore through the
+# tip's outer wall, and an M2 clamp screw crosses the slit (2.0 mm hole, 3.9 mm counterbore for the head on the +y side in the strut's local frame).
+COLLAR_IN, SLIT_W = 4.0, 0.6
+SCREW_X = TIP_D / 2 - 1.2                 # local x offset of the screw axis from the tip centre, in the 2.45 mm wall between the bore and the outer edge
 COUPLER_D, COUPLER_L = 8.0, 7.5        # ASSUMED small flexible 3 mm coupling, 0.5 mm from the motor's front face and 0.5 mm short of the cap (tight: real couplings are usually longer)
 # Each strut's support starts flush with the inboard face of ITS OWN plate (A: 77.25, B: 81.25), so nothing sticks out behind the plate.
 # --------------------------------------------
@@ -140,6 +145,9 @@ def strut(boss_range, plate_range, wheel_inner, direction):
         arm = arm - pockets          # pockets start at z = 0 on the plate's inboard face (local frame, before on_axle)
     arm = on_axle(arm, plate_range[0])
     s = boss + arm
+    if TIP_MODE != "axle":
+        collar = Cylinder(TIP_D / 2, COLLAR_IN, align=(Align.CENTER, Align.CENTER, Align.MIN)).moved(Location((STRUT_L, 0, 0)))
+        s = s + on_axle(collar, plate_range[0] - COLLAR_IN)
     if TIP_MODE == "axle":
         tip_axle = Cylinder(AXLE_D / 2, WHEEL_X[1] + COLLAR_L - plate_range[1], align=(Align.CENTER, Align.CENTER, Align.MIN)).moved(
             Location((STRUT_L, 0, 0)))
@@ -147,6 +155,14 @@ def strut(boss_range, plate_range, wheel_inner, direction):
     else:   # a round bore through the tip boss and plate for the spindle tube (0.05 mm radial clearance, filled with thermal paste or adhesive)
         bore = Cylinder((SPINDLE_OD + 0.1) / 2, 30, align=(Align.CENTER, Align.CENTER, Align.MIN)).moved(Location((STRUT_L, 0, 0)))
         s = s - on_axle(bore, plate_range[0] - 5)
+    if TIP_MODE != "axle":   # the clamp slit (from the bore through the tip's outer wall along +x) and the M2 screw across it
+        zlen = t_plate + COLLAR_IN + 2.0
+        slit = Box(TIP_D / 2 + 1.0, SLIT_W, zlen, align=(Align.MIN, Align.CENTER, Align.MIN)).moved(Location((STRUT_L + 0.5, 0, 0)))
+        s = s - on_axle(slit, plate_range[0] - COLLAR_IN - 1.0)
+        zc = (t_plate - COLLAR_IN) / 2.0                                            # the middle of the plate plus collar, local z from -COLLAR_IN to t_plate
+        hole = Cylinder(1.0, TIP_D, align=(Align.CENTER, Align.CENTER, Align.CENTER)).rotate(Axis.X, 90)
+        cbore = Cylinder(1.95, 5.0, align=(Align.CENTER, Align.CENTER, Align.MIN)).rotate(Axis.X, -90).moved(Location((0, 2.7, 0)))
+        s = s - on_axle((hole + cbore).moved(Location((STRUT_L + SCREW_X, 0, zc))), plate_range[0])
     bore_d = BORE_D if HUB_MODE == "stud" else (15.05 if boss_range == A_BOSS else 5.05)
     s = s - on_axle(Cylinder(bore_d / 2, 20, align=(Align.CENTER, Align.CENTER, Align.MIN)), boss_range[0] - 1)
     s = s.moved(Location((0, 0, E.HUB_Z)))
@@ -186,7 +202,7 @@ def tail_for(direction):
 
 def spindle(direction, tail=None):
     """Spindle tube, end cap and bearing barrel (one aluminium part): tube OD 19 / ID 16.2 from the strut plate's inboard face to the cap, then the 11 mm barrel with an 8 mm bearing bore."""
-    tail = tail_for(direction) if tail is None else tail
+    tail = tail_for(direction) - COLLAR_IN if tail is None else tail
     tube = _cyl(SPINDLE_OD / 2, SPINDLE_ID / 2, tail, TUBE_END - CAP_T)
     cap = _cyl(SPINDLE_OD / 2, 2.5, TUBE_END - CAP_T, TUBE_END)                 # end wall with a 5 mm hole for the shaft
     barrel = _cyl(BARREL_OD / 2, BRG_OD / 2, TUBE_END, BARREL_END)

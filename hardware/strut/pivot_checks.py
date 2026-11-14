@@ -9,14 +9,16 @@ import math
 TIP_D, TUBE_OD, TUBE_ID, PLATE_T = 24.0, 19.0, 16.2, 3.0          # SRC strut.py
 BORE = 19.1                                                          # SRC (bore on the 19 mm tube: 0.1 mm slip fit)
 wall = (TIP_D - BORE) / 2
-print(f"tip wall round the bore: {wall:.2f} mm; clamp length = plate thickness {PLATE_T} mm")
+COLLAR_IN = 4.0                                                      # SRC strut.py (2026-11-14): the tip boss gets a 4 mm collar on its inboard side
+print(f"tip wall round the bore: {wall:.2f} mm; clamp length: plate {PLATE_T} mm alone, {PLATE_T + COLLAR_IN} mm with the collar")
 # loads on the wheel support (docs/strut-spec.md: 9 N bearing load static, 53 N in a 6x bump; the bearing pair's centre is about 40 mm outboard of the plate's inboard face, from strut.py)
 LEVER = 118.25 - 77.25                                               # mm, bearing-pair centre (|x| 118.25) to strut A's plate inboard face (77.25), SRC strut.py
-for name, f in (("static (9 N)", 9.0), ("6x bump (53 N)", 53.0)):
-    m = f * LEVER / 1000                                             # N.m at the clamp
-    couple = m / (PLATE_T / 1000)                                    # N: the two edge forces of the bore that resist the moment
-    area = BORE * 1.0                                                # mm2 ASM: an edge contact strip of 1 mm along the tube on each edge of the bore
-    print(f"  {name:16s} moment {m:.2f} N.m, bore edge force {couple:.0f} N, edge pressure {couple / area:.0f} MPa (6061-T6 yield about 275, ASM)")
+for L_CL, lab in ((PLATE_T, "plate only"), (PLATE_T + COLLAR_IN, "with collar")):
+    for name, f in (("static (9 N)", 9.0), ("6x bump (53 N)", 53.0)):
+        m = f * (LEVER + (COLLAR_IN if L_CL > PLATE_T else 0) / 2) / 1000      # N.m at the clamp (the lever is measured from the plate's inboard face; the collar moves the clamp's centre inboard by half its length)
+        couple = m / (L_CL / 1000)                                   # N: the two edge forces of the bore that resist the moment
+        area = BORE * 1.0                                            # mm2 ASM: an edge contact strip of 1 mm along the tube on each edge of the bore
+        print(f"  {lab:12s} {name:16s} moment {m:.2f} N.m, bore edge force {couple:.0f} N, edge pressure {couple / area:.0f} MPa (6061-T6 yield about 275, ASM); unclamped 0.1 mm slip fit tilts {math.degrees(0.1 / L_CL):.1f} degrees")
 I = math.pi / 64 * (TUBE_OD ** 4 - TUBE_ID ** 4)
 print(f"  tube bending at the clamp (6x bump): {53.0 * LEVER * (TUBE_OD / 2) / I:.1f} MPa; tube I = {I:.0f} mm4 (wall {(TUBE_OD - TUBE_ID) / 2:.1f} mm)")
 # motor reaction torque the clamp friction must hold: the #3068's stall torque 0.31 N.m (Pololu: 3.2 kg.cm at 6 V, 1.5 A), a worst case
@@ -24,7 +26,7 @@ T = 0.314
 for mu in (0.2, 0.5):
     p = T / (mu * 2 * math.pi * (BORE / 2000) ** 2 * (PLATE_T / 1000))
     print(f"  stall reaction {T} N.m with mu = {mu}: bore pressure needed {p / 1e6:.2f} MPa, hoop stress in the tip wall {p * (BORE / 2) / wall / 1e6:.1f} MPa")
-print("  -> strength is not the problem. The 3 mm clamp length is: a tilt of the tube of clearance / 3 mm (0.1 mm slip fit: 1.9 degrees if unclamped).")
+print("  -> strength is not the problem; the 3 mm clamp length was (tilt of clearance / length), hence the 4 mm collar on the inboard side of each tip (strut.py COLLAR_IN).")
 print("     Fix: a tight fit plus retaining compound, and the M2 clamp screw needs an ear at the slit (a 2.45 mm wall cannot carry a screw head and thread).")
 
 # ---- 2. cable round the hub boss: length to wrap and unwrap (strut.py: BOSS_D 30) ----
