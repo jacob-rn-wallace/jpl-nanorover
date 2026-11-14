@@ -54,8 +54,8 @@ def joint_features():
     # lid platform's side face (|x| = 37), where four spring contacts press horizontally on four pads on that face; the lid lifts straight off and the contacts part. The bottom lid's mirror.
     for zc in (49.0, 60 - 49.0):
         for sx in (1, -1):
-            holes.append(Box(18.5, 3.2, 3.2).moved(Location((sx * (43.0 + 18.5 / 2), 0, zc))))                              # the channel, |x| 43 to 61.5 (it overlaps the wall hole's inner end at 60)
-            L = PL["+" if sx > 0 else "-"]; holes.append(Box(6.0, L, 3.2).moved(Location((sx * (37.0 + 3.0), -5.0 + L / 2, zc))))        # the connector pocket for the side's spring contacts (harness.py), |x| 37 to 43, y from -5 along the platform's face
+            holes.append(Box(18.5, 3.2, 3.2).moved(Location((sx * (43.0 + 18.5 / 2), 0, zc))))                              # the channel, |x| 43 to 61.5 (it overlaps the wall hole's inner end at 60 and now the pocket's last 6 mm, |x| 43 to 49)
+            L = PL["+" if sx > 0 else "-"]; holes.append(Box(12.0, L, 3.2).moved(Location((sx * (37.0 + 6.0), -5.0 + L / 2, zc))))        # the connector pocket for the side's spring contacts (harness.py), |x| 37 to 49 (12 mm: Mill-Max 854 horizontal strip, contact_fit.py; it was 6 mm), y from -5 along the platform's face
     grooves = []
     for z0 in (60 - D_RIM - 0.8, D_RIM):
         grooves.append(box(-67, 67, -67, 67, z0, z0 + 0.8) - box(-65, 65, -65, 65, z0 - 0.1, z0 + 0.9))

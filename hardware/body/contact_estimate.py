@@ -5,7 +5,7 @@ Method of 2026-11-14 (CLAUDE.md): no bench test, so bound it by arithmetic. Inpu
   contact resistance per spring contact incl. its pad: 10 to 40 mOhm new (a typical figure for gold-plated spring contacts, remembered, to confirm in the datasheet), times 2.5 when aged (wear, dust,
   oxide: the lids come off for service) -> 10 to 100 mOhm over the contact's life;
   pack side peak current 3.5 A at 3.0 V cell voltage (SRC: hardware-spec section 3: 7.4 V x 1.2 A with 85% efficiency); 7.4 V rail: 1.2 A design, 2.0 A worst (ASM, with the wheels in use);
-  rating per contact: 2 A continuous (the ultra-low-profile Mill-Max 815/817 series, search listing; the 0.050 in series quotes 7 A at a 30 C rise: both to confirm).
+  rating per contact: 2 A continuous, 3 A peak, 20 mOhm max (SRC: Mill-Max series 854 datasheet, the chosen part, `contact_fit.py`; confirmed 2026-11-14, replacing the 815/817 and 7 A figures from search listings).
 Criteria I set: total path drop at most 3% of the node voltage, at most 1 A per contact, at most 50 mW per contact.
 """
 R_LO, R_HI = 0.010, 0.100          # ohm per contact over life

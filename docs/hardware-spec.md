@@ -152,3 +152,8 @@ Read from the datasheets themselves (downloaded and read as text): DRV8837/DRV88
 8. Optional: the Lighthouse receiver amplifier (needs the SM940K09L cell layout from Anysolar, `docs/positioning.md`).
 
 - Mechanical details (wheel fixing, tube clamp, coupling, seals, hub adapters, wire passage, strut stops, lid joint): `docs/mechanical-spec.md` (2026-11-13).
+
+## Lid-joint contacts (chosen 2026-11-14)
+
+**Mill-Max series 854, .050 in pitch horizontal SMT spring-loaded strips with mounting pegs: 854-22-017-40-601101 (+ side, 17 contacts) and 854-22-018-40-601101 (- side, 18 contacts), one of each per lid pocket.** Source: Mill-Max PR661 and datasheet page 18.2 (private repo, `datasheets/`). Verified: the piston moves parallel to the board; 2 A continuous and 3 A peak per contact; contact resistance 20 mOhm max; spring force 25 g at the initial height and 60 g at mid stroke; stroke 0.7 mm mid, 1.4 mm max; 1,000,000 cycles; gold over nickel; 2.21 mm profile on the board, piston centre 1.10 mm above it; 10.9 mm from piston tip to tail end; standard stock of 2 to 20 positions. Fit and forces: `hardware/body/contact_fit.py`; pocket now 12 mm deep (`lid_cad.py`); the board under the strip must be 0.8 mm or thinner; the two sides' 10 N pushes cancel; up to 6 N of friction on lid removal (ESTIMATE). Pad plating (hard gold, 30 microinch) is my assumption, from standard edge-finger practice. Not checked: distributor stock and price, whether 17 and 18 positions are stocked parts or need a request (the datasheet says 2 to 20 are standard).
+
