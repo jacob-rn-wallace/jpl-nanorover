@@ -9,6 +9,7 @@ Findings it prints:
   * the package has 33 I/O pins (no RB6 on 44-pin parts), 31 after the ICSP pair;
   * which configurations (UART roles, I2C port, camera link, crystal or not) have a perfect
     assignment, and the one recommended.
+Configuration bits the plan needs (see docs/hardware-spec.md section 6): FVBUSONIO=0, FUSBIDIO=0, IOL1WAY=0, JTAGEN=0, ICESEL=00; VUSB3V3 to VDD; VBUS to VSS through 10 k.
 Not checked here: 5 V tolerance (shading is not in the PDF text), pin electrical limits.
 """
 import itertools
