@@ -47,6 +47,12 @@ def joint_features():
                 cbore = Cylinder(6.7, 2.1).rotate(Axis.Y, 90).moved(Location((sx * 69.05, y0, zc)))                        # the counterbore for the cam's flange and its gasket, x 68 to 70.1
                 hole = Cylinder(1.7, abs(zear - zc)).moved(Location((sx * 60.0, y0, (zear + zc) / 2)))                      # the catch's hole up to the ear pocket
                 holes += [bore, cbore, hole]
+    # strut motor wiring inside the body (docs/mechanical-spec.md item 6): from the wall hole's inner end (|x| = 60, y = 0, z = 49) a 3.2 mm square channel runs inboard to a connector pocket against the
+    # lid platform's side face (|x| = 37), where four spring contacts press horizontally on four pads on that face; the lid lifts straight off and the contacts part. The bottom lid's mirror.
+    for zc in (49.0, 60 - 49.0):
+        for sx in (1, -1):
+            holes.append(Box(18.5, 3.2, 3.2).moved(Location((sx * (43.0 + 18.5 / 2), 0, zc))))                              # the channel, |x| 43 to 61.5 (it overlaps the wall hole's inner end at 60)
+            holes.append(Box(6.0, 7.0, 3.2).moved(Location((sx * (37.0 + 3.0), 0, zc))))                                     # the connector pocket for four contacts at 1.5 mm pitch (+ margin), |x| 37 to 43
     grooves = []
     for z0 in (60 - D_RIM - 0.8, D_RIM):
         grooves.append(box(-67, 67, -67, 67, z0, z0 + 0.8) - box(-65, 65, -65, 65, z0 - 0.1, z0 + 0.9))
