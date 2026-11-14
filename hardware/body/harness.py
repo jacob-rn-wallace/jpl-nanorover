@@ -6,6 +6,7 @@ Partition (my recommendation, 2026-11-14; changes layout.py's board names): the 
 and the servo-bus buffer; the POWER board (upper lid) carries the cell protection, charger, solar inputs and the 7.4 V boost. Why the drivers go with the processor: the back-EMF counting reads
 each motor's terminal voltage at the driver's coast gaps, so the analogue sense lines stay on one board instead of crossing a connector, and the eight IN1/IN2 control lines do too (they would be
 the bulk of the crossing). The price: the strut motors' wires enter the body at the BOTTOM lid (the wall hole is at z = 11, 19 mm below the hub axis; it was z = 49).
+(2026-11-14, later: the camera is an SPI module with a frame buffer, so four lines cross to the camera end; the XBee reset line and the IMU interrupt are dropped for pins, `pin_table.py`.)
 Between the boards only power and four slow signals cross, and they cross through the body's own wiring: each lid's contacts press on the lid's platform side face, the body wires join the two lids' pockets.
 Contacts: Mill-Max 0.050 in (1.27 mm) pitch spring-loaded contacts are the candidate family (search result, [Mill-Max](https://www.mouser.in/new/mill-max/mill-max-050-pitch-spring-loaded-contacts): 1.02 mm full stroke, 7 A at a 30 C rise
 for the high-current type; 2 A continuous for the ultra-low-profile 815/817 series); mounted on a small stand-up strip so the pins point sideways. To confirm in the datasheets. Rule used here: one contact per signal net; power nets get the counts that `contact_estimate.py` finds (VBAT and ground at the battery 6 each, the 7.4 V rail 3, the 3.3 V converter's VBAT 2), none shared.
@@ -14,9 +15,9 @@ PITCH = 1.27          # mm between contact centres (ASM: the standard 0.050 in p
 MARGIN = 1.5          # mm from the pocket's ends to the first and last contact centres
 # net -> number of contacts; one dictionary per (lid, side). Side + is the camera end's side (x = +), side - the antenna end's.
 LOWER = {
-    "+": {"wheel motor wires (2 motors x 2)": 4, "camera TX": 1, "camera RX": 1, "ranging+IMU SDA": 1, "ranging SCL": 1, "ranging INT": 1, "LED enable": 1, "3V3 to camera end": 1, "GND camera end": 1,
+    "+": {"wheel motor wires (2 motors x 2)": 4, "camera SCK": 1, "camera MOSI": 1, "camera MISO": 1, "camera CS": 1, "ranging+IMU SDA": 1, "ranging SCL": 1, "ranging INT": 1, "LED enable": 1, "3V3 to camera end": 1, "GND camera end": 1,
           "boost enable": 1, "charger status": 1, "battery current sense": 1},
-    "-": {"wheel motor wires (2 motors x 2)": 4, "XBee TX": 1, "XBee RX": 1, "XBee sleep": 1, "XBee reset": 1, "3V3 to antenna end": 1, "GND antenna end": 1, "servo bus data": 1,
+    "-": {"wheel motor wires (2 motors x 2)": 4, "XBee TX": 1, "XBee RX": 1, "XBee sleep": 1, "3V3 to antenna end": 1, "GND antenna end": 1, "servo bus data": 1,
           "VBAT in": 2, "V7.4 in (wheel drivers)": 3, "GND power return": 3},
 }
 UPPER = {
