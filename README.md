@@ -40,11 +40,13 @@ Every figure is marked with how well it is sourced, and conflicting figures are 
 ```
 python3 -m venv .venv
 .venv/bin/pip install -r hardware/requirements.txt
-.venv/bin/python hardware/body/body.py        # then strut/strut.py, wheel/wheel.py, assembly/rover.py
+.venv/bin/python hardware/body/body.py        # then hub/hub.py, strut/strut.py, wheel/wheel.py, assembly/rover.py (the older Hammond-box assembly)
+.venv/bin/python hardware/body/layout.py      # the carbon body redesign: placements, mass and balance; then body/block.py (the block with cavities)
+python3 hardware/body/power_budget.py         # plain python3 scripts: power_budget.py, battery_sizing.py, hardware/strut/pivot_checks.py
 ```
-Each script prints its checks and writes STEP files to an `out/` folder beside it. Run them from the repository root, in that order. `body.py` needs Hammond's
+Each script prints its checks and writes STEP files to an `out/` folder beside it. Run them from the repository root, in that order (`layout.py` before `block.py`). `body.py` needs Hammond's
 1590Z090 STEP file, which is not in this repository (see [`NOTICE.md`](NOTICE.md)); it is read from the private companion repository `jpl-nanorover-private`
-cloned beside this one, or from the path in `HAMMOND_1590Z090_STP`.
+cloned beside this one, or from the path in `HAMMOND_1590Z090_STP`. The carbon-body scripts (`layout.py`, `block.py`) do not need it. The Blender renders are described in [`docs/blender-render.md`](docs/blender-render.md); the browser simulation runs with `npm run dev` in [`sim/`](sim/).
 
 ## Contributing
 Corrections with a primary source are the most valuable contribution, especially dimensions of the hub, wheel and struts, or engineering drawings. Contact with the JPL Robotics group or JPL Archives is the only known route to authoritative dimensions.
