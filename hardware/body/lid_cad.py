@@ -1,4 +1,4 @@
-"""The lid as a real CAD split of the block: a stepped, flat-faced simplification of the equidistant-surface lid of lid_split.py (owner's method, rim rule agreed 2026-11-14).
+"""The lid DESIGN SPACE as a real CAD split of the block (the maximum space the lid may occupy, not a final lid form: topology optimisation, fasteners and the real walls come later): a stepped, flat-faced simplification of the equidistant-surface region of lid_split.py (owner's method, rim rule agreed 2026-11-14).
 
 Run: .venv/bin/python hardware/body/lid_cad.py     (needs the .venv; imports layout.py; writes hardware/body/out/lid.step and body_mid.step)
 Top lid: a plate from the lid face down to the rim plane (D_RIM below the face, over the whole 140 x 140 footprint) plus a raised platform under the board (the board's own footprint plus

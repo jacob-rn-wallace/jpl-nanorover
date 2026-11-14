@@ -1,4 +1,4 @@
-"""A first cut of the lid shape by the owner's method (2026-11-14): split the design space along the surface equidistant from the lid components and the body components,
+"""The MAXIMUM SPACE each lid can occupy, by the owner's method (2026-11-14; this is a design space for the later topology optimisation, not a final lid form, and mass plays no part in it): split the design space along the surface equidistant from the lid components and the body components,
 for the top and the bottom lid, mirror one onto the other and keep what both have in common.
 
 Run: .venv/bin/python hardware/body/lid_split.py     (imports layout.py, so run it from the repository root; about a minute)
@@ -7,7 +7,7 @@ battery, the camera, the LED ring, the ranging sensor, the comms patch and the e
 component (a 3D Euclidean distance transform, 1 mm voxels); the split surface is where the two distances are equal. To make a lid that can be lifted straight off (no undercuts) only
 the part of that region connected to the lid face down each (x, y) column is kept ("height field"). The bottom lid is the same mirrored about z = 30; the common shape is the intersection of
 the top lid and the mirrored bottom lid. Then the OUTER RIM RULE (owner agreed 2026-11-14): within BAND mm of the four outer faces the parting line is a flat plane D_RIM mm below the lid face
-(above the end-face cells' top edge at z = 52.3, with the 1 mm clearance), and the Voronoi surface applies inside. Prints the numbers (volume, depth, clearance, shell mass) and writes
+(above the end-face cells' top edge at z = 52.3, with the 1 mm clearance), and the Voronoi surface applies inside. Prints the numbers (volume, depth, clearance) and writes
 docs/images/lid-split.png.
 """
 import contextlib, io, sys
@@ -81,14 +81,6 @@ print(f"\nWITH THE RIM RULE (parting plane {D_RIM} mm below the face within {BAN
 print(f"  lid region {final.sum() * vox:.0f} cm3; overlap with body components {clash} voxels; nearest body component to the lid {gap[final].min():.1f} mm (the layout's own clearance is {LY.CLR:.0f} mm)")
 dd = np.where(final.any(axis=2), 60 - np.argmax(final, axis=2) * RES, np.nan)
 print(f"  lid depth: min {np.nanmin(dd):.1f}, median {np.nanmedian(dd):.1f}, max {np.nanmax(dd):.1f} mm; rim depth is {D_RIM} mm all round, so the cell pocket leaves {D_RIM - CELL_T:.1f} mm of lid under the cells there")
-# a shell of the lid: its outer area (the lid face, the side bands) plus the underside (the split surface)
-face_a = final[:, :, -1].sum() * RES ** 2                                # the lid face
-under_a = (final & ~np.roll(final, 1, axis=2) & (Z > 0)).sum() * RES ** 2   # voxel faces looking down into non-lid (the underside): lowest lid voxel in each column and steps
-side = ((final & ~np.roll(final, 1, axis=0)).sum() + (final & ~np.roll(final, -1, axis=0)).sum() + (final & ~np.roll(final, 1, axis=1)).sum() + (final & ~np.roll(final, -1, axis=1)).sum()) * RES ** 2
-cup = face_a + side                                                      # an open cup: the face and all the side walls (including the steps inside)
-for t in (1.0, 1.5):
-    print(f"  shell mass at {t} mm forged carbon (1.55 g/cm3): open cup (face and walls, underside open) {cup * t * 1.55e-3:.0f} g; closed (plus an underside plate over the lid footprint) {(cup + under_a) * t * 1.55e-3:.0f} g  [face {face_a / 100:.0f} cm2, walls {side / 100:.0f} cm2, underside {under_a / 100:.0f} cm2]")
-print("  (the cells, the board and the screws are not in these figures)")
 common = final                                                           # the figure shows the final lid
 th = depth_final
 
