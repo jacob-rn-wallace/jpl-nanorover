@@ -2,7 +2,7 @@
 
 Run from the repository root, after hardware/assembly/blender_export.py:
     VIEW=hero ~/tools/blender-4.5.9-linux-x64/blender -b -P hardware/assembly/blender_render.py
-VIEW is one of hero, rear, top, detail, cells, window (default hero); SAMPLES (default 96), RES (default 1600x1000) and DEVICE (cpu, the default, or gpu: Metal on a Mac) LED (off, the default, or on) and SUFFIX (a name suffix for the output, for example -lit) are optional.  Output: docs/images/rover-<view>.png.
+VIEW is one of hero, rear, top, detail, cells, window (default hero); SAMPLES (default 96), RES (default 1600x1000) and DEVICE (cpu, the default, or gpu: Metal on a Mac) LED (off, the default, or on), BEZEL (bare, the default, or black) and SUFFIX (a name suffix for the output, for example -lit) are optional.  Output: docs/images/rover-<view>.png.
 1 Blender unit = 1 mm.  The body is a 140 x 140 x 60 mm block with 0.8 mm edges, NOT the real shell (hardware/body/block.py is only the cavity volume);
 the cells, panes and windows are laid on its faces from the same numbers as layout.py, cell_pocket.py and cell_endface.py.  Not modelled: lid screws and
 seals, hub studs and rings, the lamp, the beamsplitter, anything inside.  The forged-carbon pattern is procedural (chips of random orientation, each with
@@ -130,6 +130,8 @@ MAT = {
     "film": principled("laminate margin", (0.009, 0.010, 0.013), metallic=0.0, rough=0.42),     # photos show no pale border: the part is black edge to edge
     "glass": principled("camera pane", (0.0, 0.0, 0.0), metallic=0.0, rough=0.04, Coat_Weight=0.5, Coat_Roughness=0.02),
     "bezel": principled("bezel", (0.18, 0.18, 0.2), metallic=1.0, rough=0.28),
+    "blackring": principled("black-oxide ring", (0.045, 0.046, 0.05), metallic=1.0, rough=0.38, Anisotropic=0.3),
+    "blackscrew": principled("black-oxide screw", (0.05, 0.051, 0.055), metallic=1.0, rough=0.30),
     "screw": principled("M1.6 socket-head screw, stainless", (0.55, 0.56, 0.58), metallic=1.0, rough=0.28),
     "hood": principled("lens hood and mask ring", (0.004, 0.004, 0.005), metallic=0.0, rough=0.55),
     "lens": principled("M12 lens front", (0.0, 0.0, 0.0), metallic=0.0, rough=0.10, Coat_Weight=0.25, Coat_Roughness=0.12),
@@ -251,10 +253,11 @@ wx = 70 - (GAP + 13)
 # the window bezel (owner's taste, 2026-11-14: a metal frame with visible screws, like a viewport; flush with the carbon face, screws flush with the ring): a bare machined aluminium ring,
 # r = 13 to 18 mm, 1.5 mm thick (y 68.5 to 70.0, flush with the face), clamping the 28 mm sapphire disc (y 68.0 to 68.5, in a seat in the carbon) with a 1 mm overlap; six countersunk M1.6 screws
 # (flat heads, 3 mm across) on a 15.5 mm radius at 30, 90, 150, 210, 270 and 330 degrees, flush with the ring; docs/hardware-spec.md section 5.
-ring_y("bezel ring", wx, 30, 18.0, 13.0, 68.5, 70.0, "strut")
+BLACK = os.environ.get("BEZEL", "bare").lower() == "black"      # BEZEL=black: the ring and screws in a black oxide finish (black anodise on the aluminium ring in practice)
+ring_y("bezel ring", wx, 30, 18.0, 13.0, 68.5, 70.0, "blackring" if BLACK else "strut")
 for deg in (30, 90, 150, 210, 270, 330):
     a_ = math.radians(deg)
-    cylinder_y(f"screw{deg}", wx + 15.5 * math.cos(a_), 30 + 15.5 * math.sin(a_), 1.5, 69.9, 70.02, "screw", verts=32)
+    cylinder_y(f"screw{deg}", wx + 15.5 * math.cos(a_), 30 + 15.5 * math.sin(a_), 1.5, 69.9, 70.02, "blackscrew" if BLACK else "screw", verts=32)
     cylinder_y(f"socket{deg}", wx + 15.5 * math.cos(a_), 30 + 15.5 * math.sin(a_), 0.65, 70.02, 70.03, "hood", verts=6)
 cylinder_y("pane", wx, 30, 14.0, 68.0, 68.5, "glass")
 # behind the sapphire disc (drawn on the pane's outer side, inside the opening: the pane is dark glass): the smoked dead-front annulus over the LED ring, the LEDs when LED=on, the lens hood, the lens, the sensor
