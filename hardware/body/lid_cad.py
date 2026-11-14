@@ -17,6 +17,7 @@ with contextlib.redirect_stdout(io.StringIO()):
 D_RIM = 7.0                       # lid depth at the rim (lid_split.py's 6.5 mm rule rounds to 7.0 on the 1 mm grid); the end-face cells stop at z = 52.3, so 53 leaves 0.7 mm
 board = LY.comps["power + motor-driver board (upper lid module)"][1]        # x0, x1, y0, y1, z0, z1 of the upper board
 MARGIN = 2.0                                                              # platform margin round the board
+EAR_Z0, EAR_Y = 60 - D_RIM - 8.0, (40.0, -40.0)                          # lid ears for the side-entry screws: 8 mm deep below the rim plane, two per hub face at y = +-40 (inboard of the gasket groove)
 Z_FLOOR = board[4] - 2.0                                                  # platform floor 2 mm below the board's lower face
 
 def box(x0, x1, y0, y1, z0, z1):
@@ -26,8 +27,28 @@ def lid_spaces():
     """The top and bottom lid design spaces as build123d solids (the bottom is the top mirrored about z = 30)."""
     plate = box(-70, 70, -70, 70, 60 - D_RIM, 60)
     platform = box(board[0] - MARGIN, board[1] + MARGIN, board[2] - MARGIN, board[3] + MARGIN, Z_FLOOR, 60 - D_RIM)
+    ears = [box(sx * 58.0 if sx > 0 else -62.0, sx * 62.0 if sx > 0 else -58.0, y0 - 3.0, y0 + 3.0, EAR_Z0, 60 - D_RIM) for sx in (1, -1) for y0 in EAR_Y]
     top = plate + platform
+    for e in ears:
+        top = top + e
     return top, top.mirror(Plane.XY.offset(30))
+
+
+def joint_features():
+    """The fastening details that the lids' design spaces need (stand-in design, docs/mechanical-spec.md item 8): returns (screw_holes, grooves) as lists of solids for both lids.
+    Screw holes: along x from each hub face (|x| = 70) inward into a lid ear: 2.0 mm hole, 3.8 mm head recess at the face; four per lid (two per hub face).
+    Grooves: a gasket groove 2 mm wide and 0.8 mm deep in the body's rim face, a rectangular loop 3 to 5 mm in from the outer faces, one at each lid joint."""
+    holes = []
+    for zc in (EAR_Z0 + 4.0, 60 - (EAR_Z0 + 4.0)):
+        for sx in (1, -1):
+            for y0 in EAR_Y:
+                shaft = Cylinder(1.0, 8.0, align=(Align.CENTER, Align.CENTER, Align.CENTER)).rotate(Axis.Y, 90).moved(Location((sx * (62.0 + 4.0 + 0.1), y0, zc)))
+                head = Cylinder(1.9, 1.2, align=(Align.CENTER, Align.CENTER, Align.CENTER)).rotate(Axis.Y, 90).moved(Location((sx * 69.6, y0, zc)))
+                holes += [shaft, head]
+    grooves = []
+    for z0 in (60 - D_RIM - 0.8, D_RIM):
+        grooves.append(box(-67, 67, -67, 67, z0, z0 + 0.8) - box(-65, 65, -65, 65, z0 - 0.1, z0 + 0.9))
+    return holes, grooves
 
 
 def main():
@@ -42,6 +63,9 @@ def main():
     # component overlap and clearance with the placed components (voxel masks from layout.py)
     X, Y, Z = LY.X, LY.Y, LY.Z
     lid_mask = ((Z >= 60 - D_RIM) | ((np.abs(X - (board[0] + board[1]) / 2) <= (board[1] - board[0]) / 2 + MARGIN) & (Y >= board[2] - MARGIN) & (Y <= board[3] + MARGIN) & (Z >= Z_FLOOR)))
+    for sx in (1, -1):
+        for y0 in EAR_Y:
+            lid_mask = lid_mask | ((np.abs(X - sx * 60.0) <= 2.0) & (np.abs(Y - y0) <= 3.0) & (Z >= EAR_Z0))      # the lid ears (x 58 to 62, y +-3, down to 8 mm below the rim plane)
     lid_mask_bot = lid_mask[:, :, ::-1]
     body_comps = LY.occ.copy()
     for n, m in LY.placed.items():

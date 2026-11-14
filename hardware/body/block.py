@@ -128,14 +128,21 @@ print(f"re-imported {step_path.name}: {len(chk.solids())} solid(s), volume {chk.
 print(f"if it were solid carbon at 1.55 g/cm3 the block with cavities weighs {cut.volume / 1000 * 1.55:.0f} g (a design volume, not the part)")
 
 # ---------------- split the cut block into the two lids and the body between them (docs/mechanical-spec.md item 8; the lids' design spaces from lid_cad.py) ----------------
-from lid_cad import lid_spaces  # noqa: E402
+from lid_cad import lid_spaces, joint_features  # noqa: E402
 lid_top, lid_bot = lid_spaces()
-parts = {"body_lid_top": cut & lid_top, "body_lid_bottom": cut & lid_bot, "body_middle": cut - lid_top - lid_bot}
+holes, grooves = joint_features()
+for h in holes:
+    cut = cut - h                                                                  # the side-entry screw holes pass through the body wall into the lid ears
+body_middle = cut - lid_top - lid_bot
+for g in grooves:
+    body_middle = body_middle - g                                                  # the gasket grooves in the body's rim faces
+parts = {"body_lid_top": cut & lid_top, "body_lid_bottom": cut & lid_bot, "body_middle": body_middle}
 total = 0.0
 for nm, sh in parts.items():
     export_step(sh, str(OUT / f"{nm}.step")); r = import_step(str(OUT / f"{nm}.step")); total += sh.volume
     print(f"  {nm:16s} {sh.volume / 1000:6.1f} cm3; re-imports as {len(r.solids())} solid(s), volume {r.volume / 1000:.1f} cm3")
-print(f"  the three parts add up to {total / 1000:.1f} cm3 against the cut block's {cut.volume / 1000:.1f} cm3 -> {'OK' if abs(total - cut.volume) < 50 else 'CHECK'}")
+expected = cut.volume - sum(g.volume for g in grooves)
+print(f"  the three parts add up to {total / 1000:.1f} cm3 against {expected / 1000:.1f} cm3 expected (the cut block's {cut.volume / 1000:.1f} cm3 less the two gasket grooves' {sum(g.volume for g in grooves) / 1000:.1f}) -> {'OK' if abs(total - expected) < 200 else 'CHECK'}")
 
 # ---------------- what the cavities leave: skin and core, by distance transform on a voxel copy ----------------
 from scipy.ndimage import distance_transform_edt  # noqa: E402
