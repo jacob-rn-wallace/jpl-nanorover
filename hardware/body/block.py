@@ -91,7 +91,7 @@ for n, (m, bb, note, _c) in LY.comps.items():
         add("boards (ride on the lids)", bx(*bb), area_box(*bb))
     elif n.startswith("battery"):
         add("battery", bx(*bb), area_box(*bb))
-    elif n.startswith("comms patch"):
+    elif n.startswith("comms patch") or n.startswith("XBee"):
         add("comms antenna", bx(*bb), area_box(*bb))
     else:
         add("camera, LED ring and ranging window", bx(*bb), area_box(*bb))

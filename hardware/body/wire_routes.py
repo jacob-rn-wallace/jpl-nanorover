@@ -10,7 +10,7 @@ Method (2026-11-14; ASM = my assumption):
   * the nets and their lids and sides come from harness.py; the pocket's wire pads are at its inner end (|x| = 50), at the pocket's middle in y (the real wires fan out along the pocket's 24.6 mm).
   * wire: 30 AWG silicone (0.6 mm over the insulation: the size cable_check.py uses for the strut wires) for signals; 28 AWG silicone (0.8 mm) where a net carries power.  Masses per metre: ASM from copper
     density and a 0.2 mm silicone wall.  Each wire gets 6 mm at each end for the pad tail and a 10% slack allowance.
-  * ends that the layout does not place (the servo connectors, the XBee at the antenna end) are my assumptions and are marked ASM in the table.
+  * ends that the layout does not place (the servo connectors, the cells' wire exits) are my assumptions and are marked ASM in the table.
 Not done: the wires' fan-out along the pocket, the bundle's twisting and the connector bodies; the real shell's draft and ribs (the block is a design volume, `block.py`).
 """
 import contextlib
@@ -123,7 +123,7 @@ def pocket(lid, side):                                  # the wire-pad end of a 
 
 CAM_END = (48.0, 60.0, 12.0)            # under the camera board's lower edge (the board's box is y 57 to 66, z 13 to 47)
 LED_END = (61.0, 66.7, 25.0)            # beside the LED ring board's outboard edge (the ring board is x 39.2 to 59.9, y 66 to 67.5)
-ANT_END = (-48.0, -61.0, 16.5)          # under the comms patch board's lower edge (box y -67.5 to -62, z 17.5 to 42.5); the XBee module is not placed in layout.py: ASM that it sits with the patch
+ANT_END = (-12.0, -61.0, 30.0)          # behind the XBee carrier board's -x end (layout.py: x -11 to 11, y -67 to -64, z 22 to 38), in the rear bay's centre
 BATT_END = (0.0, 40.0, 29.5)            # the protection board's +y end (box y 27 to 39, z 28 to 31)
 SERVO = {"B+": (29.0, 36.5, 30.0), "B-": (-29.0, 36.5, 30.0), "A+": (33.5, -59.0, 30.0), "A-": (-33.5, -59.0, 30.0)}   # ASM: each servo's connector at the end opposite its output shaft
 SOLAR_BOTTOM = (-40.0, 4.0, 5.0)        # ASM: the bottom lid cells' wires leave the lid at its -x edge (just outside the board, x = -40) at y = 4 (the cells' tabs: layout of the cell pocket not done)
@@ -136,7 +136,7 @@ bundles = [
     ("LED ring supply (upper + pocket to the ring board)", pocket("upper", +1), LED_END, [(2, S28)], "V7.4 and GND for the three LED pairs (0.6 W while on)"),
     ("link signals (lower + pocket to upper + pocket)", pocket("lower", +1), pocket("upper", +1), [(3, S30)], "boost enable, charger status, battery current sense (moved to the + side of the upper lid: they were on its - side, across the body)"),
     ("battery (protection board to upper + pocket)", BATT_END, pocket("upper", +1), [(12, S28)], "VBAT 6 and GND 6 (the battery path, 3.5 A peak)"),
-    ("antenna end (lower - pocket to the patch board)", pocket("lower", -1), ANT_END, [(5, S30)], "XBee TX, RX, sleep, 3V3, GND (the XBee is assumed to sit with the patch)"),
+    ("antenna end (lower - pocket to the XBee carrier board)", pocket("lower", -1), ANT_END, [(5, S30)], "XBee TX, RX, sleep, 3V3, GND (to the XBee carrier board beside the patch)"),
     ("power across (upper + pocket to lower - pocket)", pocket("upper", +1), pocket("lower", -1), [(8, S28)], "V7.4 in 3, GND return 3, VBAT in 2 (wheel drivers, 3.3 V converter)"),
     ("solar: end face at the camera end (to upper - pocket)", SOLAR_ENDS[0], pocket("upper", -1), [(2, S30)], "one cell string: + and -"),
     ("solar: end face at the antenna end (to upper - pocket)", SOLAR_ENDS[1], pocket("upper", -1), [(2, S30)], "one cell string: + and -"),

@@ -147,7 +147,7 @@
   "wires": 12,
   "channel_side_mm": 3.9
  },
- "antenna end (lower - pocket to the patch board)": {
+ "antenna end (lower - pocket to the XBee carrier board)": {
   "points": [
    [
     -50.0,
@@ -161,26 +161,26 @@
    ],
    [
     -49.0,
-    7.0,
-    13.0
+    -61.0,
+    11.0
    ],
    [
-    -49.0,
+    -11.0,
     -61.0,
-    13.0
+    11.0
    ],
    [
-    -47.0,
+    -11.0,
     -61.0,
-    13.0
+    31.0
    ],
    [
-    -48.0,
+    -12.0,
     -61.0,
-    16.5
+    30.0
    ]
   ],
-  "length_mm": 77.8,
+  "length_mm": 129.3,
   "wires": 5,
   "channel_side_mm": 3.0
  },
@@ -481,6 +481,16 @@
     31.0
    ],
    [
+    -33.0,
+    -63.0,
+    41.0
+   ],
+   [
+    33.0,
+    -63.0,
+    41.0
+   ],
+   [
     33.0,
     -63.0,
     31.0
@@ -491,7 +501,7 @@
     30.0
    ]
   ],
-  "length_mm": 77.0,
+  "length_mm": 97.0,
   "wires": 3,
   "channel_side_mm": 3.0
  }
