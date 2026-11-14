@@ -51,11 +51,31 @@ def image_name(env):
     return f"rover-{env.get('VIEW', 'hero')}{env.get('SUFFIX', '')}.png"
 
 
+def blender_version(binary):
+    try:
+        out = subprocess.run([binary, "--version"], capture_output=True, text=True, timeout=60).stdout
+        m = re.search(r"Blender (\d+)\.(\d+)(?:\.(\d+))?", out)
+        return (int(m.group(1)), int(m.group(2)), int(m.group(3) or 0)) if m else None
+    except Exception:
+        return None
+
+
 def blender_binary():
-    for cand in (os.environ.get("BLENDER"), "/Applications/Blender.app/Contents/MacOS/Blender", str(Path.home() / "tools/blender-4.5.9-linux-x64/blender")):
-        if cand and Path(cand).exists():
-            return cand
-    sys.exit("Blender not found: set BLENDER to the binary (see docs/blender-render.md)")
+    """The first Blender that is 4.2 or later (the cell material needs the thin-film input added in 4.2; the renders were made with 4.5.9). BLENDER overrides; otherwise the usual places are tried, newest first."""
+    home = Path.home()
+    cands = [os.environ.get("BLENDER")] + [str(p) for pat in ("tools/Blender*.app", "Applications/Blender*.app", "tools/blender-4*/blender") for p in sorted(home.glob(pat), reverse=True)
+                                           for p in ([p / "Contents/MacOS/Blender"] if p.suffix == ".app" else [p])] + sorted(str(p / "Contents/MacOS/Blender") for p in Path("/Applications").glob("Blender*.app"))[::-1] + \
+            [str(home / "tools/blender-4.5.9-linux-x64/blender"), "/Applications/Blender.app/Contents/MacOS/Blender"]
+    seen, found = set(), []
+    for c in cands:
+        if not c or c in seen or not Path(c).exists():
+            continue
+        seen.add(c); v = blender_version(c); found.append((c, v))
+        if v and v >= (4, 2, 0):
+            print(f"Blender: {c} (version {v[0]}.{v[1]}.{v[2]})")
+            return c
+    sys.exit("No Blender 4.2 or later found. Found: " + (", ".join(f"{c} ({'.'.join(map(str, v)) if v else 'unknown'})" for c, v in found) or "none") +
+             ".\nInstall Blender 4.5.9 LTS (docs/blender-render.md, 'Setup on an Apple Silicon Mac'), for example to ~/tools/Blender-4.5.9.app, or set BLENDER to its binary.")
 
 
 def image_check(path):
@@ -122,7 +142,8 @@ def main():
         if ok:
             ok, msg = image_check(img)
         else:
-            msg = "no image written: " + " | ".join(l for l in out.splitlines() if "Error" in l or "Traceback" in l)[-200:]
+            errs = [l for l in out.splitlines() if ("Error" in l or "error" in l) and "no attribute 'vs'" not in l]
+            msg = "no image written; " + (" | ".join(errs[-3:])[-300:] if errs else "see Blender's output") + f" (Blender {'.'.join(map(str, blender_version(blender) or ()))})"
         cells = jobs[jid]["cells"]
         if ok:
             cells[5] = f"done {today}"; cells[6] = f"automatic ({Path(__file__).name}): {dev}, {secs:.0f} s, {samples} samples; {msg}"

@@ -4,7 +4,7 @@
 # Job ids and settings are the same as in docs/render-jobs.md; keep the two in step.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
-if [[ "$(uname)" == "Darwin" ]]; then BLENDER="${BLENDER:-/Applications/Blender.app/Contents/MacOS/Blender}"; DEVICE="${DEVICE:-gpu}"
+if [[ "$(uname)" == "Darwin" ]]; then BLENDER="${BLENDER:-$(ls -d "$HOME"/tools/Blender-4*.app 2>/dev/null | tail -1)/Contents/MacOS/Blender}"; [[ -x "$BLENDER" ]] || BLENDER=/Applications/Blender.app/Contents/MacOS/Blender; DEVICE="${DEVICE:-gpu}"
 else BLENDER="${BLENDER:-$HOME/tools/blender-4.5.9-linux-x64/blender}"; DEVICE="${DEVICE:-cpu}"; fi
 for f in hardware/assembly/out/blender/struts.stl hardware/assembly/out/blender/wheels.stl; do
   [[ -f "$f" ]] || { echo "missing $f: copy it from the desktop machine or regenerate it (docs/blender-render.md, 'Setup on an Apple Silicon Mac')"; exit 1; }
