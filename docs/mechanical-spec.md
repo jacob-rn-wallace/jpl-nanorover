@@ -67,3 +67,8 @@ Each strut carries one wheel motor, so **two wires per strut, eight across the f
 - Real horn and housing dimensions (item 5); the clamp ear in the strut CAD (item 2); the cable's route for strut B, the hole through the wall and the stop check from every rest orientation (items 6 and 7).
 - The lid joint (item 8) waits for the owner's go-ahead on separating the lids.
 - Camera and ranging-sensor windows and mounts, and the lamp (`docs/hardware-spec.md`, section 7).
+
+## 10. Values estimated instead of tested (method of 2026-11-14)
+
+Purchasing is deferred, so values that need a physical test are estimated with a range, designed to, and tagged ESTIMATE until a test replaces them (`CLAUDE.md`). To be measured later is listed with each.
+- **Lid cam breakaway torque (`hardware/body/cam_estimate.py`; ESTIMATE, inputs are assumptions):** gasket washer 51 mm2 compressed 38% gives 26 to 102 N on the cam; thread and gasket friction alone give **0.06 to 0.65 N.m, so the 0.4 N.m target is not met at the low end without a patch**. With a nylon prevailing-torque patch (0.3 to 1.5 N.m, remembered order of magnitude) the new cam breaks away at 0.37 to 2.2 N.m, and 0.25 N.m in the worst case after reuse (patch down to 60%). **Design rule: specify the patch at 0.6 N.m or more first-on prevailing torque** (computed minimum 0.55 for 0.4 N.m after reuse at the worst friction corner); the new cam then stays under about 2.4 N.m, inside the 4 mm hex socket's assumed 3 N.m. To be measured: breakaway with a torque screwdriver (10 cams, 20 cycles). Not bounded: the patch's real torque and its wear (supplier data needed).
