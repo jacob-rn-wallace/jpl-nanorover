@@ -297,11 +297,12 @@ import_stl("struts", "strut"); import_stl("wheels", "wheel")
 bm = bmesh.new(); add_box(bm, -3000, 3000, -3000, 3000, GROUND_Z - 1, GROUND_Z); make("ground", bm, "ground")
 
 # ---------------------------------------------------------------- scale fiducial (owner, 2026-11-14): a US quarter next to the rover, as in JPL's own photographs (docs/photo-measurements.md)
-# FIDUCIAL=quarter draws it, standing on edge and leaning back a little, face toward the camera, on the ground at (QX, QY) (mm; defaults suit the hero view); FIDUCIAL=off (default) leaves it out.
+# FIDUCIAL=cube (the one the renders use) draws a Rubik's cube (QX, QY, QYAW); FIDUCIAL=quarter (tried first, too hard to read: kept as an option) draws a US quarter, standing on edge and leaning back a little, face toward the camera, on the ground at (QX, QY) (mm; defaults suit the hero view); FIDUCIAL=off (default) leaves it out.
 # Real size: 24.26 mm across, 1.75 mm thick, 119 reeds, raised rim about 0.2 mm; the portrait is only a hint (a head and shoulders in low relief), not Washington's likeness.
 FIDUCIAL = os.environ.get("FIDUCIAL", "off").lower()
 if FIDUCIAL == "quarter":
     MAT["coin"] = principled("quarter, cupronickel", (0.86, 0.87, 0.87), metallic=1.0, rough=0.20)
+    MAT["coinfield"] = principled("quarter field, frosted", (0.42, 0.43, 0.44), metallic=1.0, rough=0.50)     # the flat field of a coin is darker and duller than its polished devices: that is what makes the face readable
     R_Q, T_Q, REEDS = 12.13, 1.75, 119
     def coin_parts():
         bm = bmesh.new(); n = REEDS * 2; top, bot = [], []
@@ -311,7 +312,7 @@ if FIDUCIAL == "quarter":
         for i in range(n):
             j = (i + 1) % n; bm.faces.new((bot[i], bot[j], top[j], top[i]))
         bm.faces.new(top[::-1]); bm.faces.new(bot)
-        bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:]); make("quarter body", bm, "coin")
+        bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:]); make("quarter body", bm, "coinfield")
         for sgn in (1, -1):                                              # raised rim on both faces (outer 11.95, inner 10.9)
             bm = bmesh.new(); m_ = 96
             o = [bm.verts.new((11.95 * math.cos(2 * math.pi * k / m_), 11.95 * math.sin(2 * math.pi * k / m_), sgn * (T_Q / 2 - 0.2))) for k in range(m_)]
@@ -323,10 +324,23 @@ if FIDUCIAL == "quarter":
                 for quad in ((o[k], o[l], o2[l], o2[k]), (o2[k], o2[l], i2[l], i2[k]), (i2[k], i2[l], i1[l], i1[k])):
                     bm.faces.new(quad)
             bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:]); make("quarter rim", bm, "coin")
-        for nm, (cx_, cy_), (sx_, sy_) in (("head", (0.0, 2.8), (2.9, 3.4)), ("shoulders", (0.0, -5.2), (6.8, 3.2))):   # portrait hint, front face only
-            bm = bmesh.new(); bmesh.ops.create_uvsphere(bm, u_segments=32, v_segments=16, radius=1.0)
-            for v in bm.verts: v.co = (cx_ + v.co.x * sx_, cy_ + v.co.y * sy_, T_Q / 2 - 0.2 + v.co.z * 0.12)
-            make("quarter " + nm, bm, "coin")
+        # the obverse: a left-facing bust in low relief (a hand-drawn silhouette, mm on the face, y up; not Washington's likeness in detail) and the legends LIBERTY (top arc) and IN GOD WE TRUST (left arc)
+        prof = [(4.5, -6.6), (6.6, -5.6), (3.9, -2.0), (3.7, 2.0), (1.9, 5.0), (-0.8, 5.7), (-2.8, 4.5), (-3.6, 3.1), (-3.9, 2.3), (-5.3, 0.6), (-4.1, 0.2), (-4.3, -0.5), (-4.1, -1.1),
+                (-4.3, -2.2), (-2.7, -3.0), (-2.3, -4.2), (-5.6, -6.9), (-0.5, -8.5), (4.8, -7.3)]
+        z0_, rel = T_Q / 2 - 0.2, 0.38
+        bm = bmesh.new(); vs_ = [bm.verts.new((x_, y_, z0_ - 0.05)) for x_, y_ in prof]; f_ = bm.faces.new(vs_)
+        ex = bmesh.ops.extrude_face_region(bm, geom=[f_]); bmesh.ops.translate(bm, verts=[v for v in ex["geom"] if isinstance(v, bmesh.types.BMVert)], vec=(0, 0, rel + 0.05))
+        bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:]); make("quarter bust", bm, "coin")
+        def arc_text(txt, r_, mid_deg, span_deg, size_, outward=True):
+            n_ = len(txt)
+            for k_, ch in enumerate(txt):
+                if ch == " ": continue
+                a_ = math.radians(mid_deg + span_deg * (0.5 - k_ / max(n_ - 1, 1)))
+                bpy.ops.object.text_add(location=(r_ * math.cos(a_), r_ * math.sin(a_), z0_ - 0.02), rotation=(0, 0, a_ - math.pi / 2 if outward else a_ + math.pi / 2))
+                t_ = bpy.context.object; t_.data.body = ch; t_.data.size = size_; t_.data.extrude = 0.2; t_.data.align_x = "CENTER"; t_.data.align_y = "CENTER"
+                bpy.ops.object.convert(target="MESH"); t_.data.materials.append(MAT["coin"])
+        arc_text("LIBERTY", 9.3, 90, 62, 1.7)
+        arc_text("IN GOD WE TRUST", 9.3, 205, 70, 1.15, outward=False)
     before = set(bpy.data.objects.keys()); coin_parts(); coin_objs = [bpy.data.objects[k] for k in bpy.data.objects.keys() if k not in before]
     qx, qy = float(os.environ.get("QX", "140")), float(os.environ.get("QY", "110")); face_az = math.radians(float(os.environ.get("QAZ", "38"))); lean = math.radians(float(os.environ.get("QLEAN", "12")))
     nrm = Vector((math.cos(face_az) * math.cos(lean), math.sin(face_az) * math.cos(lean), math.sin(lean)))
@@ -334,6 +348,38 @@ if FIDUCIAL == "quarter":
     zc = GROUND_Z + R_Q * math.cos(lean) + (T_Q / 2) * math.sin(lean)                          # centre height of a coin standing on its edge, leaning back by `lean`
     for ob in coin_objs:
         ob.rotation_mode = "QUATERNION"; ob.rotation_quaternion = quat; ob.location = (qx, qy, zc); smooth(ob, 30)
+
+# FIDUCIAL=cube (owner's idea, 2026-11-14): a Rubik's cube, 57 mm on a side (the standard 3 x 3 x 3), scrambled with a fixed seed, standing on the ground at (QX, QY) turned QYAW degrees about the vertical.
+# 27 black cubies 18.9 mm with 0.45 mm gaps and rounded edges; 54 coloured stickers 16.2 mm square with rounded corners, standing 0.12 mm proud.  Colours are the usual six (white, yellow, red, orange, blue, green).
+if FIDUCIAL == "cube":
+    CUBE, GAPC = 57.0, 0.45
+    CUBIE = (CUBE - 2 * GAPC) / 3
+    cols = {"W": (0.80, 0.80, 0.78), "Y": (0.90, 0.68, 0.03), "R": (0.62, 0.03, 0.03), "O": (0.85, 0.22, 0.02), "B": (0.02, 0.10, 0.55), "G": (0.02, 0.45, 0.10)}
+    for k_, c_ in cols.items(): MAT["cube" + k_] = principled("cube sticker " + k_, c_, metallic=0.0, rough=0.28, Coat_Weight=0.2, Coat_Roughness=0.1)
+    MAT["cubeblack"] = principled("cube plastic", (0.012, 0.012, 0.013), metallic=0.0, rough=0.35)
+    rng_c = random.Random(11); qx, qy = float(os.environ.get("QX", "120")), float(os.environ.get("QY", "130")); yaw = math.radians(float(os.environ.get("QYAW", "28")))
+    zc_ = GROUND_Z + CUBE / 2
+    def to_world(v_):
+        x_, y_, z_ = v_; return Vector((qx + x_ * math.cos(yaw) - y_ * math.sin(yaw), qy + x_ * math.sin(yaw) + y_ * math.cos(yaw), zc_ + z_))
+    def piece(name, bm, mat):
+        for v_ in bm.verts: v_.co = to_world(v_.co)
+        ob = make(name, bm, mat); smooth(ob, 40); return ob
+    pitch = CUBIE + GAPC
+    for ix in (-1, 0, 1):
+        for iy in (-1, 0, 1):
+            for iz in (-1, 0, 1):
+                bm = bmesh.new(); add_box(bm, ix * pitch - CUBIE / 2, ix * pitch + CUBIE / 2, iy * pitch - CUBIE / 2, iy * pitch + CUBIE / 2, iz * pitch - CUBIE / 2, iz * pitch + CUBIE / 2)
+                bmesh.ops.bevel(bm, geom=bm.edges[:], offset=0.9, segments=2, affect="EDGES"); piece("cubie", bm, "cubeblack")
+    ST, STH = CUBIE - 2.4, 0.12
+    for axis in range(3):
+        for sgn in (1, -1):
+            for a_ in (-1, 0, 1):
+                for b_ in (-1, 0, 1):
+                    c3 = [0, 0, 0]; c3[axis] = sgn * (CUBE / 2 + STH / 2 - 0.02); c3[(axis + 1) % 3] = a_ * pitch; c3[(axis + 2) % 3] = b_ * pitch
+                    half = [ST / 2, ST / 2, ST / 2]; half[axis] = STH / 2
+                    bm = bmesh.new(); add_box(bm, c3[0] - half[0], c3[0] + half[0], c3[1] - half[1], c3[1] + half[1], c3[2] - half[2], c3[2] + half[2])
+                    bmesh.ops.bevel(bm, geom=[e for e in bm.edges if abs((e.verts[0].co - e.verts[1].co)[axis]) < 1e-6], offset=1.4, segments=3, affect="EDGES")
+                    piece("sticker", bm, "cube" + rng_c.choice("WYROBG"))
 
 # ---------------------------------------------------------------- lights: soft boxes (visible only in reflections) and a world fill
 def softbox(name, loc, size, strength, target=(0, 0, 12)):
