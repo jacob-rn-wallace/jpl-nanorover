@@ -32,7 +32,7 @@ for n, d in (("indoors, 500 lux LED, poly-Si (8 uW/cm2)", 8e-6), ("indoors, 500 
 V_SERVO = 12.0
 loads = {
     "keep-alive: MCU deep sleep + RTC + wake input (ASM 0.1 mW; the chip alone is 7-8 uA, SRC)": 0.0001,
-    "controller awake + radio receiving (PIC32MX250F128B (now the 44-pin F128D, docs/hardware-spec.md) about 0.5 mA/MHz x 40 MHz = 20 mA, a family-datasheet summary scaled by me, ASM; XBee 3 802.15.4 receive 15 mA, Digi page; both at 3.3 V)": (0.020 + 0.015) * 3.3,
+    "controller awake + radio receiving (PIC32MX250F128D 20 mA typical at 40 MHz, SRC: DS61168E Table 29-5, verified 2026-11-14; XBee 3 802.15.4 receive 15 mA, Digi page; both at 3.3 V)": (0.020 + 0.015) * 3.3,
     "radio transmitting, ABOVE the receiving figure (XBee 3 802.15.4 non-PRO 40 mA at +8 dBm, a manual snippet via distributors, less the 15 mA already counted; at 3.3 V)": (0.040 - 0.015) * 3.3,
     "camera streaming (ASM 0.3 W)": 0.3,
     "LED ring on, 7 white LEDs round the lens behind a smoked dead-front film (ASM 0.25 W: about 0.05 W for the exposure the beamsplitter lamp gave, times 5 for a 20% film; the lamp is on only about 1 s a photo)": 0.25,
