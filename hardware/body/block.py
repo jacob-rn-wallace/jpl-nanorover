@@ -127,6 +127,16 @@ print(f"block {volume_block / 1000:.0f} cm3; {len(all_cavities)} cavities cut; r
 print(f"re-imported {step_path.name}: {len(chk.solids())} solid(s), volume {chk.volume / 1000:.1f} cm3 (live {cut.volume / 1000:.1f}) -> {'OK' if abs(chk.volume - cut.volume) < 1.0 else 'MISMATCH'}")
 print(f"if it were solid carbon at 1.55 g/cm3 the block with cavities weighs {cut.volume / 1000 * 1.55:.0f} g (a design volume, not the part)")
 
+# ---------------- split the cut block into the two lids and the body between them (docs/mechanical-spec.md item 8; the lids' design spaces from lid_cad.py) ----------------
+from lid_cad import lid_spaces  # noqa: E402
+lid_top, lid_bot = lid_spaces()
+parts = {"body_lid_top": cut & lid_top, "body_lid_bottom": cut & lid_bot, "body_middle": cut - lid_top - lid_bot}
+total = 0.0
+for nm, sh in parts.items():
+    export_step(sh, str(OUT / f"{nm}.step")); r = import_step(str(OUT / f"{nm}.step")); total += sh.volume
+    print(f"  {nm:16s} {sh.volume / 1000:6.1f} cm3; re-imports as {len(r.solids())} solid(s), volume {r.volume / 1000:.1f} cm3")
+print(f"  the three parts add up to {total / 1000:.1f} cm3 against the cut block's {cut.volume / 1000:.1f} cm3 -> {'OK' if abs(total - cut.volume) < 50 else 'CHECK'}")
+
 # ---------------- what the cavities leave: skin and core, by distance transform on a voxel copy ----------------
 from scipy.ndimage import distance_transform_edt  # noqa: E402
 

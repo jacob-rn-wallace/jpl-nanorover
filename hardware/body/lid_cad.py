@@ -22,28 +22,38 @@ Z_FLOOR = board[4] - 2.0                                                  # plat
 def box(x0, x1, y0, y1, z0, z1):
     return Box(x1 - x0, y1 - y0, z1 - z0, align=(Align.CENTER, Align.CENTER, Align.MIN)).moved(Location(((x0 + x1) / 2, (y0 + y1) / 2, z0)))
 
-plate = box(-70, 70, -70, 70, 60 - D_RIM, 60)
-platform = box(board[0] - MARGIN, board[1] + MARGIN, board[2] - MARGIN, board[3] + MARGIN, Z_FLOOR, 60 - D_RIM)
-lid_top = plate + platform
-lid_bot = lid_top.mirror(Plane.XY.offset(30))
-full = box(-70, 70, -70, 70, 0, 60)
-body_mid = full - lid_top - lid_bot
-for nm, sh in (("lid", lid_top), ("body_mid", body_mid)):
-    print(f"{nm:9s} volume {sh.volume / 1000:6.1f} cm3, solids: {len(sh.solids())}")
-out = Path(__file__).resolve().parent / "out"; out.mkdir(exist_ok=True)
-export_step(lid_top, str(out / "lid.step")); export_step(body_mid, str(out / "body_mid.step"))
-re = import_step(str(out / "lid.step")); print(f"lid.step re-imports as {len(re.solids())} solid, volume {re.volume / 1000:.1f} cm3")
-# component overlap and clearance with the placed components (voxel masks from layout.py)
-X, Y, Z = LY.X, LY.Y, LY.Z
-lid_mask = ((Z >= 60 - D_RIM) | ((np.abs(X - (board[0] + board[1]) / 2) <= (board[1] - board[0]) / 2 + MARGIN) & (Y >= board[2] - MARGIN) & (Y <= board[3] + MARGIN) & (Z >= Z_FLOOR)))
-lid_mask_bot = lid_mask[:, :, ::-1]
-body_comps = LY.occ.copy()
-for n, m in LY.placed.items():
-    if not (n.startswith("power") or n.startswith("processor")):
-        body_comps |= m
-ex = LY.END_CELL_X
-body_comps |= (((X >= ex - 43.6) & (X <= ex + 43.6) & (Y >= 68.2) & (Z >= 7.7) & (Z <= 52.3)) | ((X >= -ex - 43.6) & (X <= -ex + 43.6) & (Y <= -68.2) & (Z >= 7.7) & (Z <= 52.3)))
-from scipy.ndimage import distance_transform_edt as edt
-gap = edt(~body_comps, sampling=LY.RES)
-for nm, m in (("top lid", lid_mask), ("bottom lid", lid_mask_bot)):
-    print(f"{nm}: overlap with body components {int((m & body_comps).sum())} voxels; nearest body component {gap[m].min():.1f} mm")
+def lid_spaces():
+    """The top and bottom lid design spaces as build123d solids (the bottom is the top mirrored about z = 30)."""
+    plate = box(-70, 70, -70, 70, 60 - D_RIM, 60)
+    platform = box(board[0] - MARGIN, board[1] + MARGIN, board[2] - MARGIN, board[3] + MARGIN, Z_FLOOR, 60 - D_RIM)
+    top = plate + platform
+    return top, top.mirror(Plane.XY.offset(30))
+
+
+def main():
+    lid_top, lid_bot = lid_spaces()
+    full = box(-70, 70, -70, 70, 0, 60)
+    body_mid = full - lid_top - lid_bot
+    for nm, sh in (("lid", lid_top), ("body_mid", body_mid)):
+        print(f"{nm:9s} volume {sh.volume / 1000:6.1f} cm3, solids: {len(sh.solids())}")
+    out = Path(__file__).resolve().parent / "out"; out.mkdir(exist_ok=True)
+    export_step(lid_top, str(out / "lid.step")); export_step(body_mid, str(out / "body_mid.step"))
+    re = import_step(str(out / "lid.step")); print(f"lid.step re-imports as {len(re.solids())} solid, volume {re.volume / 1000:.1f} cm3")
+    # component overlap and clearance with the placed components (voxel masks from layout.py)
+    X, Y, Z = LY.X, LY.Y, LY.Z
+    lid_mask = ((Z >= 60 - D_RIM) | ((np.abs(X - (board[0] + board[1]) / 2) <= (board[1] - board[0]) / 2 + MARGIN) & (Y >= board[2] - MARGIN) & (Y <= board[3] + MARGIN) & (Z >= Z_FLOOR)))
+    lid_mask_bot = lid_mask[:, :, ::-1]
+    body_comps = LY.occ.copy()
+    for n, m in LY.placed.items():
+        if not (n.startswith("power") or n.startswith("processor")):
+            body_comps |= m
+    ex = LY.END_CELL_X
+    body_comps |= (((X >= ex - 43.6) & (X <= ex + 43.6) & (Y >= 68.2) & (Z >= 7.7) & (Z <= 52.3)) | ((X >= -ex - 43.6) & (X <= -ex + 43.6) & (Y <= -68.2) & (Z >= 7.7) & (Z <= 52.3)))
+    from scipy.ndimage import distance_transform_edt as edt
+    gap = edt(~body_comps, sampling=LY.RES)
+    for nm, m in (("top lid", lid_mask), ("bottom lid", lid_mask_bot)):
+        print(f"{nm}: overlap with body components {int((m & body_comps).sum())} voxels; nearest body component {gap[m].min():.1f} mm")
+
+
+if __name__ == "__main__":
+    main()
