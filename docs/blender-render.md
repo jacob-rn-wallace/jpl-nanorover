@@ -7,6 +7,14 @@ A Cycles render of the interpreted nanorover (forged-carbon body, IXOLAR cells, 
 - Blender **4.5.9 LTS** from the portable Linux tarball, `~/tools/blender-4.5.9-linux-x64/` (downloaded from `download.blender.org/release/Blender4.5/`, SHA-256 `dcdc3eca6c9825bb35a8033b689c053f3cb5a9b0cd2a61b2eac2a49436b4ad3d`, matching the checksum Blender publishes). No root, nothing installed system-wide; delete the folder to remove it. The 4.5 LTS line was chosen so the script stays stable (5.3 was current).
 - The machine: 4 CPU cores, 7 GB of memory, only Intel integrated graphics, so Cycles runs on the CPU. A 1600 x 1000 image at 64 samples took several minutes; 900 x 560 at 32 samples about a minute.
 
+## Setup on an Apple Silicon Mac (added 2026-11-14, not yet tried)
+
+The owner's MacBook Air (M2, 16 GB) should render several times faster than the EliteDesk (my estimate from benchmark rankings, not measured: about 3 times on the CPU, and a further 2 to 3 times with the Metal GPU, so the views here should take well under two minutes each; the Air is fanless and may throttle on long runs).
+
+1. Blender **4.5.9 LTS** for macOS Apple Silicon: `https://download.blender.org/release/Blender4.5/blender-4.5.9-macos-arm64.dmg`. Its SHA-256 in Blender's published checksum file (`blender-4.5.9.sha256`, read 2026-11-14) is `e3a3d7aac381fb4e4d05197f99cd8899484d7e8bc4497c134066e6733f372238`; check the download with `shasum -a 256`. Drag Blender into Applications; the binary for headless use is `/Applications/Blender.app/Contents/MacOS/Blender`.
+2. The two meshes the render needs, `hardware/assembly/out/blender/struts.stl` and `wheels.stl`, are git-ignored. Either copy them from the desktop machine, or regenerate them with the CAD chain (`pip install -r hardware/requirements.txt` in a venv, then `hardware/body/body.py`, `hub/hub.py`, `strut/strut.py`, `wheel/wheel.py`, `assembly/blender_export.py`; body.py needs Hammond's STEP from the private repository).
+3. Run with the GPU: `DEVICE=gpu VIEW=hero /Applications/Blender.app/Contents/MacOS/Blender -b -P hardware/assembly/blender_render.py`. The script prints `render device: METAL [...]` when it finds the GPU and says so if it falls back to the CPU. Images will differ from the Linux ones only in noise.
+
 ## Run
 
 ```
@@ -14,7 +22,7 @@ A Cycles render of the interpreted nanorover (forged-carbon body, IXOLAR cells, 
 VIEW=hero ~/tools/blender-4.5.9-linux-x64/blender -b -P hardware/assembly/blender_render.py
 ```
 
-`VIEW` is `hero` (camera end, three-quarter), `rear` (comms end), `top` (orthographic), `detail` (close-up of the camera-end corner, with depth of field) or `cells` (close-up of the top-lid cells at a raking angle). `SAMPLES` (default 96) and `RES` (default `1600x1000`) are optional. Output: `docs/images/rover-<view>.png`. Run `strut.py` and `wheel.py` first so the STEP files exist.
+`VIEW` is `hero` (camera end, three-quarter), `rear` (comms end), `top` (orthographic), `detail` (close-up of the camera-end corner, with depth of field) or `cells` (close-up of the top-lid cells at a raking angle). `DEVICE` is `cpu` (default) or `gpu` (Metal on a Mac; see the Mac setup above). `SAMPLES` (default 96) and `RES` (default `1600x1000`) are optional. Output: `docs/images/rover-<view>.png`. Run `strut.py` and `wheel.py` first so the STEP files exist.
 
 ## What is modelled, and what is not
 

@@ -2,7 +2,7 @@
 
 Run from the repository root, after hardware/assembly/blender_export.py:
     VIEW=hero ~/tools/blender-4.5.9-linux-x64/blender -b -P hardware/assembly/blender_render.py
-VIEW is one of hero, rear, top, detail, cells, window (default hero); SAMPLES (default 96), RES (default 1600x1000) are optional.  Output: docs/images/rover-<view>.png.
+VIEW is one of hero, rear, top, detail, cells, window (default hero); SAMPLES (default 96), RES (default 1600x1000) and DEVICE (cpu, the default, or gpu: Metal on a Mac) are optional.  Output: docs/images/rover-<view>.png.
 1 Blender unit = 1 mm.  The body is a 140 x 140 x 60 mm block with 0.8 mm edges, NOT the real shell (hardware/body/block.py is only the cavity volume);
 the cells, panes and windows are laid on its faces from the same numbers as layout.py, cell_pocket.py and cell_endface.py.  Not modelled: lid screws and
 seals, hub studs and rings, the lamp, the beamsplitter, anything inside.  The forged-carbon pattern is procedural (chips of random orientation, each with
@@ -284,7 +284,24 @@ elif VIEW == "cells":
 else: raise SystemExit(f"unknown VIEW {VIEW}")
 
 # ---------------------------------------------------------------- render
-scene.render.engine = "CYCLES"; scene.cycles.device = "CPU"; scene.cycles.samples = SAMPLES
+scene.render.engine = "CYCLES"; scene.cycles.samples = SAMPLES
+# DEVICE=cpu (default) or DEVICE=gpu: gpu uses Metal on an Apple Silicon Mac (CUDA, OptiX or HIP elsewhere), falling back to the CPU if no GPU is found
+scene.cycles.device = "CPU"
+if os.environ.get("DEVICE", "cpu").lower() == "gpu":
+    prefs = bpy.context.preferences.addons["cycles"].preferences
+    for kind in ("METAL", "OPTIX", "CUDA", "HIP", "ONEAPI"):
+        try:
+            prefs.compute_device_type = kind
+            prefs.refresh_devices() if hasattr(prefs, "refresh_devices") else prefs.get_devices()
+            gpus = [d for d in prefs.devices if d.type == kind]
+        except Exception:
+            continue
+        if gpus:
+            for d in prefs.devices:
+                d.use = d.type in (kind, "CPU") if kind == "METAL" else d.type == kind     # on Apple Silicon the CPU cores help the GPU a little
+            scene.cycles.device = "GPU"; print("render device:", kind, [d.name for d in gpus]); break
+    else:
+        print("no GPU device found; rendering on the CPU")
 scene.cycles.use_denoising = True; scene.cycles.denoiser = "OPENIMAGEDENOISE"
 scene.cycles.glossy_bounces = 4; scene.cycles.max_bounces = 6; scene.cycles.diffuse_bounces = 2; scene.cycles.transmission_bounces = 2
 scene.render.resolution_x, scene.render.resolution_y = RES; scene.render.resolution_percentage = 100
