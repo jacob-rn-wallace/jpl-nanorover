@@ -64,6 +64,18 @@ export const RISK = [
 ];
 export const SLAM_QUALITY = [0, 0.5, 1, 2];   // 0 perfect; 1 a typical dead-reckoning drift ASM
 
+/** Systematic odometry errors (owner's open item, 2026-11-14; docs/hardware-spec.md section 6): the wheel speeds come from back-EMF, not encoders, so there is a wheel-scale error (the motor constant,
+ *  the wheel's real rolling radius), a slow drift of it (magnet temperature, about -0.1 %/K over 30 K), slip episodes (the wheels turn and the rover does not move as far: the speed reads too high),
+ *  and a gyro scale error. All ASM unless marked; every figure is multiplied by the quality switch (x0.5, x1, x2) like the random errors. */
+export const ODO_SYS = {
+  wheelSigma: 0.04,            // per-run wheel scale error, 1 sigma (an uncalibrated motor constant is typically +-5 to 10 %; the wheel's real radius +-1 %) ASM
+  driftSigma: 0.0015,          // random walk of the wheel scale per sqrt(s): about 1.5 % after 100 s ASM
+  gyroScaleSigma: 0.005,       // per-run gyro scale error, 1 sigma (MEMS sensitivity error of the order of 0.5 %) ASM
+  slipRate: 0.04,              // slip episodes per second of driving ASM
+  slipMin: 0.05, slipMax: 0.25,// the speed reads this much too high during a slip episode ASM
+  slipDur: [0.3, 1.0],         // s ASM
+};
+
 /** ultrasonic beacon fix (Cricket pattern; owner decision 2026-11-13). The radio packet gives the time sync, so each post's range is a time of flight.
  *  Figures: sigma 4 cm is the middle of the 3 to 5 cm plan (docs/positioning.md section 7); the rest are ASM. */
 export const BEACON = {

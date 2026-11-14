@@ -1,5 +1,5 @@
 // The rover's sensors as the firmware sees them: an 8 x 8 multizone time-of-flight sensor, wheel odometry, a gyro and a tilt sensor.
-import { ROVER, TOF, SLAM_QUALITY, BEACON, LIGHTHOUSE as LH } from "./constants";
+import { ROVER, TOF, SLAM_QUALITY, BEACON, LIGHTHOUSE as LH, ODO_SYS } from "./constants";
 import { Rng, rotate, tiltDown, V3, wrap } from "./util";
 import { World } from "./world";
 import { Rover } from "./rover";
@@ -64,11 +64,15 @@ export class Odometry {
   lighthouse = false; lhDetect = LH.detect;
   private lhT = 0; lhFixes = 0; lhRejected = 0;
   private beaconT = 0; fixes = 0; rejected = 0;
+  /** systematic errors (wheel scale, its drift, slip episodes, gyro scale): off by default so the earlier measurements stay comparable */
+  systematic = false;
+  private wheelScale = 1; private gyroScale = 1; private slipLeft = 0; private slipMag = 0;
   private still = 0; private accum = 0; private n = 0; private biasEst = 0;
   constructor(private rng: Rng) {}
   reset(r: Rover): void {
     this.est = { x: r.x, y: r.y, theta: r.theta, z: r.z, sigma: 0 };
     this.bias = this.rng.gauss() * 0.003 * this.quality;
+    this.wheelScale = 1 + this.rng.gauss() * ODO_SYS.wheelSigma * this.quality; this.gyroScale = 1 + this.rng.gauss() * ODO_SYS.gyroScaleSigma * this.quality; this.slipLeft = 0; this.slipMag = 0;
     this.still = 0; this.accum = 0; this.n = 0; this.biasEst = 0; this.beaconT = 0; this.fixes = 0; this.rejected = 0; this.lhT = 0; this.lhFixes = 0; this.lhRejected = 0;
   }
   /** angles (azimuth about vertical, elevation) from a station to a point, as the sweeps would give them */
@@ -152,7 +156,15 @@ export class Odometry {
     if (q === 0) { e.x = r.x; e.y = r.y; e.theta = r.theta; e.z = r.z; e.sigma = 0; this.imu = { pitch: r.pitch, roll: r.roll }; return; }
     this.imu = { pitch: r.pitch + this.rng.gauss() * this.tiltSigma, roll: r.roll + this.rng.gauss() * this.tiltSigma };
     this.bias += this.rng.gauss() * 0.0008 * Math.sqrt(dt) * q;
-    const v = r.vel * (1 + this.rng.gauss() * 0.02 * q), raw = r.omega + this.bias;
+    let v = r.vel * (1 + this.rng.gauss() * 0.02 * q), raw = r.omega + this.bias;
+    if (this.systematic) {
+      this.wheelScale += this.rng.gauss() * ODO_SYS.driftSigma * Math.sqrt(dt) * q;                  // the wheel scale drifts
+      if (this.slipLeft <= 0 && Math.abs(r.vel) > 1e-3 && this.rng.next() < ODO_SYS.slipRate * dt * q) {   // a slip episode starts while driving
+        this.slipLeft = ODO_SYS.slipDur[0] + this.rng.next() * (ODO_SYS.slipDur[1] - ODO_SYS.slipDur[0]); this.slipMag = ODO_SYS.slipMin + this.rng.next() * (ODO_SYS.slipMax - ODO_SYS.slipMin);
+      }
+      if (this.slipLeft > 0) { this.slipLeft -= dt; v *= 1 + this.slipMag; }
+      v *= this.wheelScale; raw = r.omega * this.gyroScale + this.bias;
+    }
     if (this.calibrate) {                       // wheel counts say "stopped": average the raw gyro over the stop (after 0.5 s of settling)
       if (Math.abs(r.vel) < 1e-4 && Math.abs(r.omega) < 1e-4) {
         this.still += dt;

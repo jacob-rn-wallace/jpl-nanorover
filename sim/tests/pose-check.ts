@@ -1,9 +1,9 @@
 // Pose error of the dead-reckoned estimate along the autopilot's route, with and without the ultrasonic beacon fix (npm run pose).
 import { Sim } from "../src/sim";
 const goals = [{ x: -0.2, y: -0.35 }, { x: 0.2, y: 0.0 }, { x: 0.6, y: 0.3 }];
-function run(q: number, seed: number, beacons: boolean, calibrate: boolean, lh = false, detect = 1) {
+function run(q: number, seed: number, beacons: boolean, calibrate: boolean, lh = false, detect = 1, sys = false) {
   const s = new Sim(seed); while (s.slamQuality !== q) s.cycleSlam();
-  s.odo.beacons = beacons; s.odo.calibrate = calibrate; s.odo.lighthouse = lh; s.odo.lhDetect = detect;
+  s.odo.beacons = beacons; s.odo.calibrate = calibrate; s.odo.lighthouse = lh; s.odo.lhDetect = detect; s.odo.systematic = sys;
   s.setRisk(1); s.setMode("mission"); s.setGoals(goals);
   let t = 0, se = 0, n = 0, mx = 0;
   while (t < 600 && !s.rover.fallen && !s.rover.stuck && !s.rover.tipped) {
@@ -18,4 +18,15 @@ for (const q of [1]) for (const [b, c, lh, det] of [[false, false, false, 1], [f
   let r = 0, m = 0, tt = 0;
   for (let seed = 1; seed <= N; seed++) { const o = run(q, seed, b, c, lh, det); r += o.rms; m += o.mx; tt += o.t; }
   console.log(`x${q}  beacons ${b ? "on " : "off"} calibration ${c ? "on " : "off"} lighthouse ${lh ? "on, detect " + det : "off"}: mean RMS position error ${(r / N * 100).toFixed(1)} cm, mean worst ${(m / N * 100).toFixed(1)} cm (${N} seeds, mean ${(tt / N).toFixed(0)} s)`);
+}
+
+// With the systematic errors (wheel scale, its drift, slip episodes, gyro scale) on: does dead reckoning survive, and do the beacons or the Lighthouse fix rescue it?
+console.log("\nwith systematic odometry errors (docs/hardware-spec.md section 6, ODO_SYS):");
+for (const q of [0.5, 1, 2]) {
+  while (false) {}
+  for (const [b, lh, label] of [[false, false, "dead reckoning only"], [true, false, "beacons"], [false, true, "Lighthouse"], [true, true, "beacons and Lighthouse"]] as [boolean, boolean, string][]) {
+    let r = 0, m = 0, ok = 0;
+    for (let seed = 1; seed <= N; seed++) { const o = run(q, seed, b, true, lh, 1, true); r += o.rms; m += o.mx; if (o.mx < 0.15) ok++; }
+    console.log(`x${q}  ${label.padEnd(24)}: mean RMS position error ${(r / N * 100).toFixed(1)} cm, mean worst ${(m / N * 100).toFixed(1)} cm, ${ok} of ${N} runs stay within 15 cm`);
+  }
 }
