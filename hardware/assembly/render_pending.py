@@ -11,7 +11,7 @@
 What it does, in order: `git pull --rebase`; reads the Jobs table in docs/render-jobs.md (columns: Id, Image, Settings, Expected, Why, Status, Notes); takes the rows whose
 Status starts with "pending"; regenerates the strut and wheel meshes if the repository's .venv exists; for each job runs Blender headless (the Metal GPU on a Mac, the CPU elsewhere)
 with the job's settings; checks that the image exists and is not blank; sets the row's Status to "done YYYY-MM-DD" and its Notes to the device, the time and the check result;
-commits the images and the table and pushes (pulling and retrying if the push is refused). A job that fails stays pending with the error in its Notes.
+commits the images and the table and pushes (pulling and retrying if the push is refused). A job that fails stays pending with the last real error in its Notes; those failure notes are COMMITTED AND PUSHED too (the choice made, so that no uncommitted change to the table is left to get in the way of the next `git pull`, and so that the modelling session can see why a job failed); an identical note on a repeat run changes nothing and makes no commit.
 It does NOT look at the pictures: open the new images once (docs/images/) and, if one is wrong, set its row back to pending with a note.
 Settings are read from the Settings cell: environment assignments in backticks (VIEW=hero, LED=on, BEZEL=black, SUFFIX=-lit ...), a size such as 1500x940 and the sample count.
 """
@@ -60,22 +60,38 @@ def blender_version(binary):
         return None
 
 
+DMG = "https://download.blender.org/release/Blender4.5/blender-4.5.9-macos-arm64.dmg"
+DMG_SHA = "e3a3d7aac381fb4e4d05197f99cd8899484d7e8bc4497c134066e6733f372238"
+
+
 def blender_binary():
-    """The first Blender that is 4.2 or later (the cell material needs the thin-film input added in 4.2; the renders were made with 4.5.9). BLENDER overrides; otherwise the usual places are tried, newest first."""
+    """The first of these that exists AND reports Blender 4.2 or newer (the cell material needs the thin-film input added in 4.2; the renders were made with 4.5.9): $BLENDER,
+    ~/tools/Blender-4.5.9.app, /Applications/Blender.app, the Linux tarball under ~/tools. Never falls back to an older version."""
     home = Path.home()
-    cands = [os.environ.get("BLENDER")] + [str(p) for pat in ("tools/Blender*.app", "Applications/Blender*.app", "tools/blender-4*/blender") for p in sorted(home.glob(pat), reverse=True)
-                                           for p in ([p / "Contents/MacOS/Blender"] if p.suffix == ".app" else [p])] + sorted(str(p / "Contents/MacOS/Blender") for p in Path("/Applications").glob("Blender*.app"))[::-1] + \
-            [str(home / "tools/blender-4.5.9-linux-x64/blender"), "/Applications/Blender.app/Contents/MacOS/Blender"]
-    seen, found = set(), []
+    cands = [os.environ.get("BLENDER"), str(home / "tools/Blender-4.5.9.app/Contents/MacOS/Blender"), "/Applications/Blender.app/Contents/MacOS/Blender",
+             str(home / "tools/blender-4.5.9-linux-x64/blender")]
+    found = []
     for c in cands:
-        if not c or c in seen or not Path(c).exists():
+        if not c or not Path(c).exists():
             continue
-        seen.add(c); v = blender_version(c); found.append((c, v))
+        v = blender_version(c); found.append((c, v))
         if v and v >= (4, 2, 0):
             print(f"Blender: {c} (version {v[0]}.{v[1]}.{v[2]})")
             return c
-    sys.exit("No Blender 4.2 or later found. Found: " + (", ".join(f"{c} ({'.'.join(map(str, v)) if v else 'unknown'})" for c, v in found) or "none") +
-             ".\nInstall Blender 4.5.9 LTS (docs/blender-render.md, 'Setup on an Apple Silicon Mac'), for example to ~/tools/Blender-4.5.9.app, or set BLENDER to its binary.")
+    sys.exit("No Blender 4.2 or newer found (found: " + ("; ".join(f"{c} is {'.'.join(map(str, v)) if v else 'of unknown version'}" for c, v in found) or "none") + ").\n"
+             "Blender 4.5.9 LTS is needed. macOS arm64: " + DMG + "\n  SHA-256 " + DMG_SHA + "\nInstall it as ~/tools/Blender-4.5.9.app (see docs/blender-render.md), or set BLENDER to its binary.")
+
+
+def last_error(out):
+    """The last real error in Blender's output, in full if it is short: the last line that names an error (SomeError: ...), cut at a word boundary near 200 characters, with no '|' (it goes in a table cell)."""
+    lines = [l.strip() for l in out.splitlines() if re.match(r"^\s*\w*(Error|Exception)\b", l) and "no attribute 'vs'" not in l]
+    if not lines:
+        lines = [l.strip() for l in out.splitlines() if "rror" in l and "no attribute 'vs'" not in l]
+    msg = lines[-1] if lines else "no error line found in Blender's output"
+    msg = msg.replace("|", "/")
+    if len(msg) > 200:
+        msg = msg[:200].rsplit(" ", 1)[0] + " ..."
+    return msg
 
 
 def image_check(path):
@@ -142,23 +158,25 @@ def main():
         if ok:
             ok, msg = image_check(img)
         else:
-            errs = [l for l in out.splitlines() if ("Error" in l or "error" in l) and "no attribute 'vs'" not in l]
-            msg = "no image written; " + (" | ".join(errs[-3:])[-300:] if errs else "see Blender's output") + f" (Blender {'.'.join(map(str, blender_version(blender) or ()))})"
+            msg = "no image written: " + last_error(out)
         cells = jobs[jid]["cells"]
         if ok:
             cells[5] = f"done {today}"; cells[6] = f"automatic ({Path(__file__).name}): {dev}, {secs:.0f} s, {samples} samples; {msg}"
             done.append(jid); images.append(img)
         else:
-            cells[6] = f"automatic render failed {today}: {msg}"
+            cells[6] = f"automatic render failed {today}: {msg}"[:260]
             failed.append(jid)
         lines[jobs[jid]["line"]] = "| " + " | ".join(cells) + " |"
         print(f"  {jid}: {'done' if ok else 'FAILED'} in {secs:.0f} s on {dev}; {msg}")
         JOBS.write_text("\n".join(lines))                    # save after every job, so a stop part-way loses nothing
 
-    if a.no_commit or not done:
-        print("not committing" + (" (nothing rendered)" if not done else " (--no-commit)")); sys.exit(1 if failed else 0)
+    if a.no_commit:
+        print("not committing (--no-commit)"); sys.exit(1 if failed else 0)
     sh(["git", "add", "docs/render-jobs.md"] + [str(p.relative_to(ROOT)) for p in images])
-    sh(["git", "commit", "-m", f"Renders {', '.join(done)} (automatic, {dev})"])
+    if sh(["git", "diff", "--cached", "--quiet"], check=False).returncode == 0:
+        print("nothing changed in the table: not committing"); sys.exit(1 if failed else 0)
+    msg = (f"Renders {', '.join(done)} (automatic, {dev})" + (f"; failed: {', '.join(failed)}" if failed else "")) if done else f"Render attempt failed for {', '.join(failed)} (automatic): notes in docs/render-jobs.md"
+    sh(["git", "commit", "-m", msg])
     if a.no_push:
         print("committed; not pushed (--no-push)")
     else:

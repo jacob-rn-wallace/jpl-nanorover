@@ -114,10 +114,7 @@ def solar_cell():
     lw = N.new("ShaderNodeLayerWeight"); lw.inputs["Blend"].default_value = 0.35            # facing ratio: the coating's colour moves from blue to violet toward grazing angles
     cr = N.new("ShaderNodeValToRGB"); cr.color_ramp.elements[0].color = (0.50, 0.40, 0.85, 1); cr.color_ramp.elements[1].color = (0.80, 0.85, 1.0, 1)      # a faint cool sheen toward grazing angles only
     L.new(lw.outputs["Facing"], cr.inputs["Fac"]); L.new(cr.outputs["Color"], b.inputs["Specular Tint"])
-    if "Thin Film Thickness" in b.inputs:                                  # added in Blender 4.2; an older Blender renders the cells without the thin-film tint (a warning is printed)
-        b.inputs["Thin Film Thickness"].default_value = 78.0; b.inputs["Thin Film IOR"].default_value = 2.0
-    else:
-        print("WARNING: this Blender (%s) has no thin-film input (4.2 or later needed): the cells are rendered without it, so they will differ slightly from the 4.5 renders" % bpy.app.version_string)
+    b.inputs["Thin Film Thickness"].default_value = 78.0; b.inputs["Thin Film IOR"].default_value = 2.0
     b.inputs["Coat Weight"].default_value = 0.30; b.inputs["Coat Roughness"].default_value = 0.22; b.inputs["Coat IOR"].default_value = 1.58      # a satin film (the SM940K09L front looks matte in its photo; index assumed)
     tc = N.new("ShaderNodeTexCoord"); mp = N.new("ShaderNodeMapping"); mp.inputs["Scale"].default_value = (1 / 60.0, 1 / 60.0, 1 / 60.0)
     L.new(tc.outputs["Object"], mp.inputs["Vector"])
