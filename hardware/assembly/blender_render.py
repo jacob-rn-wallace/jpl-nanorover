@@ -130,6 +130,7 @@ MAT = {
     "film": principled("laminate margin", (0.009, 0.010, 0.013), metallic=0.0, rough=0.42),     # photos show no pale border: the part is black edge to edge
     "glass": principled("camera pane", (0.0, 0.0, 0.0), metallic=0.0, rough=0.04, Coat_Weight=0.5, Coat_Roughness=0.02),
     "bezel": principled("bezel", (0.18, 0.18, 0.2), metallic=1.0, rough=0.28),
+    "screw": principled("M1.6 socket-head screw, stainless", (0.55, 0.56, 0.58), metallic=1.0, rough=0.28),
     "hood": principled("lens hood and mask ring", (0.004, 0.004, 0.005), metallic=0.0, rough=0.55),
     "lens": principled("M12 lens front", (0.0, 0.0, 0.0), metallic=0.0, rough=0.10, Coat_Weight=0.25, Coat_Roughness=0.12),
     "iris": principled("lens inner element", (0.004, 0.006, 0.022), metallic=0.0, rough=0.12, Coat_Weight=0.3, Coat_Roughness=0.08),
@@ -196,6 +197,24 @@ def cylinder_y(name, cx, cz, r, y0, y1, mat, verts=96):
     return make(name, bm, mat)
 
 
+def ring_y(name, cx, cz, r_out, r_in, y0, y1, mat, n=96):
+    """A flat ring (annulus) with walls, axis along y, from y0 to y1."""
+    bm = bmesh.new()
+    ang = [2 * math.pi * k / n for k in range(n)]
+    vo0 = [bm.verts.new((cx + r_out * math.cos(a), y0, cz + r_out * math.sin(a))) for a in ang]
+    vo1 = [bm.verts.new((cx + r_out * math.cos(a), y1, cz + r_out * math.sin(a))) for a in ang]
+    vi0 = [bm.verts.new((cx + r_in * math.cos(a), y0, cz + r_in * math.sin(a))) for a in ang]
+    vi1 = [bm.verts.new((cx + r_in * math.cos(a), y1, cz + r_in * math.sin(a))) for a in ang]
+    for k in range(n):
+        j = (k + 1) % n
+        bm.faces.new((vo0[k], vo0[j], vo1[j], vo1[k]))        # outer wall
+        bm.faces.new((vi1[k], vi1[j], vi0[j], vi0[k]))        # inner wall
+        bm.faces.new((vo1[k], vo1[j], vi1[j], vi1[k]))        # front annulus
+        bm.faces.new((vi0[k], vi0[j], vo0[j], vo0[k]))        # back annulus
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    return make(name, bm, mat)
+
+
 def body():
     bm = bmesh.new(); add_box(bm, -70, 70, -70, 70, 0, 60)
     uv = bm.loops.layers.uv.new("UVMap")
@@ -204,6 +223,14 @@ def body():
         off = 200.0 * (2 * (n[ax] > 0) + ax)             # a different patch of the pattern on each face
         for lp in f.loops: lp[uv].uv = (lp.vert.co[a] + off, lp.vert.co[b] + off)
     ob = make("body", bm, "carbon")
+    wx_ = 70 - (GAP + 13)
+    for nm, r, y0_, y1_ in (("cut opening", 13.0, 60.0, 70.5), ("cut sapphire seat", 14.1, 67.7, 70.5), ("cut bezel pocket", 18.0, 68.5, 70.5)):
+        cb = bmesh.new(); bmesh.ops.create_cone(cb, cap_ends=True, cap_tris=False, segments=96, radius1=r, radius2=r, depth=y1_ - y0_)
+        for v in cb.verts: v.co = (v.co.x, v.co.z, -v.co.y)
+        bmesh.ops.translate(cb, verts=cb.verts, vec=(wx_, (y0_ + y1_) / 2, 30))
+        cm = bpy.data.meshes.new(nm); cb.to_mesh(cm); cb.free()
+        co = bpy.data.objects.new(nm, cm); bpy.context.collection.objects.link(co); co.hide_render = True; co.hide_viewport = True
+        bo = ob.modifiers.new(nm, "BOOLEAN"); bo.operation = "DIFFERENCE"; bo.object = co; bo.solver = "EXACT"
     bev = ob.modifiers.new("bevel", "BEVEL"); bev.width = 0.8; bev.segments = 4; bev.limit_method = "ANGLE"
     return ob
 
@@ -221,10 +248,17 @@ def import_stl(name, mat):
 smooth(body(), 30)
 cells()
 wx = 70 - (GAP + 13)
-cylinder_y("bezel", wx, 30, 14.6, 70.0, 70.0 + T, "bezel")
-cylinder_y("pane", wx, 30, 13.0, 70.0, 70.0 + T + 0.25, "glass")
-# behind the cover glass (drawn just in front of the pane, which is dark glass): the smoked dead-front annulus over the LED ring, 7 LEDs (off), the lens hood, the lens, the ranging sensor's IR ink
-y0 = 70.0 + T + 0.25
+# the window bezel (owner's taste, 2026-11-14: a metal frame with visible screws, like a viewport; flush with the carbon face, screws flush with the ring): a bare machined aluminium ring,
+# r = 13 to 18 mm, 1.5 mm thick (y 68.5 to 70.0, flush with the face), clamping the 28 mm sapphire disc (y 68.0 to 68.5, in a seat in the carbon) with a 1 mm overlap; six countersunk M1.6 screws
+# (flat heads, 3 mm across) on a 15.5 mm radius at 30, 90, 150, 210, 270 and 330 degrees, flush with the ring; docs/hardware-spec.md section 5.
+ring_y("bezel ring", wx, 30, 18.0, 13.0, 68.5, 70.0, "strut")
+for deg in (30, 90, 150, 210, 270, 330):
+    a_ = math.radians(deg)
+    cylinder_y(f"screw{deg}", wx + 15.5 * math.cos(a_), 30 + 15.5 * math.sin(a_), 1.5, 69.9, 70.02, "screw", verts=32)
+    cylinder_y(f"socket{deg}", wx + 15.5 * math.cos(a_), 30 + 15.5 * math.sin(a_), 0.65, 70.02, 70.03, "hood", verts=6)
+cylinder_y("pane", wx, 30, 14.0, 68.0, 68.5, "glass")
+# behind the sapphire disc (drawn on the pane's outer side, inside the opening: the pane is dark glass): the smoked dead-front annulus over the LED ring, the LEDs when LED=on, the lens hood, the lens, the sensor
+y0 = 68.5
 cylinder_y("film ring", wx, 30, 11.8, y0, y0 + 0.08, "smoked")
 # LED=off (default): the LEDs do not appear at all, as behind a real dead-front film; LED=on draws them lit (warm white, emissive) for a photograph-with-lamp view
 if os.environ.get("LED", "off").lower() == "on":
@@ -280,7 +314,7 @@ elif VIEW == "top": camera((0, 0, 1400), (0, 0, 0), 55, ortho=330); scene.camera
 elif VIEW == "detail":
     tgt = (45, 70, 38); loc = orbit(32, 18, 230, tgt); camera(loc, tgt, 85, dof=(loc - Vector(tgt)).length)
 elif VIEW == "window":
-    tgt = (wx, 70, 33); loc = orbit(90, 10, 150, tgt); camera(loc, tgt, 100, dof=(loc - Vector(tgt)).length)
+    tgt = (wx, 70, 33); loc = orbit(90, 10, 178, tgt); camera(loc, tgt, 100, dof=(loc - Vector(tgt)).length)
 elif VIEW == "cells":
     tgt = (20, 30, 60); loc = orbit(24, 24, 190, tgt); camera(loc, tgt, 100, dof=(loc - Vector(tgt)).length)
 else: raise SystemExit(f"unknown VIEW {VIEW}")

@@ -94,11 +94,11 @@ def end_cells(face):
     return [slab(face, start + 21.8 * k, start + 21.8 * k + 21.5, 7.75, 52.25) for k in range(4)]
 
 
-BIAS = {"cells": 1.5, "bezel": 1.8, "glass": 2.0, "plug": 1.5, "hood": 2.3, "lens": 2.4, "leds": 2.5, "tof": 2.6}     # mm toward the viewer: the thin overlays on the body faces must sort after the body
+BIAS = {"cells": 1.5, "bezel": 1.8, "glass": 2.0, "plug": 1.5, "hood": 2.3, "lens": 2.4, "leds": 2.5, "tof": 2.6, "screws": 3.2}     # mm toward the viewer: the thin overlays on the body faces must sort after the body
 
 
 TEX = {}
-UNIT = {"glass", "bezel", "hood", "lens", "leds", "tof"}      # overlays on the window: sorted as one unit each, so coplanar discs do not interleave
+UNIT = {"glass", "bezel", "hood", "lens", "leds", "tof", "screws"}      # overlays on the window: sorted as one unit each, so coplanar discs do not interleave
 
 
 def render(ax, meshes, el, az, title, lims=None):
@@ -134,17 +134,20 @@ def main():
     cells = fine(trimesh.util.concatenate(lid_cells("+z") + lid_cells("-z") + end_cells("+y") + end_cells("-y")))
     wx = 70 - (GAP + 13)
     glass = fine(disc("+y", wx, 30, 13.0))                                    # the cover glass: the original 26 mm circle again (LED ring instead of the beamsplitter)
-    bezel = fine(disc("+y", wx, 30, 14.6)); bezel.apply_translation((0, -0.12, 0))
+    bezel = trimesh.creation.annulus(r_min=13.0, r_max=18.0, height=0.3, sections=96)               # bare machined aluminium ring, flush with the face in the design (drawn 0.3 mm proud so that the painter's sort keeps it above the carbon); the sapphire sits recessed behind it, which this renderer cannot show
+    bezel.apply_transform(trimesh.transformations.rotation_matrix(np.pi / 2, [1, 0, 0])); bezel.apply_translation((wx, 70.15, 30)); bezel = fine(bezel)
+    screws = fine(trimesh.util.concatenate([disc("+y", wx + 15.5 * np.cos(np.radians(d)), 30 + 15.5 * np.sin(np.radians(d)), 1.5) for d in (30, 90, 150, 210, 270, 330)]))
+    screws.apply_translation((0, 0.3, 0))                                                          # six M1.6 screw heads on the bezel
     hood = fine(disc("+y", wx, 30, 8.2))                                      # black mask ring and lens hood against the glass
     lens = fine(disc("+y", wx, 30, 6.3))                                      # the M12 lens front
     leds = fine(trimesh.util.concatenate([disc("+y", wx + 10.0 * np.cos(np.radians(d)), 30 + 10.0 * np.sin(np.radians(d)), 1.5) for d in (0, 45, 135, 180, 225, 315)]))   # 6 white LEDs, top slot and bottom free
     tof = fine(slab("+y", wx - 3.2, wx + 3.2, 40.5 - 1.5, 40.5 + 1.5))      # the ranging sensor (6.4 x 3.0 mm) in the ring's top slot
     plug = fine(slab("-y", -(70 - (GAP + 13)) - 13.5, -(70 - (GAP + 13)) + 13.5, 30 - 13.5, 30 + 13.5))
     parts = [(Path("body.step"), "#34383e", 0), (Path("struts.step"), "#b9b4aa", 0), (Path("wheels.step"), "#cdd1d6", 0),
-             (Path("cells.step"), "#161a22", 0), (Path("bezel.step"), "#7a7f86", 0), (Path("glass.step"), "#0b0e13", 0), (Path("plug.step"), "#3f4a46", 0),
-             (Path("hood.step"), "#0d0f13", 0), (Path("lens.step"), "#010203", 0), (Path("leds.step"), "#17150f", 0), (Path("tof.step"), "#4a5262", 0)]
+             (Path("cells.step"), "#161a22", 0), (Path("bezel.step"), "#c7cbd1", 0), (Path("glass.step"), "#0b0e13", 0), (Path("plug.step"), "#3f4a46", 0),
+             (Path("screws.step"), "#9aa0a6", 0), (Path("hood.step"), "#0d0f13", 0), (Path("lens.step"), "#010203", 0), (Path("leds.step"), "#17150f", 0), (Path("tof.step"), "#4a5262", 0)]
     pv.PARTS = parts
-    meshes = [body, struts, wheels, cells, bezel, glass, plug, hood, lens, leds, tof]
+    meshes = [body, struts, wheels, cells, bezel, glass, plug, screws, hood, lens, leds, tof]
     TEX["body"] = forged_texture(body)
     fig, axs = plt.subplots(2, 2, figsize=(14, 10.5))
     render(axs[0, 0], meshes, 24, 38, title="camera end (+y), +x hub side, top lid")
@@ -163,10 +166,10 @@ def main():
     f3, a3 = plt.subplots(figsize=(9, 7)); f3.patch.set_facecolor("#e9ecef"); a3.set_facecolor("#e9ecef")
     r3, u3, d3 = pv.view(0, 90)
     wp = np.array([wx, 70.0, 30.0]); cxx, cyy = wp @ r3, wp @ u3
-    render(a3, meshes, 0, 90, "the 26 mm window from +y: lens, LED ring (off, behind a smoked dead-front), ranging sensor in the top slot", lims=(cxx - 36, cxx + 36, cyy - 26, cyy + 26))
+    render(a3, meshes, 0, 90, "camera window from +y: bezel, lens, LED ring (off), ranging sensor", lims=(cxx - 36, cxx + 36, cyy - 26, cyy + 26))
     sp = np.array([wx, 70.0, 40.5]); a3.annotate("ranging sensor\n(VL53L5CX, 6.4 x 3 mm)", (sp @ r3, sp @ u3), (cxx - 30, cyy + 20), fontsize=9, arrowprops=dict(arrowstyle="->"), ha="center", bbox=dict(boxstyle="round,pad=0.25", fc="white", ec="0.5", alpha=0.92))
     cp = np.array([wx, 70.0, 30.0 - 4]); a3.annotate("camera lens (M12)\nand hood", (cp @ r3, cp @ u3), (cxx, cyy - 25), fontsize=9, arrowprops=dict(arrowstyle="->"), ha="center", bbox=dict(boxstyle="round,pad=0.25", fc="white", ec="0.5", alpha=0.92))
-    gp = np.array([wx - 13.0 * 0.7, 70.0, 30.0 + 13.0 * 0.7]); a3.annotate("cover glass\n(26 mm)", (gp @ r3, gp @ u3), (cxx + 26, cyy + 20), fontsize=9, arrowprops=dict(arrowstyle="->"), ha="center", bbox=dict(boxstyle="round,pad=0.25", fc="white", ec="0.5", alpha=0.92))
+    gp = np.array([wx - 15.5 * 0.866, 70.0, 30.0 + 15.5 * 0.5]); a3.annotate("aluminium bezel,\nsix M1.6 screws", (gp @ r3, gp @ u3), (cxx + 26, cyy + 20), fontsize=9, arrowprops=dict(arrowstyle="->"), ha="center", bbox=dict(boxstyle="round,pad=0.25", fc="white", ec="0.5", alpha=0.92))
     f3.savefig(HW.parent / "docs" / "images" / "rover-concept-window.png", dpi=110, facecolor=f3.get_facecolor())
     out = HW.parent / "docs" / "images" / "rover-concept.png"
     fig.savefig(out, dpi=80, facecolor=fig.get_facecolor())

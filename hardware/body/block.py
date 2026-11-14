@@ -109,6 +109,9 @@ add("comms antenna", bx(*w), area_box(*w))   # 27 mm square RF-transparent windo
 
 # the through-wall opening for the shared cover glass is a circle of radius WIN_R_GLASS on the same centre (the ranging sensor sits in its ring)
 add("ranging sensor", cyl("y", LY.WIN_X, LY.WIN_Z, LY.WIN_R_GLASS, 60.0, 70.0), area_cyl(LY.WIN_R_GLASS, 10.0))
+# the flush bezel (docs/hardware-spec.md section 5): a 1.5 mm pocket for the 36 mm aluminium ring (y 68.5 to 70, flush with the face) and a 0.8 mm seat for the 28 mm sapphire disc and its gasket (y 67.7 to 68.5)
+add("camera, LED ring and ranging window", cyl("y", LY.WIN_X, LY.WIN_Z, 18.0, 68.5, 70.0), area_cyl(18.0, 1.5))
+add("camera, LED ring and ranging window", cyl("y", LY.WIN_X, LY.WIN_Z, 14.1, 67.7, 68.5), area_cyl(14.1, 0.8))
 
 block = Box(140, 140, 60, align=(Align.CENTER, Align.CENTER, Align.MIN))
 volume_block = block.volume
@@ -134,6 +137,8 @@ for n, bm in LY.placed.items():
 X, Y, Z = LY.X, LY.Y, LY.Z
 solid &= ~((Y >= 60) & ((X - LY.WIN_X) ** 2 + (Z - LY.WIN_Z) ** 2 <= r_win ** 2))
 solid &= ~((Y >= 60) & ((X - LY.WIN_X) ** 2 + (Z - LY.WIN_Z) ** 2 <= LY.WIN_R_GLASS ** 2))
+solid &= ~((Y >= 68.5) & ((X - LY.WIN_X) ** 2 + (Z - LY.WIN_Z) ** 2 <= 18.0 ** 2))
+solid &= ~((Y >= 67.7) & ((X - LY.WIN_X) ** 2 + (Z - LY.WIN_Z) ** 2 <= 14.1 ** 2))
 solid &= ~((np.abs(X) >= 60) & (Y ** 2 + (Z - LY.HZ - 19.0) ** 2 <= 1.0))
 solid &= ~((Y <= -67.5) & (np.abs(X - LY.ANT_X) <= LY.ANT_WIN_HALF) & (np.abs(Z - LY.ANT_Z) <= LY.ANT_WIN_HALF))
 pad = np.pad(solid, 1, constant_values=False)
