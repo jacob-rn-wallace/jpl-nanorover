@@ -6,9 +6,10 @@ Partition (my recommendation, 2026-11-14; changes layout.py's board names): the 
 and the servo-bus buffer; the POWER board (upper lid) carries the cell protection, charger, solar inputs and the 7.4 V boost. Why the drivers go with the processor: the back-EMF counting reads
 each motor's terminal voltage at the driver's coast gaps, so the analogue sense lines stay on one board instead of crossing a connector, and the eight IN1/IN2 control lines do too (they would be
 the bulk of the crossing). The price: the strut motors' wires enter the body at the BOTTOM lid (the wall hole is at z = 11, 19 mm below the hub axis; it was z = 49).
+(2026-11-14, later still: the three link signals moved to the upper lid's + side, matching the lower lid's, so their wires run up one corridor instead of across the body, `wire_routes.py`.)
 (2026-11-14, later: the camera is an SPI module with a frame buffer, so four lines cross to the camera end; the XBee reset line and the IMU interrupt are dropped for pins, `pin_table.py`.)
 Between the boards only power and four slow signals cross, and they cross through the body's own wiring: each lid's contacts press on the lid's platform side face, the body wires join the two lids' pockets.
-Contacts (CHOSEN 2026-11-14, `contact_fit.py`): Mill-Max series 854, 0.050 in (1.27 mm) pitch horizontal SMT spring-loaded strips, 854-22-0XX-40-601101 (with mounting pegs): the piston moves parallel to the board, 2 A continuous / 3 A peak per contact, 20 mOhm max, 25 g to 60 g over the stroke, 2.21 mm high on a 0.8 mm board: 854-22-017-... for the + pockets and 854-22-018-... for the - pockets (the pockets are 12 mm deep: the strip is 10.9 mm from piston tip to tail end). Rule used here: one contact per signal net; power nets get the counts that `contact_estimate.py` finds (VBAT and ground at the battery 6 each, the 7.4 V rail 3, the 3.3 V converter's VBAT 2), none shared.
+Contacts (CHOSEN 2026-11-14, `contact_fit.py`): Mill-Max series 854, 0.050 in (1.27 mm) pitch horizontal SMT spring-loaded strips, 854-22-0XX-40-601101 (with mounting pegs): the piston moves parallel to the board, 2 A continuous / 3 A peak per contact, 20 mOhm max, 25 g to 60 g over the stroke, 2.21 mm high on a 0.8 mm board: 854-22-018-... in every pocket (the pockets are 12 mm deep: the strip is 10.9 mm from piston tip to tail end). Rule used here: one contact per signal net; power nets get the counts that `contact_estimate.py` finds (VBAT and ground at the battery 6 each, the 7.4 V rail 3, the 3.3 V converter's VBAT 2), none shared.
 """
 PITCH = 1.27          # mm between contact centres (ASM: the standard 0.050 in pitch)
 MARGIN = 1.5          # mm from the pocket's ends to the first and last contact centres
@@ -20,8 +21,8 @@ LOWER = {
           "VBAT in": 2, "V7.4 in (wheel drivers)": 3, "GND power return": 3},
 }
 UPPER = {
-    "+": {"VBAT (battery)": 6, "V7.4 out (to servos, LED ring, lower board)": 3, "GND power return (battery and loads)": 6},
-    "-": {"solar: bottom lid cells": 1, "solar: end A cells": 1, "solar: end B cells": 1, "boost enable": 1, "charger status": 1, "battery current sense": 1, "GND reference": 1},
+    "+": {"VBAT (battery)": 6, "V7.4 out (to servos, LED ring, lower board)": 3, "GND power return (battery and loads)": 6, "boost enable": 1, "charger status": 1, "battery current sense": 1},
+    "-": {"solar: bottom lid cells": 1, "solar: end A cells": 1, "solar: end B cells": 1, "GND reference": 1},
 }
 
 

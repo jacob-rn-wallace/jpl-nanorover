@@ -39,8 +39,8 @@ print(f"  board {BOARD_T} + profile {H_PROFILE:.2f} = {stack:.2f} mm in a {POCKE
 print(f"  piston centre {BOARD_T + H_CENTRE:.2f} mm above the pocket floor (pocket middle {POCKET_Z / 2:.2f}): the pads sit {BOARD_T + H_CENTRE - POCKET_Z / 2:+.2f} mm off the pocket's middle")
 print(f"  with a 1.0 mm board: {1.0 + H_PROFILE:.2f} mm, over the pocket: the board must be 0.8 mm or thinner")
 
-print("\nLENGTH along y (strip = N x 0.050 in + 0.015 in; pockets from harness.py: 23.3 mm for 17 contacts, 24.6 mm for 18):")
-for n, pocket in ((17, 23.3), (18, 24.6)):
+print("\nLENGTH along y (strip = N x 0.050 in + 0.015 in; harness.py: the largest contact count on any side is 18, so both pockets are 24.6 mm and ONE part, the 18-position strip, serves every pocket; unused positions are left unconnected):")
+for n, pocket in ((18, 24.6),):
     ln = n * 0.050 * IN + 0.015 * IN
     print(f"  {n} positions: strip {ln:.1f} mm in a {pocket} mm pocket: slack {pocket - ln:.1f} mm; part 854-22-{n:03d}-40-601101 (with pegs)")
 
@@ -50,12 +50,12 @@ def force(compress):                                                # grams, lin
 for c in (0.2, MID, 1.2):
     print(f"  compression {c:.2f} mm: {force(c):4.0f} g = {force(c) * G:.2f} N per contact")
 print(f"  stroke window: 0 to {MAXS:.2f} mm available; nominal {MID:.2f} mm leaves +-0.5 mm for the pad plane and the strip's placement (lid face +-0.2, strip +-0.15, ASM) with margin to both ends")
-for side, n in (("+", 17), ("-", 18)):
+for side, n in (("+", 18), ("-", 18)):
     print(f"  {side} side, {n} contacts at mid stroke: {n * force(MID) * G:.1f} N pushing the lid platform's side face outward")
-net = abs(17 - 18) * force(MID) * G
+net = 0.0
 print(f"  the two sides push in opposite directions: net {net:.2f} N along x (the cam catches locate the lid); no vertical force, so the contacts add nothing to the gasket load")
 MU = 0.3
-print(f"  lifting the lid drags the pistons along the pads: friction at mu = {MU} (ASM): up to {MU * 35 * force(MID) * G:.1f} N in total for 35 contacts, about the weight of a 0.6 kg object: a light extra pull when the lid is lifted off by hand, and it acts only while the lid moves (the sideways forces cancel at rest)")
+print(f"  lifting the lid drags the pistons along the pads: friction at mu = {MU} (ASM): up to {MU * 36 * force(MID) * G:.1f} N in total for 36 contacts, about the weight of a 0.6 kg object: a light extra pull when the lid is lifted off by hand, and it acts only while the lid moves (the sideways forces cancel at rest)")
 
 print("\nCURRENT (contact_estimate.py's worst per-contact figure is 0.58 A): rating 2 A continuous / 3 A peak -> margin x%.1f; contact resistance 20 mOhm max new (datasheet), 10 to 100 mOhm over life used in contact_estimate.py (ASM) stays valid." % (2.0 / 0.58))
 

@@ -113,6 +113,20 @@ add("ranging sensor", cyl("y", LY.WIN_X, LY.WIN_Z, LY.WIN_R_GLASS, 60.0, 70.0), 
 add("camera, LED ring and ranging window", cyl("y", LY.WIN_X, LY.WIN_Z, 18.0, 68.5, 70.0), area_cyl(18.0, 1.5))
 add("camera, LED ring and ranging window", cyl("y", LY.WIN_X, LY.WIN_Z, 14.1, 67.7, 68.5), area_cyl(14.1, 0.8))
 
+# body-side wire channels (docs/mechanical-spec.md item 9, hardware/body/wire_routes.py: run it BEFORE this script): square channels swept along each bundle's route, from the lid pockets to the camera and
+# antenna ends, the battery, the servos and the end-face cells; each is at least 3 mm square and keeps 2 mm clear of every component (checked at 1 mm in wire_routes.py)
+import json as _json
+_wr = OUT / "wire_routes.json"
+if _wr.exists():
+    for _nm, _r in _json.loads(_wr.read_text()).items():
+        _h = _r["channel_side_mm"] / 2
+        for _a, _b in zip(_r["points"][:-1], _r["points"][1:]):
+            _lo = [min(_a[i], _b[i]) - _h for i in range(3)]; _hi = [max(_a[i], _b[i]) + _h for i in range(3)]
+            _ln = max(_hi[i] - _lo[i] for i in range(3))
+            add("wire channels", bx(_lo[0], _hi[0], _lo[1], _hi[1], _lo[2], _hi[2]), 4 * _r["channel_side_mm"] * _ln)
+else:
+    print("no out/wire_routes.json: run hardware/body/wire_routes.py first; the wire channels are left out")
+
 block = Box(140, 140, 60, align=(Align.CENTER, Align.CENTER, Align.MIN))
 volume_block = block.volume
 cut = block
