@@ -26,7 +26,7 @@ function groundPlane(valid: Uint8Array, xf: Float32Array, yl: Float32Array, zb: 
   const pool: number[] = [];
   for (let j = n - 3; j < n; j++) for (let i = 0; i < n; i++) if (valid[j * n + i]) pool.push(j * n + i);
   let plane: [number, number, number] = [0, 0, 0];
-  for (const tol of [0.045, 0.02, 0.01]) {
+  for (const tol of [0.030, 0.02, 0.01]) {
     const idx = pool.filter(k => Math.abs(zb[k] - (plane[0] * xf[k] + plane[1] * yl[k] + plane[2])) < tol);
     if (idx.length < 10) return null;
     let sxx = 0, sxy = 0, sx = 0, syy = 0, sy = 0, sxz = 0, syz = 0, sz = 0;
