@@ -1,8 +1,17 @@
 # Render jobs (the hand-off between the modelling session and the render session)
 
-**How this works.** Two kinds of Claude Code session share this repository. The **modelling session** (the desktop, an HP EliteDesk with no GPU) changes the CAD and the render scripts, commits and pushes. The **render session** (the owner's MacBook Air, M2, 16 GB) pulls, renders the jobs that are `pending` below, checks the images, marks the jobs `done`, commits and pushes. The render session does not change the models, the scripts or the docs other than this file and the images. If something looks wrong in a render, it records that in the job's row and leaves the fix to the modelling session.
+**How this works.** Two machines share this repository. The **modelling session** (the desktop, an HP EliteDesk with no GPU) changes the CAD and the render scripts, commits and pushes. The **render session** (the owner's MacBook Air, M2, 16 GB) pulls, renders the jobs that are `pending` below, checks the images, marks the jobs `done`, commits and pushes. The render session does not change the models, the scripts or the docs other than this file and the images. If something looks wrong in a render, it records that in the job's row and leaves the fix to the modelling session.
 
-## For the render session: what to do
+## The automatic way (added 2026-11-14): one command on the render machine, no session needed
+
+```
+git pull
+python3 hardware/assembly/render_pending.py          # or, with the repository's venv: .venv/bin/python hardware/assembly/render_pending.py
+```
+
+The script pulls, reads the Jobs table below, renders every row whose Status starts with `pending` (Blender headless, the Metal GPU on a Mac, the settings from the row's Settings cell), checks that each image exists and is not blank, sets the row to `done <date>` with the device and the time in Notes, commits the images and this file and pushes (with a pull and retry if the push is refused). A job that fails stays `pending` with the error in Notes. Options: `--dry-run` (show the jobs and stop), `--jobs R1,R2` (render these whatever their status), `--no-push`, `--no-commit`; see the top of the script. **It cannot look at the pictures: open the new images in `docs/images/` afterwards, and if one is wrong set its row back to `pending` with a note.** The Mac needs Blender 4.5.9 installed and, for the meshes, the repository's `.venv` (the script regenerates the strut and wheel meshes from it); both are described in `docs/blender-render.md`. A render session of Claude Code is still possible (below) for anything the script cannot do, such as fixing a scene problem.
+
+## For a Claude render session: what to do
 
 1. `git pull`. Read this file and `docs/blender-render.md` ("Setup on an Apple Silicon Mac", not yet tried: if a step there fails, note it under "Notes from the render session" below).
 2. Make sure Blender 4.5.9 and the two meshes (`hardware/assembly/out/blender/struts.stl`, `wheels.stl`; git-ignored) are in place.
