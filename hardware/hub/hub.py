@@ -43,6 +43,9 @@ SV_BOSS_D, SV_BOSS_H = 9.0, 3.4              # output boss on the front face
 SV_G = 55.0
 # shafts and bearings
 INNER_D = 5.0                                # strut B shaft (steel)
+INNER_BORE = 3.0                             # the shaft is hollow (2026-11-14): strut B's two motor wires run through it (docs/mechanical-spec.md item 6); a 1.2 mm cross hole at X_WIRE lets them out between the horn adapter and gear A
+X_WIRE = 52.25                               # |x| of the cross hole: in the 1.5 mm window between the adapter (ends 51.5) and the hollow shaft and gear plane (start 53.0)
+WIRE_HOLE_D = 1.2
 HOLLOW_OD, HOLLOW_ID = 15.0, 11.0            # strut A shaft (6061)
 BRG_IN = dict(id=5.0, od=11.0, w=5.0)        # 685 size, between the shafts
 BRG_OUT = dict(id=15.0, od=21.0, w=4.0)      # 6702 size (thin series), in the housing
@@ -97,7 +100,9 @@ def build_side():
     parts["hollow"] = cylx(HOLLOW_OD / 2, HOLLOW_ID / 2, *X_HOLLOW)
     parts["gear_a"] = cylx(GEAR_OD / 2, HOLLOW_OD / 2, *X_GEAR)
     # inner shaft B with the horn adapter
-    parts["inner"] = cylx(INNER_D / 2, 0, *INNER_X)
+    inner = cylx(INNER_D / 2, INNER_BORE / 2, *INNER_X)
+    xh = Cylinder(WIRE_HOLE_D / 2, INNER_D + 2, align=(Align.CENTER, Align.CENTER, Align.CENTER)).rotate(Axis.Y, 90)      # across the shaft, along the local x (world y)
+    parts["inner"] = inner - S.on_axle(xh, X_WIRE).moved(Location((0, 0, HZ)))
     parts["adapter"] = cylx(20.0 / 2, INNER_D / 2, *B_ADAPTER)
     # bearings (as rings): two outer, two inner
     parts["bearings_out"] = Compound([cylx(BRG_OUT["od"] / 2, BRG_OUT["id"] / 2, x0, x1) for x0, x1 in X_BRG_OUT])
