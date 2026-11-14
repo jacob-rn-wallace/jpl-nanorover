@@ -1,0 +1,16 @@
+# To be measured: every estimate and the test that would replace it
+
+Method (owner, 2026-11-14, `CLAUDE.md`): purchasing is deferred, so values that need a physical test are ESTIMATED with a range, the design is made to hold across the range, and each is listed here with the test that replaces it. Nothing below has been measured. Scripts are plain python3 in `hardware/body/` unless noted.
+
+| # | Quantity | Estimate and basis | Design consequence now | Test that replaces it | Script / doc |
+|---|---|---|---|---|---|
+| 1 | Lid cam breakaway torque | friction alone 0.06 to 0.65 N.m; with a nylon patch 0.37 to 2.2 N.m new, 0.25 N.m worst after reuse (patch 0.3 to 1.5 N.m is a remembered order of magnitude) | patch specified at 0.6 N.m or more first-on prevailing torque | torque screwdriver on 10 cams, 20 lock/unlock cycles | `cam_estimate.py`, mechanical-spec section 10 |
+| 2 | Sapphire window crosstalk on the VL53L5CX | reflects 1.8x glass, 13% less round-trip signal; direct-path geometry marginal at a 0.5 mm gap (emitter-to-receiver separation backed out of ST's gap rule: 1.0 to 1.3 mm) | gap set to 0.3 mm (sensor box y 66.2 to 67.7); fallback AR-coated sapphire, then 0.5 mm glass | the sensor's crosstalk histogram 1 to 3 cm behind the real window, glass against sapphire | `window_estimate.py` |
+| 3 | Spring-contact resistance and heating | 10 to 100 mOhm per contact over life (typical gold-plated spring contact, remembered) | VBAT and ground 6 contacts each, 7.4 V rail 3, 3.3 V converter 2; protection IC moved to the battery | four-wire resistance new and after 20 lid cycles; temperature rise at 2 A | `contact_estimate.py` |
+| 4 | LED ring current and brightness | 16 to 33 mA per LED over an assumed Vf of 2.50 to 2.85 V; 65 lux at 0.3 m (Lambertian, 20% film, assumed) | 75 ohm resistors, MOSFET switch, 3 s on-time cap | LED current by meter; lux at 0.3 and 0.5 m behind the real film | `lamp_budget.py` |
+| 5 | Gasket compression and seal | silicone 50 Shore A, 0.5 to 2.0 MPa at 38% compression (handbook range) | washer 0.8 mm locked, seam gasket 0.8 mm groove | squeeze force against deflection on a sample; a pressure-decay leak test of the closed body | `cam_estimate.py`, mechanical-spec item 8 |
+| 6 | Back-EMF wheel counting | EMF 0.55 V at 12 rpm, a 3.2 mV ADC step (arithmetic, not a test) | drivers on the processor board so the sense lines stay short | count error against a marked wheel turn at 5 speeds and two loads | hardware-spec section 6 |
+| 7 | Strut wire fatigue | 3.0 mm shaft wrap is 5 wire diameters (the rule's limit); 345 degrees of travel | stop gap placement, 30 AWG silicone | flex test: 10,000 cycles of the full travel on a strut model | `hardware/strut/cable_check.py` |
+| 8 | Battery protection present or not in the cell | unknown (retailer pages gave no answer); treated as unprotected | BQ29700 + FET pair at the battery | inspect the pack (a PCM at the leads?) and test the trip with a bench supply | hardware-spec section 4 |
+
+Items that are not estimates but unconfirmed reading of datasheets (LED SKU, Vf and absolute maximum; contact part number; MOSFET on-resistance at 3.3 V; the PIC32 and DRV8837 limits already read) are in `docs/handover.md`.
