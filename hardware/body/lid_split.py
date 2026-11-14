@@ -6,7 +6,9 @@ Lid components (per lid): the solar cells on the lid face and the board that rid
 battery, the camera, the LED ring, the ranging sensor, the comms patch and the end-face cells. A point belongs to the top lid if it is closer to the top lid components than to any body
 component (a 3D Euclidean distance transform, 1 mm voxels); the split surface is where the two distances are equal. To make a lid that can be lifted straight off (no undercuts) only
 the part of that region connected to the lid face down each (x, y) column is kept ("height field"). The bottom lid is the same mirrored about z = 30; the common shape is the intersection of
-the top lid and the mirrored bottom lid. Prints the numbers and writes docs/images/lid-split.png.
+the top lid and the mirrored bottom lid. Then the OUTER RIM RULE (owner agreed 2026-11-14): within BAND mm of the four outer faces the parting line is a flat plane D_RIM mm below the lid face
+(above the end-face cells' top edge at z = 52.3, with the 1 mm clearance), and the Voronoi surface applies inside. Prints the numbers (volume, depth, clearance, shell mass) and writes
+docs/images/lid-split.png.
 """
 import contextlib, io, sys
 from pathlib import Path
@@ -57,7 +59,6 @@ vox = RES ** 3 / 1000.0
 print(f"top lid, equidistant region        {reg_t.sum() * vox:7.0f} cm3; lifted straight off (height field): {hf_t.sum() * vox:7.0f} cm3 ({100 * (1 - hf_t.sum() / reg_t.sum()):.0f}% of the region is undercut)")
 print(f"bottom lid, same, mirrored          {reg_b.sum() * vox:7.0f} cm3; height field {hf_b.sum() * vox:7.0f} cm3")
 print(f"common shape (intersection)         {common.sum() * vox:7.0f} cm3; the two lids differ by {((hf_t ^ hf_b_m).sum()) * vox:.0f} cm3 ({100 * (hf_t ^ hf_b_m).sum() / (hf_t | hf_b_m).sum():.0f}% of their union)")
-under = np.where(common.any(axis=2), nz - common[:, :, ::-1].argmax(axis=2), nz).astype(float)    # unused placeholder
 # underside height of the common lid (mm above the floor) per column: the lowest z of the lid
 low = np.where(common.any(axis=2), np.argmax(common, axis=2) * RES, np.nan)
 th = np.where(common.any(axis=2), 60 - low, np.nan)
@@ -68,8 +69,31 @@ perim = th[0:3, :].tolist()
 edge_depths = np.r_[th[0, :], th[-1, :], th[:, 0], th[:, -1]]
 print(f"depth at the outer faces (the rim a gasket would sit on): min {np.nanmin(edge_depths):.0f}, median {np.nanmedian(edge_depths):.0f}, max {np.nanmax(edge_depths):.0f} mm")
 
+
+# ---------------- the outer rim rule ----------------
+D_RIM, BAND = 6.5, 8.0                                                   # mm: parting depth at the rim, and the width of the band where it applies
+d_edge = 70.0 - np.maximum(np.abs(X[:, :, 0]), np.abs(Y[:, :, 0]))      # distance of each column from the nearest outer face
+depth_final = np.where(d_edge <= BAND, D_RIM, np.nan_to_num(th, nan=D_RIM))
+final = Z >= (60.0 - depth_final)[:, :, None]
+clash = int((final & body_comps).sum())
+gap = edt(~body_comps, sampling=RES)
+print(f"\nWITH THE RIM RULE (parting plane {D_RIM} mm below the face within {BAND:.0f} mm of the outer faces, the Voronoi surface inside):")
+print(f"  lid region {final.sum() * vox:.0f} cm3; overlap with body components {clash} voxels; nearest body component to the lid {gap[final].min():.1f} mm (the layout's own clearance is {LY.CLR:.0f} mm)")
+dd = np.where(final.any(axis=2), 60 - np.argmax(final, axis=2) * RES, np.nan)
+print(f"  lid depth: min {np.nanmin(dd):.1f}, median {np.nanmedian(dd):.1f}, max {np.nanmax(dd):.1f} mm; rim depth is {D_RIM} mm all round, so the cell pocket leaves {D_RIM - CELL_T:.1f} mm of lid under the cells there")
+# a shell of the lid: its outer area (the lid face, the side bands) plus the underside (the split surface)
+face_a = final[:, :, -1].sum() * RES ** 2                                # the lid face
+under_a = (final & ~np.roll(final, 1, axis=2) & (Z > 0)).sum() * RES ** 2   # voxel faces looking down into non-lid (the underside): lowest lid voxel in each column and steps
+side = ((final & ~np.roll(final, 1, axis=0)).sum() + (final & ~np.roll(final, -1, axis=0)).sum() + (final & ~np.roll(final, 1, axis=1)).sum() + (final & ~np.roll(final, -1, axis=1)).sum()) * RES ** 2
+cup = face_a + side                                                      # an open cup: the face and all the side walls (including the steps inside)
+for t in (1.0, 1.5):
+    print(f"  shell mass at {t} mm forged carbon (1.55 g/cm3): open cup (face and walls, underside open) {cup * t * 1.55e-3:.0f} g; closed (plus an underside plate over the lid footprint) {(cup + under_a) * t * 1.55e-3:.0f} g  [face {face_a / 100:.0f} cm2, walls {side / 100:.0f} cm2, underside {under_a / 100:.0f} cm2]")
+print("  (the cells, the board and the screws are not in these figures)")
+common = final                                                           # the figure shows the final lid
+th = depth_final
+
 fig, ax = plt.subplots(2, 3, figsize=(15, 9))
-im = ax[0, 0].imshow(th.T, origin="lower", extent=(-70, 70, -70, 70), cmap="viridis"); ax[0, 0].set_title("depth of the common lid below its face (mm)\n(x across, y along; +y camera end up)", fontsize=9); plt.colorbar(im, ax=ax[0, 0], fraction=0.046)
+im = ax[0, 0].imshow(th.T, origin="lower", extent=(-70, 70, -70, 70), cmap="viridis"); ax[0, 0].set_title("depth of the final lid (rim rule) below its face (mm)\n(x across, y along; +y camera end up)", fontsize=9); plt.colorbar(im, ax=ax[0, 0], fraction=0.046)
 def section(a, axis, val, title):
     idx = int(round((val + 70) / RES - 0.5)) if axis in "xy" else None
     if axis == "y": img = np.zeros((nz, nx, 3)); sl = (slice(None), idx, slice(None)); coords = (-70, 70)
