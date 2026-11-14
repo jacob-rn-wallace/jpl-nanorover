@@ -59,3 +59,5 @@ The source papers, photographs and video, and Hammond's CAD file, are kept in a 
 - **Documentation** (the notes in `docs/`, READMEs) is licensed under **CC BY 4.0** (see [`LICENSE-DOCUMENTATION.txt`](LICENSE-DOCUMENTATION.txt)).
 
 See [`NOTICE.md`](NOTICE.md) for third-party material. This is an independent hobby project, not affiliated with NASA, JPL or ISAS/JAXA.
+- **Third-party model in the renders:** the Rubik's Cube beside the rover (scale reference) is based on "Rubik's Cube" (https://sketchfab.com/3d-models/rubiks-cube-688917bf6a064601aef28fdce328ad86) by BeyondDigital (https://sketchfab.com/BeyondDigital) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/); changes: textures reduced to 2048 x 2048, scaled to 57 mm. See [`hardware/assembly/assets/rubiks-cube/ATTRIBUTION.md`](hardware/assembly/assets/rubiks-cube/ATTRIBUTION.md).
+

@@ -15,7 +15,7 @@ from pathlib import Path
 
 import bmesh
 import bpy
-from mathutils import Euler, Vector
+from mathutils import Euler, Matrix, Vector
 
 ROOT = Path(__file__).resolve().parents[2]
 STL = ROOT / "hardware" / "assembly" / "out" / "blender"
@@ -297,7 +297,7 @@ import_stl("struts", "strut"); import_stl("wheels", "wheel")
 bm = bmesh.new(); add_box(bm, -3000, 3000, -3000, 3000, GROUND_Z - 1, GROUND_Z); make("ground", bm, "ground")
 
 # ---------------------------------------------------------------- scale fiducial (owner, 2026-11-14): a US quarter next to the rover, as in JPL's own photographs (docs/photo-measurements.md)
-# FIDUCIAL=cube (the one the renders use) draws a Rubik's cube (QX, QY, QYAW); FIDUCIAL=quarter (tried first, too hard to read: kept as an option) draws a US quarter, standing on edge and leaning back a little, face toward the camera, on the ground at (QX, QY) (mm; defaults suit the hero view); FIDUCIAL=off (default) leaves it out.
+# FIDUCIAL=cube (the one the renders use) draws the Rubik's cube model (QX, QY, QYAW); FIDUCIAL=quarter (tried first, too hard to read: kept as an option) draws a US quarter, standing on edge and leaning back a little, face toward the camera, on the ground at (QX, QY) (mm; defaults suit the hero view); FIDUCIAL=off (default) leaves it out.
 # Real size: 24.26 mm across, 1.75 mm thick, 119 reeds, raised rim about 0.2 mm; the portrait is only a hint (a head and shoulders in low relief), not Washington's likeness.
 FIDUCIAL = os.environ.get("FIDUCIAL", "off").lower()
 if FIDUCIAL == "quarter":
@@ -349,37 +349,30 @@ if FIDUCIAL == "quarter":
     for ob in coin_objs:
         ob.rotation_mode = "QUATERNION"; ob.rotation_quaternion = quat; ob.location = (qx, qy, zc); smooth(ob, 30)
 
-# FIDUCIAL=cube (owner's idea, 2026-11-14): a Rubik's cube, 57 mm on a side (the standard 3 x 3 x 3), scrambled with a fixed seed, standing on the ground at (QX, QY) turned QYAW degrees about the vertical.
-# 27 black cubies 18.9 mm with 0.45 mm gaps and rounded edges; 54 coloured stickers 16.2 mm square with rounded corners, standing 0.12 mm proud.  Colours are the usual six (white, yellow, red, orange, blue, green).
+# FIDUCIAL=cube (owner's idea, 2026-11-14): a Rubik's cube, the CC BY model "Rubik's Cube" by BeyondDigital (hardware/assembly/assets/rubiks-cube/, ATTRIBUTION.md), scaled to 57 mm on a side (the standard
+# 3 x 3 x 3; the model page gives no size), turned QYAW degrees about the vertical and set on the ground at (QX, QY).  (My first, hand-built cube looked wrong and was dropped.)
 if FIDUCIAL == "cube":
-    CUBE, GAPC = 57.0, 0.45
-    CUBIE = (CUBE - 2 * GAPC) / 3
-    cols = {"W": (0.80, 0.80, 0.78), "Y": (0.90, 0.68, 0.03), "R": (0.62, 0.03, 0.03), "O": (0.85, 0.22, 0.02), "B": (0.02, 0.10, 0.55), "G": (0.02, 0.45, 0.10)}
-    for k_, c_ in cols.items(): MAT["cube" + k_] = principled("cube sticker " + k_, c_, metallic=0.0, rough=0.28, Coat_Weight=0.2, Coat_Roughness=0.1)
-    MAT["cubeblack"] = principled("cube plastic", (0.012, 0.012, 0.013), metallic=0.0, rough=0.35)
-    rng_c = random.Random(11); qx, qy = float(os.environ.get("QX", "120")), float(os.environ.get("QY", "130")); yaw = math.radians(float(os.environ.get("QYAW", "28")))
-    zc_ = GROUND_Z + CUBE / 2
-    def to_world(v_):
-        x_, y_, z_ = v_; return Vector((qx + x_ * math.cos(yaw) - y_ * math.sin(yaw), qy + x_ * math.sin(yaw) + y_ * math.cos(yaw), zc_ + z_))
-    def piece(name, bm, mat):
-        for v_ in bm.verts: v_.co = to_world(v_.co)
-        ob = make(name, bm, mat); smooth(ob, 40); return ob
-    pitch = CUBIE + GAPC
-    for ix in (-1, 0, 1):
-        for iy in (-1, 0, 1):
-            for iz in (-1, 0, 1):
-                bm = bmesh.new(); add_box(bm, ix * pitch - CUBIE / 2, ix * pitch + CUBIE / 2, iy * pitch - CUBIE / 2, iy * pitch + CUBIE / 2, iz * pitch - CUBIE / 2, iz * pitch + CUBIE / 2)
-                bmesh.ops.bevel(bm, geom=bm.edges[:], offset=0.9, segments=2, affect="EDGES"); piece("cubie", bm, "cubeblack")
-    ST, STH = CUBIE - 2.4, 0.12
-    for axis in range(3):
-        for sgn in (1, -1):
-            for a_ in (-1, 0, 1):
-                for b_ in (-1, 0, 1):
-                    c3 = [0, 0, 0]; c3[axis] = sgn * (CUBE / 2 + STH / 2 - 0.02); c3[(axis + 1) % 3] = a_ * pitch; c3[(axis + 2) % 3] = b_ * pitch
-                    half = [ST / 2, ST / 2, ST / 2]; half[axis] = STH / 2
-                    bm = bmesh.new(); add_box(bm, c3[0] - half[0], c3[0] + half[0], c3[1] - half[1], c3[1] + half[1], c3[2] - half[2], c3[2] + half[2])
-                    bmesh.ops.bevel(bm, geom=[e for e in bm.edges if abs((e.verts[0].co - e.verts[1].co)[axis]) < 1e-6], offset=1.4, segments=3, affect="EDGES")
-                    piece("sticker", bm, "cube" + rng_c.choice("WYROBG"))
+    before = set(bpy.data.objects.keys())
+    bpy.ops.import_scene.gltf(filepath=str(ROOT / "hardware" / "assembly" / "assets" / "rubiks-cube" / "scene.gltf"))
+    new_obs = [bpy.data.objects[k] for k in bpy.data.objects.keys() if k not in before]
+    roots = [o for o in new_obs if o.parent is None or o.parent not in new_obs]
+    def bbox(obs):
+        pts = [o.matrix_world @ Vector(c) for o in obs if o.type == "MESH" for c in o.bound_box]
+        return Vector((min(p.x for p in pts), min(p.y for p in pts), min(p.z for p in pts))), Vector((max(p.x for p in pts), max(p.y for p in pts), max(p.z for p in pts)))
+    bpy.context.view_layer.update(); lo, hi = bbox(new_obs); k_ = 57.0 / max(hi - lo)
+    for r_ in roots:
+        r_.scale = r_.scale * k_; r_.location = r_.location * k_
+        r_.rotation_mode = "XYZ"
+    bpy.context.view_layer.update()
+    yaw = math.radians(float(os.environ.get("QYAW", "28")))
+    cen = (bbox(new_obs)[0] + bbox(new_obs)[1]) / 2
+    for r_ in roots:                                                   # turn about the vertical through the cube's centre, then drop it onto the ground at (QX, QY)
+        rot = Euler((0, 0, yaw)).to_matrix().to_4x4()
+        r_.matrix_world = Matrix.Translation(cen) @ rot @ Matrix.Translation(-cen) @ r_.matrix_world
+    bpy.context.view_layer.update(); lo, hi = bbox(new_obs); c2 = (lo + hi) / 2
+    off = Vector((float(os.environ.get("QX", "120")) - c2.x, float(os.environ.get("QY", "130")) - c2.y, GROUND_Z - lo.z))
+    for r_ in roots: r_.location = r_.location + off
+    bpy.context.view_layer.update(); lo, hi = bbox(new_obs); print("cube size (mm):", [round(v, 1) for v in (hi - lo)], "bottom z:", round(lo.z, 2))
 
 # ---------------------------------------------------------------- lights: soft boxes (visible only in reflections) and a world fill
 def softbox(name, loc, size, strength, target=(0, 0, 12)):
