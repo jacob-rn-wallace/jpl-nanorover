@@ -64,6 +64,9 @@ export const RISK = [
 ];
 export const SLAM_QUALITY = [0, 0.5, 1, 2];   // 0 perfect; 1 a typical dead-reckoning drift ASM
 
+/** The tilt filter's time constant, s (firmware: a complementary filter on the gyro's tilt rates and the accelerometer's tilt; the rover moves at 1.5 mm/s, so its own acceleration barely disturbs the accelerometer) ASM */
+export const TILT_TAU = 0.5;
+
 /** Systematic odometry errors (owner's open item, 2026-11-14; docs/hardware-spec.md section 6): the wheel speeds come from back-EMF, not encoders, so there is a wheel-scale error (the motor constant,
  *  the wheel's real rolling radius), a slow drift of it (magnet temperature, about -0.1 %/K over 30 K), slip episodes (the wheels turn and the rover does not move as far: the speed reads too high),
  *  and a gyro scale error. All ASM unless marked; every figure is multiplied by the quality switch (x0.5, x1, x2) like the random errors. */

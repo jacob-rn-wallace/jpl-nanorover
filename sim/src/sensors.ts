@@ -1,5 +1,5 @@
 // The rover's sensors as the firmware sees them: an 8 x 8 multizone time-of-flight sensor, wheel odometry, a gyro and a tilt sensor.
-import { ROVER, TOF, SLAM_QUALITY, BEACON, LIGHTHOUSE as LH, ODO_SYS } from "./constants";
+import { ROVER, TOF, SLAM_QUALITY, BEACON, LIGHTHOUSE as LH, ODO_SYS, TILT_TAU } from "./constants";
 import { Rng, rotate, tiltDown, V3, wrap } from "./util";
 import { World } from "./world";
 import { Rover } from "./rover";
@@ -56,6 +56,9 @@ export class Odometry {
   quality = SLAM_QUALITY[1];
   /** tilt sensor noise, rad (0.5 degrees raw), independent of the quality switch; 0 gives the true tilt */
   tiltSigma = 0.0087;
+  /** tilt filter (firmware only): a complementary filter that integrates the gyro's pitch and roll rates and leans on the accelerometer's noisy tilt with time constant TILT_TAU; off gives the raw accelerometer tilt */
+  tiltFilter = true;
+  private fp = 0; private fr = 0; private lastPitch = 0; private lastRoll = 0; private tiltBias = 0; private tiltInit = false;
   /** gyro zero-rate calibration at stops: the firmware averages the gyro while the wheels are still and subtracts it (firmware only, no hardware) */
   calibrate = true;
   /** ultrasonic beacon fixes: off by default so the earlier measurements stay comparable */
@@ -72,6 +75,7 @@ export class Odometry {
   reset(r: Rover): void {
     this.est = { x: r.x, y: r.y, theta: r.theta, z: r.z, sigma: 0 };
     this.bias = this.rng.gauss() * 0.003 * this.quality;
+    this.tiltInit = false; this.tiltBias = this.rng.gauss() * 0.003;
     this.wheelScale = 1 + this.rng.gauss() * ODO_SYS.wheelSigma * this.quality; this.gyroScale = 1 + this.rng.gauss() * ODO_SYS.gyroScaleSigma * this.quality; this.slipLeft = 0; this.slipMag = 0;
     this.still = 0; this.accum = 0; this.n = 0; this.biasEst = 0; this.beaconT = 0; this.fixes = 0; this.rejected = 0; this.lhT = 0; this.lhFixes = 0; this.lhRejected = 0;
   }
@@ -154,7 +158,16 @@ export class Odometry {
   step(r: Rover, dt: number): void {
     const q = this.quality, e = this.est;
     if (q === 0) { e.x = r.x; e.y = r.y; e.theta = r.theta; e.z = r.z; e.sigma = 0; this.imu = { pitch: r.pitch, roll: r.roll }; return; }
-    this.imu = { pitch: r.pitch + this.rng.gauss() * this.tiltSigma, roll: r.roll + this.rng.gauss() * this.tiltSigma };
+    const mp = r.pitch + this.rng.gauss() * this.tiltSigma, mr = r.roll + this.rng.gauss() * this.tiltSigma;        // the accelerometer's tilt: noisy but unbiased
+    if (!this.tiltFilter) this.imu = { pitch: mp, roll: mr };
+    else {
+      if (!this.tiltInit) { this.fp = mp; this.fr = mr; this.tiltInit = true; }
+      const k = TILT_TAU / (TILT_TAU + dt);                                                                          // weight of the gyro-integrated estimate
+      const gp = (r.pitch - this.lastPitch) / dt + this.tiltBias + this.rng.gauss() * 0.0005 / Math.sqrt(dt), gr = (r.roll - this.lastRoll) / dt + this.tiltBias + this.rng.gauss() * 0.0005 / Math.sqrt(dt);   // the gyro's rates: a small bias and noise (ICM-42688 class: 2.8 mdps/rtHz)
+      this.fp = k * (this.fp + gp * dt) + (1 - k) * mp; this.fr = k * (this.fr + gr * dt) + (1 - k) * mr;
+      this.imu = { pitch: this.fp, roll: this.fr };
+    }
+    this.lastPitch = r.pitch; this.lastRoll = r.roll;
     this.bias += this.rng.gauss() * 0.0008 * Math.sqrt(dt) * q;
     let v = r.vel * (1 + this.rng.gauss() * 0.02 * q), raw = r.omega + this.bias;
     if (this.systematic) {

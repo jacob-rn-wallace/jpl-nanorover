@@ -11,6 +11,7 @@ function run(quality: number, seed: number, goals: { x: number; y: number }[]) {
   if (process.env.BEACON) s.odo.beacons = true;
   if (process.env.NOCAL) s.odo.calibrate = false;
   if (process.env.NOTILT) s.odo.tiltSigma = 0;
+  if (process.env.RAWTILT) s.odo.tiltFilter = false;                    // the accelerometer's raw tilt, no filter: the earlier behaviour
   s.setRisk(1); s.setMode("mission"); s.setGoals(goals);
   const path: { x: number; y: number }[] = []; let t = 0, k = 0;
   while (t < 900 && !s.rover.fallen && !s.rover.stuck && !s.rover.tipped) {
@@ -44,8 +45,9 @@ function run(quality: number, seed: number, goals: { x: number; y: number }[]) {
   return { fpNear, fpFar, fpDrop, fpRock, fpSlope, t, ok: s.fw.goals.length === 0, recall, precision, coverage: cover / Math.max(1, total), rms: Math.sqrt(se / Math.max(1, ne)), cells: seen };
 }
 const route = [{ x: 0.52, y: 0.30 }];
-for (const q of [0, 0.5, 1]) {
-  const r: ReturnType<typeof run>[] = [1, 2, 3].map(seed => run(q, seed, route));
+const NSEEDS = Number(process.env.SEEDS ?? 3), QS = process.env.Q ? process.env.Q.split(",").map(Number) : [0, 0.5, 1];
+for (const q of QS) {
+  const r: ReturnType<typeof run>[] = Array.from({ length: NSEEDS }, (_, i) => i + 1).map(seed => run(q, seed, route));
   const avg = (f: (x: ReturnType<typeof run>) => number) => r.reduce((a, b) => a + f(b), 0) / r.length;
   console.log(`   false alarms: ${avg(x=>x.fpNear).toFixed(0)} within 6 cm of a real hazard (smear), ${avg(x=>x.fpFar).toFixed(0)} elsewhere (phantom: drop ${avg(x=>x.fpDrop).toFixed(0)}, rock ${avg(x=>x.fpRock).toFixed(0)}, slope ${avg(x=>x.fpSlope).toFixed(0)})`);
   console.log(`dead-reckoning x${q}: goals reached ${r.filter(x => x.ok).length}/3, recall ${(avg(x => x.recall) * 100).toFixed(0)}%, precision ${(avg(x => x.precision) * 100).toFixed(0)}%, coverage ${(avg(x => x.coverage) * 100).toFixed(0)}%, height error ${(avg(x => x.rms) * 100).toFixed(1)} cm RMS`);
