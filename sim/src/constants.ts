@@ -32,7 +32,7 @@ export const POWER = {                        // W, from hardware/body/power_bud
   idle: 0.1155,                               // PIC32 awake (20 mA ASM) + XBee 3 receiving (15 mA SRC Digi) at 3.3 V; was 0.105 from an ESP32-class dev board (docs/electronics-concept.md)
   hold: 1.44,                                 // four servos holding at 30 mA and 12 V SRC (sources disagree 6 to 60 mA)
   wheels: 0.4,                                // four wheel motors at full drive ASM
-  lamp: 0.1,                                  // the LED ring round the camera lens, ASM (0.2 before the beamsplitter was dropped)
+  lamp: 0.25,                                 // the LED ring round the camera lens behind a smoked dead-front film, ASM (docs/hardware-spec.md section 5)
   camera: 0.3,                                // while capturing ASM
   radioTx: 0.0825,                            // W above the receiving figure at full link utilisation: XBee 3 802.15.4 non-PRO 40 mA at +8 dBm less 15 mA, at 3.3 V (manual snippet via distributors); was 0.65 ASM
   righting: 2.0,                              // servos moving ASM

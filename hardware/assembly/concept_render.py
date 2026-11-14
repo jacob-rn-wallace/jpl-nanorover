@@ -142,7 +142,7 @@ def main():
     plug = fine(slab("-y", -(70 - (GAP + 13)) - 13.5, -(70 - (GAP + 13)) + 13.5, 30 - 13.5, 30 + 13.5))
     parts = [(Path("body.step"), "#34383e", 0), (Path("struts.step"), "#b9b4aa", 0), (Path("wheels.step"), "#cdd1d6", 0),
              (Path("cells.step"), "#161a22", 0), (Path("bezel.step"), "#7a7f86", 0), (Path("glass.step"), "#0b0e13", 0), (Path("plug.step"), "#3f4a46", 0),
-             (Path("hood.step"), "#0d0f13", 0), (Path("lens.step"), "#010203", 0), (Path("leds.step"), "#fff4d8", 0), (Path("tof.step"), "#4a5262", 0)]
+             (Path("hood.step"), "#0d0f13", 0), (Path("lens.step"), "#010203", 0), (Path("leds.step"), "#17150f", 0), (Path("tof.step"), "#4a5262", 0)]
     pv.PARTS = parts
     meshes = [body, struts, wheels, cells, bezel, glass, plug, hood, lens, leds, tof]
     TEX["body"] = forged_texture(body)
@@ -163,9 +163,9 @@ def main():
     f3, a3 = plt.subplots(figsize=(9, 7)); f3.patch.set_facecolor("#e9ecef"); a3.set_facecolor("#e9ecef")
     r3, u3, d3 = pv.view(0, 90)
     wp = np.array([wx, 70.0, 30.0]); cxx, cyy = wp @ r3, wp @ u3
-    render(a3, meshes, 0, 90, "the 26 mm window from +y: lens, ring of white LEDs, ranging sensor in the top slot", lims=(cxx - 36, cxx + 36, cyy - 26, cyy + 26))
+    render(a3, meshes, 0, 90, "the 26 mm window from +y: lens, LED ring (off, behind a smoked dead-front), ranging sensor in the top slot", lims=(cxx - 36, cxx + 36, cyy - 26, cyy + 26))
     sp = np.array([wx, 70.0, 40.5]); a3.annotate("ranging sensor\n(VL53L5CX, 6.4 x 3 mm)", (sp @ r3, sp @ u3), (cxx - 30, cyy + 20), fontsize=9, arrowprops=dict(arrowstyle="->"), ha="center", bbox=dict(boxstyle="round,pad=0.25", fc="white", ec="0.5", alpha=0.92))
-    cp = np.array([wx, 70.0, 30.0 - 4]); a3.annotate("camera lens\n(M12) and hood", (cp @ r3, cp @ u3), (cxx, cyy - 25), fontsize=9, arrowprops=dict(arrowstyle="->"), ha="center", bbox=dict(boxstyle="round,pad=0.25", fc="white", ec="0.5", alpha=0.92))
+    cp = np.array([wx, 70.0, 30.0 - 4]); a3.annotate("camera lens (M12)\nand hood", (cp @ r3, cp @ u3), (cxx, cyy - 25), fontsize=9, arrowprops=dict(arrowstyle="->"), ha="center", bbox=dict(boxstyle="round,pad=0.25", fc="white", ec="0.5", alpha=0.92))
     gp = np.array([wx - 13.0 * 0.7, 70.0, 30.0 + 13.0 * 0.7]); a3.annotate("cover glass\n(26 mm)", (gp @ r3, gp @ u3), (cxx + 26, cyy + 20), fontsize=9, arrowprops=dict(arrowstyle="->"), ha="center", bbox=dict(boxstyle="round,pad=0.25", fc="white", ec="0.5", alpha=0.92))
     f3.savefig(HW.parent / "docs" / "images" / "rover-concept-window.png", dpi=110, facecolor=f3.get_facecolor())
     out = HW.parent / "docs" / "images" / "rover-concept.png"

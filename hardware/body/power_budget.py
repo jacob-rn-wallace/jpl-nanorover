@@ -35,7 +35,7 @@ loads = {
     "controller awake + radio receiving (PIC32MX250F128B (now the 44-pin F128D, docs/hardware-spec.md) about 0.5 mA/MHz x 40 MHz = 20 mA, a family-datasheet summary scaled by me, ASM; XBee 3 802.15.4 receive 15 mA, Digi page; both at 3.3 V)": (0.020 + 0.015) * 3.3,
     "radio transmitting, ABOVE the receiving figure (XBee 3 802.15.4 non-PRO 40 mA at +8 dBm, a manual snippet via distributors, less the 15 mA already counted; at 3.3 V)": (0.040 - 0.015) * 3.3,
     "camera streaming (ASM 0.3 W)": 0.3,
-    "LED ring on, 7 white LEDs round the lens (ASM 0.1 W: the beamsplitter passed a quarter of the light, so the same exposure needs about 0.05 W; doubled for margin)": 0.1,
+    "LED ring on, 7 white LEDs round the lens behind a smoked dead-front film (ASM 0.25 W: about 0.05 W for the exposure the beamsplitter lamp gave, times 5 for a 20% film; the lamp is on only about 1 s a photo)": 0.25,
     "one servo moving at no load (180 mA at 12 V, SRC)": 0.180 * V_SERVO,
     "one servo holding or standby (6 mA datasheet to 60 mA other listings, at 12 V, SRC; sources disagree)": 0.030 * V_SERVO,
     "four wheel motors driving flat at 40 mm/s (ASM: about 0.1 W each; no-load 0.15 A at 6 V, SRC)": 0.4,
