@@ -21,6 +21,7 @@ JOBS=(
   "R8|window|BEZEL=black SUFFIX=-black|1500x940|96"
   "R9|detail|BEZEL=black SUFFIX=-black|1500x940|96"
   "R10|window|BEZEL=bare SUFFIX=-bare|1500x940|96"
+  "R12|hub||1500x940|96"
 )
 want=("$@")
 for job in "${JOBS[@]}"; do

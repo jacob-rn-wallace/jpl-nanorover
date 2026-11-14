@@ -2,7 +2,7 @@
 
 Run from the repository root, after hardware/assembly/blender_export.py:
     VIEW=hero ~/tools/blender-4.5.9-linux-x64/blender -b -P hardware/assembly/blender_render.py
-VIEW is one of hero, rear, top, detail, cells, window (default hero); SAMPLES (default 96), RES (default 1600x1000) and DEVICE (cpu, the default, or gpu: Metal on a Mac) LED (off, the default, or on), BEZEL (gunmetal, the default and the chosen finish, bare or black) and SUFFIX (a name suffix for the output, for example -lit) are optional.  Output: docs/images/rover-<view>.png.
+VIEW is one of hero, rear, top, detail, cells, window, hub (default hero); SAMPLES (default 96), RES (default 1600x1000) and DEVICE (cpu, the default, or gpu: Metal on a Mac) LED (off, the default, or on), BEZEL (gunmetal, the default and the chosen finish, bare or black) and SUFFIX (a name suffix for the output, for example -lit) are optional.  Output: docs/images/rover-<view>.png.
 1 Blender unit = 1 mm.  The body is a 140 x 140 x 60 mm block with 0.8 mm edges, NOT the real shell (hardware/body/block.py is only the cavity volume);
 the cells, panes and windows are laid on its faces from the same numbers as layout.py, cell_pocket.py and cell_endface.py.  Not modelled: lid screws and
 seals, hub studs and rings, the lamp, the beamsplitter, anything inside.  The forged-carbon pattern is procedural (chips of random orientation, each with
@@ -276,6 +276,23 @@ cylinder_y("lens", wx, 30, 6.3, y0 + 0.2, y0 + 0.3, "lens")
 cylinder_y("lens inner", wx, 30, 3.4, y0 + 0.3, y0 + 0.4, "iris")
 bm = bmesh.new(); add_box(bm, wx - 3.2, wx + 3.2, y0 + 0.08, y0 + 0.2, 40.5 - 1.5, 40.5 + 1.5); make("ranging sensor", bm, "irink")
 bm = bmesh.new(); add_box(bm, -wx - 13.5, -wx + 13.5, -70 - T, -70, 16.5, 43.5); make("RF plug", bm, "plug")
+# the lid cams' heads on the hub faces (docs/mechanical-spec.md item 8, lid_cams.py): eight smooth flush caps 13 mm across, two per face per lid at y = +-40 and z = 38.5 (top lid) and 21.5 (bottom lid),
+# each with a small pin-in-hex socket in the middle (no slot: nothing outside to grip); the gunmetal finish of the bezel's screws
+def cam_head(sx, y0, zc):
+    xf = 70.0 * sx
+    bm = bmesh.new(); bmesh.ops.create_cone(bm, cap_ends=True, cap_tris=False, segments=64, radius1=6.5, radius2=6.5, depth=0.04)
+    for v in bm.verts: v.co = (v.co.z * sx + xf, y0 + v.co.x, zc + v.co.y)                # cone axis z -> x (outward)
+    make("cam head", bm, "gunscrew")
+    bm = bmesh.new(); bmesh.ops.create_cone(bm, cap_ends=True, cap_tris=False, segments=6, radius1=2.3, radius2=2.3, depth=0.04)
+    for v in bm.verts: v.co = (v.co.z * sx + xf + 0.03 * sx, y0 + v.co.x, zc + v.co.y)
+    make("cam socket", bm, "hood")
+    bm = bmesh.new(); bmesh.ops.create_cone(bm, cap_ends=True, cap_tris=False, segments=16, radius1=0.7, radius2=0.7, depth=0.04)
+    for v in bm.verts: v.co = (v.co.z * sx + xf + 0.06 * sx, y0 + v.co.x, zc + v.co.y)
+    make("cam pin", bm, "gunscrew")
+for sx in (1, -1):
+    for y0 in (40.0, -40.0):
+        for zc in (38.5, 21.5):
+            cam_head(sx, y0, zc)
 import_stl("struts", "strut"); import_stl("wheels", "wheel")
 bm = bmesh.new(); add_box(bm, -3000, 3000, -3000, 3000, GROUND_Z - 1, GROUND_Z); make("ground", bm, "ground")
 
@@ -319,6 +336,8 @@ elif VIEW == "rear": camera(orbit(218, 20, 640), (0, 0, 8), 55)
 elif VIEW == "top": camera((0, 0, 1400), (0, 0, 0), 55, ortho=330); scene.camera.rotation_euler = (0, 0, 0)         # image up = +y, the camera end
 elif VIEW == "detail":
     tgt = (45, 70, 38); loc = orbit(32, 18, 230, tgt); camera(loc, tgt, 85, dof=(loc - Vector(tgt)).length)
+elif VIEW == "hub":
+    tgt = (70, 0, 30); loc = orbit(0, 6, 560, tgt); camera(loc, tgt, 80, dof=(loc - Vector(tgt)).length)
 elif VIEW == "window":
     tgt = (wx, 70, 33); loc = orbit(90, 10, 178, tgt); camera(loc, tgt, 100, dof=(loc - Vector(tgt)).length)
 elif VIEW == "cells":

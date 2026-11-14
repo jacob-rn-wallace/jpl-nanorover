@@ -31,6 +31,15 @@ def box(x0, x1, y0, y1, z0, z1):
     return Box(x1 - x0, y1 - y0, z1 - z0, align=(Align.CENTER, Align.CENTER, Align.MIN)).moved(Location(((x0 + x1) / 2, (y0 + y1) / 2, z0)))
 
 
+def hex_socket(af=4.0, depth=3.5):
+    """A hexagonal socket, `af` mm across the flats, `depth` mm deep from the cam's face, on the cam's axis (a prism: the intersection of three boxes turned 60 degrees apart)."""
+    h = None
+    for ang in (0, 60, 120):
+        b = box(X_FACE - depth, X_FACE + 0.1, Y0 - af / 2, Y0 + af / 2, ZC - 6, ZC + 6).rotate(Axis((0, Y0, ZC), (1, 0, 0)), ang)
+        h = b if h is None else h & b
+    return h
+
+
 def groove():
     """The cam's T-slot at its own axis (alpha = 0): a CHAMBER for the head (discs along the spiral, GROOVE_W wide along the axis) and a narrow SLIT (NECK_W wide along the axis) that runs along the
     spiral from the chamber out through the cam's surface for the pin; the two rails of cam material on either side of the slit, outside the chamber, are what catch the head. Plus an
@@ -53,8 +62,8 @@ def cam(adv, alpha):
     flange = cylx(R_FLANGE, X_FACE - 1.2, X_FACE)
     c = body + flange
     c = c - groove()
-    c = c - box(X_FACE - 1.2, X_FACE + 0.1, Y0 - 0.8, Y0 + 0.8, ZC - 6.0, ZC + 6.0)             # the screwdriver slot across the flange (vertical at alpha = 0)
-    c = c - Sphere(0.6).moved(Location((X_FACE, Y0, ZC + 5.9)))                                     # a dimple on the flange at the throat side: shows which way the throat points
+    c = c - hex_socket()                                                                            # a pin-in-hex socket in the middle of a smooth flush flange (no slot, no dimple: nothing outside to grip)
+    c = c + cylx(0.7, X_FACE - 3.5, X_FACE - 1.0, y=Y0, z=ZC)                                       # the central pin that stops an ordinary hex key from seating
     c = c.rotate(Axis((0, Y0, ZC), (1, 0, 0)), -alpha)
     return c.moved(Location((adv, 0, 0)))
 
