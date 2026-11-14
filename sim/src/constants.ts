@@ -58,9 +58,9 @@ export const PHOTO = {
 
 // risk level 1 (cautious) to 3 (bold): thresholds are ASM, the structure (a table keyed to a risk level) is Sojourner's (docs/electronics-concept.md)
 export const RISK = [
-  { name: "1 cautious", rock: 0.020, slope: 0.060, tilt: deg(15), drop: 0.030 },     // refuses anything near the wheels' limit
-  { name: "2 normal",   rock: 0.030, slope: 0.100, tilt: deg(25), drop: 0.045 },     // matches what the wheels can climb (climbMax 3.2 cm)
-  { name: "3 bold",     rock: 0.040, slope: 0.160, tilt: deg(33), drop: 0.060 },     // overshoots: it will try rocks the wheels cannot climb
+  { name: "1 cautious", rock: 0.020, slope: 0.060, tilt: deg(15), drop: 0.025 },     // refuses anything near the wheels' limit (drop thresholds retuned 2026-11-14 to the wheels' dropOk of 3.5 cm: 2.5, 3.5, 5.0 cm; they were 3.0, 4.5, 6.0, so a 5 cm pit was only just over the normal threshold)
+  { name: "2 normal",   rock: 0.030, slope: 0.100, tilt: deg(25), drop: 0.035 },     // matches what the wheels can climb (climbMax 3.2 cm) and drive off (dropOk 3.5 cm)
+  { name: "3 bold",     rock: 0.040, slope: 0.160, tilt: deg(33), drop: 0.050 },     // overshoots: it will try rocks the wheels cannot climb
 ];
 export const SLAM_QUALITY = [0, 0.5, 1, 2];   // 0 perfect; 1 a typical dead-reckoning drift ASM
 

@@ -10,7 +10,9 @@
     "preview": "vite preview",
     "check": "esbuild tests/sim-check.ts --bundle --platform=node --format=esm --outfile=.check/sim-check.mjs --log-level=warning && node .check/sim-check.mjs",
     "pose": "esbuild tests/pose-check.ts --bundle --platform=node --format=esm --outfile=.check/pose-check.mjs --log-level=warning && node .check/pose-check.mjs",
-    "map": "esbuild tests/map-check.ts --bundle --platform=node --format=esm --outfile=.check/map-check.mjs --log-level=warning && node .check/map-check.mjs"
+    "map": "esbuild tests/map-check.ts --bundle --platform=node --format=esm --outfile=.check/map-check.mjs --log-level=warning && node .check/map-check.mjs",
+    "pit": "esbuild tests/pit-sweep.ts --bundle --platform=node --format=esm --outfile=.check/pit-sweep.mjs --log-level=warning && node .check/pit-sweep.mjs",
+    "pit-approach": "esbuild tests/pit-approach.ts --bundle --platform=node --format=esm --outfile=.check/pit-approach.mjs --log-level=warning && node .check/pit-approach.mjs"
   },
   "dependencies": {
     "three": "^0.170.0"
