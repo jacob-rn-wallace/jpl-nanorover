@@ -8,8 +8,7 @@ each motor's terminal voltage at the driver's coast gaps, so the analogue sense 
 the bulk of the crossing). The price: the strut motors' wires enter the body at the BOTTOM lid (the wall hole is at z = 11, 19 mm below the hub axis; it was z = 49).
 Between the boards only power and four slow signals cross, and they cross through the body's own wiring: each lid's contacts press on the lid's platform side face, the body wires join the two lids' pockets.
 Contacts: Mill-Max 0.050 in (1.27 mm) pitch spring-loaded contacts are the candidate family (search result, [Mill-Max](https://www.mouser.in/new/mill-max/mill-max-050-pitch-spring-loaded-contacts): 1.02 mm full stroke, 7 A at a 30 C rise
-for the high-current type; 2 A continuous for the ultra-low-profile 815/817 series); mounted on a small stand-up strip so the pins point sideways. To confirm in the datasheets. Rule used here: one contact per net,
-two for power nets (redundancy and contact resistance), none shared; currents are far under the 2 A figure per contact except the 7.4 V rail's peak, which two contacts share.
+for the high-current type; 2 A continuous for the ultra-low-profile 815/817 series); mounted on a small stand-up strip so the pins point sideways. To confirm in the datasheets. Rule used here: one contact per signal net; power nets get the counts that `contact_estimate.py` finds (VBAT and ground at the battery 6 each, the 7.4 V rail 3, the 3.3 V converter's VBAT 2), none shared.
 """
 PITCH = 1.27          # mm between contact centres (ASM: the standard 0.050 in pitch)
 MARGIN = 1.5          # mm from the pocket's ends to the first and last contact centres
@@ -18,10 +17,10 @@ LOWER = {
     "+": {"wheel motor wires (2 motors x 2)": 4, "camera TX": 1, "camera RX": 1, "ranging+IMU SDA": 1, "ranging SCL": 1, "ranging INT": 1, "LED enable": 1, "3V3 to camera end": 1, "GND camera end": 1,
           "boost enable": 1, "charger status": 1, "battery current sense": 1},
     "-": {"wheel motor wires (2 motors x 2)": 4, "XBee TX": 1, "XBee RX": 1, "XBee sleep": 1, "XBee reset": 1, "3V3 to antenna end": 1, "GND antenna end": 1, "servo bus data": 1,
-          "VBAT in": 2, "V7.4 in (wheel drivers)": 2, "GND power return": 2},
+          "VBAT in": 2, "V7.4 in (wheel drivers)": 3, "GND power return": 3},
 }
 UPPER = {
-    "+": {"VBAT (battery, out and back)": 2, "V7.4 out (to servos, LED ring, lower board)": 2, "GND power return": 2},
+    "+": {"VBAT (battery)": 6, "V7.4 out (to servos, LED ring, lower board)": 3, "GND power return (battery and loads)": 6},
     "-": {"solar: bottom lid cells": 1, "solar: end A cells": 1, "solar: end B cells": 1, "boost enable": 1, "charger status": 1, "battery current sense": 1, "GND reference": 1},
 }
 
