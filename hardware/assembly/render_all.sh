@@ -11,8 +11,8 @@ for f in hardware/assembly/out/blender/struts.stl hardware/assembly/out/blender/
 done
 # id | VIEW | extra environment | RES | SAMPLES
 JOBS=(
-  "R1|hero||1600x1000|96"
-  "R2|rear||1600x1000|96"
+  "R1|hero|FIDUCIAL=quarter QX=60 QY=150|1600x1000|96"
+  "R2|rear|FIDUCIAL=quarter QX=-60 QY=-150 QAZ=218|1600x1000|96"
   "R3|top||1600x1000|96"
   "R4|detail||1500x940|96"
   "R5|cells||1500x940|96"

@@ -296,6 +296,45 @@ for sx in (1, -1):
 import_stl("struts", "strut"); import_stl("wheels", "wheel")
 bm = bmesh.new(); add_box(bm, -3000, 3000, -3000, 3000, GROUND_Z - 1, GROUND_Z); make("ground", bm, "ground")
 
+# ---------------------------------------------------------------- scale fiducial (owner, 2026-11-14): a US quarter next to the rover, as in JPL's own photographs (docs/photo-measurements.md)
+# FIDUCIAL=quarter draws it, standing on edge and leaning back a little, face toward the camera, on the ground at (QX, QY) (mm; defaults suit the hero view); FIDUCIAL=off (default) leaves it out.
+# Real size: 24.26 mm across, 1.75 mm thick, 119 reeds, raised rim about 0.2 mm; the portrait is only a hint (a head and shoulders in low relief), not Washington's likeness.
+FIDUCIAL = os.environ.get("FIDUCIAL", "off").lower()
+if FIDUCIAL == "quarter":
+    MAT["coin"] = principled("quarter, cupronickel", (0.86, 0.87, 0.87), metallic=1.0, rough=0.20)
+    R_Q, T_Q, REEDS = 12.13, 1.75, 119
+    def coin_parts():
+        bm = bmesh.new(); n = REEDS * 2; top, bot = [], []
+        for i in range(n):                                               # reeded edge: alternate outer and inner radius
+            a_ = 2 * math.pi * i / n; r_ = R_Q if i % 2 == 0 else R_Q - 0.14
+            top.append(bm.verts.new((r_ * math.cos(a_), r_ * math.sin(a_), T_Q / 2 - 0.2))); bot.append(bm.verts.new((r_ * math.cos(a_), r_ * math.sin(a_), -T_Q / 2 + 0.2)))
+        for i in range(n):
+            j = (i + 1) % n; bm.faces.new((bot[i], bot[j], top[j], top[i]))
+        bm.faces.new(top[::-1]); bm.faces.new(bot)
+        bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:]); make("quarter body", bm, "coin")
+        for sgn in (1, -1):                                              # raised rim on both faces (outer 11.95, inner 10.9)
+            bm = bmesh.new(); m_ = 96
+            o = [bm.verts.new((11.95 * math.cos(2 * math.pi * k / m_), 11.95 * math.sin(2 * math.pi * k / m_), sgn * (T_Q / 2 - 0.2))) for k in range(m_)]
+            o2 = [bm.verts.new((11.95 * math.cos(2 * math.pi * k / m_), 11.95 * math.sin(2 * math.pi * k / m_), sgn * T_Q / 2)) for k in range(m_)]
+            i2 = [bm.verts.new((10.9 * math.cos(2 * math.pi * k / m_), 10.9 * math.sin(2 * math.pi * k / m_), sgn * T_Q / 2)) for k in range(m_)]
+            i1 = [bm.verts.new((10.9 * math.cos(2 * math.pi * k / m_), 10.9 * math.sin(2 * math.pi * k / m_), sgn * (T_Q / 2 - 0.2))) for k in range(m_)]
+            for k in range(m_):
+                l = (k + 1) % m_
+                for quad in ((o[k], o[l], o2[l], o2[k]), (o2[k], o2[l], i2[l], i2[k]), (i2[k], i2[l], i1[l], i1[k])):
+                    bm.faces.new(quad)
+            bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:]); make("quarter rim", bm, "coin")
+        for nm, (cx_, cy_), (sx_, sy_) in (("head", (0.0, 2.8), (2.9, 3.4)), ("shoulders", (0.0, -5.2), (6.8, 3.2))):   # portrait hint, front face only
+            bm = bmesh.new(); bmesh.ops.create_uvsphere(bm, u_segments=32, v_segments=16, radius=1.0)
+            for v in bm.verts: v.co = (cx_ + v.co.x * sx_, cy_ + v.co.y * sy_, T_Q / 2 - 0.2 + v.co.z * 0.12)
+            make("quarter " + nm, bm, "coin")
+    before = set(bpy.data.objects.keys()); coin_parts(); coin_objs = [bpy.data.objects[k] for k in bpy.data.objects.keys() if k not in before]
+    qx, qy = float(os.environ.get("QX", "140")), float(os.environ.get("QY", "110")); face_az = math.radians(float(os.environ.get("QAZ", "38"))); lean = math.radians(float(os.environ.get("QLEAN", "12")))
+    nrm = Vector((math.cos(face_az) * math.cos(lean), math.sin(face_az) * math.cos(lean), math.sin(lean)))
+    quat = Vector((0, 0, 1)).rotation_difference(nrm)
+    zc = GROUND_Z + R_Q * math.cos(lean) + (T_Q / 2) * math.sin(lean)                          # centre height of a coin standing on its edge, leaning back by `lean`
+    for ob in coin_objs:
+        ob.rotation_mode = "QUATERNION"; ob.rotation_quaternion = quat; ob.location = (qx, qy, zc); smooth(ob, 30)
+
 # ---------------------------------------------------------------- lights: soft boxes (visible only in reflections) and a world fill
 def softbox(name, loc, size, strength, target=(0, 0, 12)):
     bm = bmesh.new(); add_box(bm, -size[0] / 2, size[0] / 2, -size[1] / 2, size[1] / 2, 0, 1)
