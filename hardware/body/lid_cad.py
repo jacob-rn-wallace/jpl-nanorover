@@ -15,7 +15,7 @@ with contextlib.redirect_stdout(io.StringIO()):
     import layout as LY
 
 D_RIM = 7.0                       # lid depth at the rim (lid_split.py's 6.5 mm rule rounds to 7.0 on the 1 mm grid); the end-face cells stop at z = 52.3, so 53 leaves 0.7 mm
-board = LY.comps["power + motor-driver board (upper lid module)"][1]        # x0, x1, y0, y1, z0, z1 of the upper board
+board = LY.comps["power board (upper lid module)"][1]        # x0, x1, y0, y1, z0, z1 of the upper board
 MARGIN = 2.0                                                              # platform margin round the board
 CAM_Z = 38.5                                                              # the cams' axis height on the top lid (the catch's head sits 3.1 to 3.5 mm above it)
 EAR_Z0, EAR_Y = 60 - D_RIM - 8.0, (40.0, -40.0)                          # lid ears for the side-entry screws: 8 mm deep below the rim plane, two per hub face at y = +-40 (inboard of the gasket groove)
@@ -35,6 +35,9 @@ def lid_spaces():
     return top, top.mirror(Plane.XY.offset(30))
 
 
+import sys as _s; _s.path.insert(0, str(__import__('pathlib').Path(__file__).resolve().parent)); import harness as _h; PL = _h.pockets()
+
+
 def joint_features():
     """The fastening details that the lids' design spaces need (stand-in design, docs/mechanical-spec.md item 8): returns (screw_holes, grooves) as lists of solids for both lids.
     Cam bores (replacing the side-entry screws of the first version, 2026-11-14): along x from each hub face (|x| = 70) inward, with a counterbore for the cam's flange and gasket and a vertical hole for the lid ear's catch (hardware/body/lid_cams.py); four per lid, two per hub face at y = +-40.
@@ -47,12 +50,12 @@ def joint_features():
                 cbore = Cylinder(6.7, 2.1).rotate(Axis.Y, 90).moved(Location((sx * 69.05, y0, zc)))                        # the counterbore for the cam's flange and its gasket, x 68 to 70.1
                 hole = Cylinder(1.7, abs(zear - zc)).moved(Location((sx * 60.0, y0, (zear + zc) / 2)))                      # the catch's hole up to the ear pocket
                 holes += [bore, cbore, hole]
-    # strut motor wiring inside the body (docs/mechanical-spec.md item 6): from the wall hole's inner end (|x| = 60, y = 0, z = 49) a 3.2 mm square channel runs inboard to a connector pocket against the
+    # strut motor wiring inside the body (docs/mechanical-spec.md item 6): from the wall hole's inner end (|x| = 60, y = 0; z = 11 on the lower lid, where the wheel drivers are) a 3.2 mm square channel runs inboard to a connector pocket against the
     # lid platform's side face (|x| = 37), where four spring contacts press horizontally on four pads on that face; the lid lifts straight off and the contacts part. The bottom lid's mirror.
     for zc in (49.0, 60 - 49.0):
         for sx in (1, -1):
             holes.append(Box(18.5, 3.2, 3.2).moved(Location((sx * (43.0 + 18.5 / 2), 0, zc))))                              # the channel, |x| 43 to 61.5 (it overlaps the wall hole's inner end at 60)
-            holes.append(Box(6.0, 7.0, 3.2).moved(Location((sx * (37.0 + 3.0), 0, zc))))                                     # the connector pocket for four contacts at 1.5 mm pitch (+ margin), |x| 37 to 43
+            L = PL["+" if sx > 0 else "-"]; holes.append(Box(6.0, L, 3.2).moved(Location((sx * (37.0 + 3.0), -5.0 + L / 2, zc))))        # the connector pocket for the side's spring contacts (harness.py), |x| 37 to 43, y from -5 along the platform's face
     grooves = []
     for z0 in (60 - D_RIM - 0.8, D_RIM):
         grooves.append(box(-67, 67, -67, 67, z0, z0 + 0.8) - box(-65, 65, -65, 65, z0 - 0.1, z0 + 0.9))

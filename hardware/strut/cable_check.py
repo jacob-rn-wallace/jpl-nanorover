@@ -2,7 +2,7 @@
 
 Run: python3 hardware/strut/cable_check.py   (plain python). Figures are from strut.py and hub.py (collar, groove, shaft cross holes, the stop gaps of item 7) and assumptions (ASM) noted.
 Strut A's two wires leave the motor tail through a notch in the collar, run along the arm's inboard face (a free 4 mm channel against the body wall), wind round the pivot boss in a ring of free space
-(r = 15 to 19 mm, between the boss's inboard face at |x| = 73.25 and the wall at about 70) and enter the body through a 2 mm hole in the wall 19 mm above the axis. Strut B's wires leave the same way,
+(r = 15 to 19 mm, between the boss's inboard face at |x| = 73.25 and the wall at about 70) and enter the body through a 2 mm hole in the wall 19 mm below the axis. Strut B's wires leave the same way,
 run in a 1.5 x 1.0 mm groove on its plate's inboard face across its boss to the hollow inner shaft, enter its 3 mm bore through a cross hole (|x| = 81.75), run inboard inside the shaft to a second cross
 hole (|x| = 52.25, in the 1.5 mm window between the horn adapter and the gear plane) and wind round the shaft there before running to the same kind of wall hole.
 """
@@ -27,7 +27,7 @@ b_arm = TIP_EXIT_R - B_BORE_R
 b_shaft = 81.75 - 52.25
 shaft_wrap_r = 3.0                 # the wire winds round the 5 mm shaft in a 1.5 mm window
 shaft_wrap = shaft_wrap_r * HALF
-b_to_wall = math.hypot(60.0 - 52.25, 49.0 - 30.0)   # from the shaft's exit to the wall hole's inner end, z = 49 at |x| = 60
+b_to_wall = math.hypot(60.0 - 52.25, 11.0 - 30.0)   # from the shaft's exit to the wall hole's inner end, z = 11 at |x| = 60
 b_len = b_arm + b_shaft + shaft_wrap + b_to_wall + inside
 print(f"strut A, per wire: along the arm {along_arm:.0f} mm, ring wrap {ring_wrap:.0f} mm, to and through the wall {to_wall:.0f} mm, inside {inside:.0f} mm: {a_len:.0f} mm")
 print(f"strut B, per wire: along the arm and groove {b_arm:.0f} mm, inside the shaft {b_shaft:.1f} mm, wrap round the shaft {shaft_wrap:.0f} mm, to the wall hole {b_to_wall:.0f} mm, inside {inside:.0f} mm: {b_len:.0f} mm")

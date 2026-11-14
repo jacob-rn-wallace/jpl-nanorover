@@ -100,10 +100,10 @@ for n, (m, bb, note, _c) in LY.comps.items():
 r_win = 13.0                                                              # 26 mm window aperture, through the +y wall
 add("camera, LED ring and ranging window", cyl("y", LY.WIN_X, LY.WIN_Z, r_win, 60.0, 70.0), area_cyl(r_win, 10.0))
 # (no frustum and no lamp beam: the camera sits 1.5 mm behind the glass, with its LED ring round the lens)
-# wire feedthroughs for the strut motors (docs/mechanical-spec.md item 6): strut A's pair goes through a 2 mm hole in each side wall, 19 mm above the hub axis (outside the 30 mm spot-face)
+# wire feedthroughs for the strut motors (docs/mechanical-spec.md item 6): strut A's pair goes through a 2 mm hole in each side wall, 19 mm BELOW the hub axis (z = 11, into the lower lid's pocket: the wheel drivers are on the processor board; outside the 30 mm spot-face; harness.py)
 for sgn in (1, -1):
     a, b = (60.0, 70.0) if sgn > 0 else (-70.0, -60.0)
-    add("hub drive (both sides)", cyl("x", 0.0, LY.HZ + 19.0, 1.0, a, b), area_cyl(1.0, 10.0))
+    add("hub drive (both sides)", cyl("x", 0.0, LY.HZ - 19.0, 1.0, a, b), area_cyl(1.0, 10.0))
 w = (LY.ANT_X - LY.ANT_WIN_HALF, LY.ANT_X + LY.ANT_WIN_HALF, -70.0, -67.5, LY.ANT_Z - LY.ANT_WIN_HALF, LY.ANT_Z + LY.ANT_WIN_HALF)
 add("comms antenna", bx(*w), area_box(*w))   # 27 mm square RF-transparent window through the -y wall, flush with the face
 
