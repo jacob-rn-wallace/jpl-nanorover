@@ -94,11 +94,11 @@ def end_cells(face):
     return [slab(face, start + 21.8 * k, start + 21.8 * k + 21.5, 7.75, 52.25) for k in range(4)]
 
 
-BIAS = {"cells": 1.5, "bezel": 1.8, "glass": 2.0, "plug": 1.5, "cam": 2.3, "tof": 2.6}     # mm toward the viewer: the thin overlays on the body faces must sort after the body
+BIAS = {"cells": 1.5, "bezel": 1.8, "glass": 2.0, "plug": 1.5, "hood": 2.3, "lens": 2.4, "leds": 2.5, "tof": 2.6}     # mm toward the viewer: the thin overlays on the body faces must sort after the body
 
 
 TEX = {}
-UNIT = {"glass", "bezel", "cam", "tof"}      # overlays on the window: sorted as one unit each, so coplanar discs do not interleave
+UNIT = {"glass", "bezel", "hood", "lens", "leds", "tof"}      # overlays on the window: sorted as one unit each, so coplanar discs do not interleave
 
 
 def render(ax, meshes, el, az, title, lims=None):
@@ -133,22 +133,24 @@ def main():
         wheels = pv.mesh_of(HW / "wheel/out/wheels.step", tmp)
     cells = fine(trimesh.util.concatenate(lid_cells("+z") + lid_cells("-z") + end_cells("+y") + end_cells("-y")))
     wx = 70 - (GAP + 13)
-    glass = fine(disc("+y", wx, 30, 14.0))                                   # the shared cover glass: 28 mm across (the enlarged window, docs/hardware-spec.md section 5)
-    bezel = fine(disc("+y", wx, 30, 15.6)); bezel.apply_translation((0, -0.12, 0))
-    cam = fine(disc("+y", wx, 30, 13.0))                                      # the camera and lamp's own 26 mm view, behind the glass
-    tof = fine(slab("+y", wx - 3.2, wx + 3.2, 41.2 - 1.5, 41.2 + 1.5))  # the ranging sensor (6.4 x 3.0 mm), seen through the glass above the camera view
+    glass = fine(disc("+y", wx, 30, 13.0))                                    # the cover glass: the original 26 mm circle again (LED ring instead of the beamsplitter)
+    bezel = fine(disc("+y", wx, 30, 14.6)); bezel.apply_translation((0, -0.12, 0))
+    hood = fine(disc("+y", wx, 30, 8.2))                                      # black mask ring and lens hood against the glass
+    lens = fine(disc("+y", wx, 30, 6.3))                                      # the M12 lens front
+    leds = fine(trimesh.util.concatenate([disc("+y", wx + 8.5 * np.cos(np.radians(90 + 45 * k)), 30 + 8.5 * np.sin(np.radians(90 + 45 * k)), 1.3) for k in range(1, 8)]))   # 7 white LEDs, top slot left free
+    tof = fine(slab("+y", wx - 3.2, wx + 3.2, 40.5 - 1.5, 40.5 + 1.5))      # the ranging sensor (6.4 x 3.0 mm) in the ring's top slot
     plug = fine(slab("-y", -(70 - (GAP + 13)) - 13.5, -(70 - (GAP + 13)) + 13.5, 30 - 13.5, 30 + 13.5))
     parts = [(Path("body.step"), "#34383e", 0), (Path("struts.step"), "#b9b4aa", 0), (Path("wheels.step"), "#cdd1d6", 0),
              (Path("cells.step"), "#161a22", 0), (Path("bezel.step"), "#7a7f86", 0), (Path("glass.step"), "#0b0e13", 0), (Path("plug.step"), "#3f4a46", 0),
-             (Path("cam.step"), "#020304", 0), (Path("tof.step"), "#4a5262", 0)]
+             (Path("hood.step"), "#0d0f13", 0), (Path("lens.step"), "#010203", 0), (Path("leds.step"), "#fff4d8", 0), (Path("tof.step"), "#4a5262", 0)]
     pv.PARTS = parts
-    meshes = [body, struts, wheels, cells, bezel, glass, plug, cam, tof]
+    meshes = [body, struts, wheels, cells, bezel, glass, plug, hood, lens, leds, tof]
     TEX["body"] = forged_texture(body)
     fig, axs = plt.subplots(2, 2, figsize=(14, 10.5))
     render(axs[0, 0], meshes, 24, 38, title="camera end (+y), +x hub side, top lid")
     render(axs[0, 1], meshes, 24, 218, title="comms end (-y), -x hub side")
     render(axs[1, 0], meshes, 89.9, -90, title="top lid: IXOLAR cells in one pocket, camera end up")
-    render(axs[1, 1], meshes, 0, 90, title="from +y: the 28 mm window (camera centre, ranging sensor above it) and the end-face cells")
+    render(axs[1, 1], meshes, 0, 90, title="from +y: the 26 mm window (lens, LED ring, ranging sensor) and the end-face cells")
     for a in axs.flat: a.set_facecolor("#e9ecef")
     fig.patch.set_facecolor("#e9ecef")
     plt.tight_layout()
@@ -156,15 +158,15 @@ def main():
     r, u, d = pv.view(24, 38)
     ctr = np.array([55.0, 70.0, 45.0])
     cx, cy = ctr @ r, ctr @ u
-    render(a2, meshes, 24, 38, "close-up: forged-carbon body (chopped chips, about 15 x 5 mm), IXOLAR cells, 28 mm window (camera and lamp view in the centre, ranging sensor in its top segment)", lims=(cx - 62, cx + 62, cy - 40, cy + 40))
+    render(a2, meshes, 24, 38, "close-up: forged-carbon body (chopped chips, about 15 x 5 mm), IXOLAR cells, 26 mm window (camera lens in the centre, a ring of LEDs round it, the ranging sensor in the top slot)", lims=(cx - 62, cx + 62, cy - 40, cy + 40))
     f2.savefig(HW.parent / "docs" / "images" / "rover-concept-detail.png", dpi=110, facecolor=f2.get_facecolor())
     f3, a3 = plt.subplots(figsize=(9, 7)); f3.patch.set_facecolor("#e9ecef"); a3.set_facecolor("#e9ecef")
     r3, u3, d3 = pv.view(0, 90)
     wp = np.array([wx, 70.0, 30.0]); cxx, cyy = wp @ r3, wp @ u3
-    render(a3, meshes, 0, 90, "the 28 mm window from +y: camera and lamp view in the centre, ranging sensor in the top segment", lims=(cxx - 36, cxx + 36, cyy - 26, cyy + 26))
-    sp = np.array([wx, 70.0, 41.2]); a3.annotate("ranging sensor\n(VL53L5CX, 6.4 x 3 mm)", (sp @ r3, sp @ u3), (cxx - 30, cyy + 20), fontsize=9, arrowprops=dict(arrowstyle="->"), ha="center", bbox=dict(boxstyle="round,pad=0.25", fc="white", ec="0.5", alpha=0.92))
-    cp = np.array([wx, 70.0, 30.0 - 8]); a3.annotate("camera + lamp view\n(26 mm)", (cp @ r3, cp @ u3), (cxx, cyy - 25), fontsize=9, arrowprops=dict(arrowstyle="->"), ha="center", bbox=dict(boxstyle="round,pad=0.25", fc="white", ec="0.5", alpha=0.92))
-    gp = np.array([wx - 14.0 * 0.7, 70.0, 30.0 + 14.0 * 0.7]); a3.annotate("shared cover glass\n(28 mm)", (gp @ r3, gp @ u3), (cxx + 26, cyy + 20), fontsize=9, arrowprops=dict(arrowstyle="->"), ha="center", bbox=dict(boxstyle="round,pad=0.25", fc="white", ec="0.5", alpha=0.92))
+    render(a3, meshes, 0, 90, "the 26 mm window from +y: lens, ring of white LEDs, ranging sensor in the top slot", lims=(cxx - 36, cxx + 36, cyy - 26, cyy + 26))
+    sp = np.array([wx, 70.0, 40.5]); a3.annotate("ranging sensor\n(VL53L5CX, 6.4 x 3 mm)", (sp @ r3, sp @ u3), (cxx - 30, cyy + 20), fontsize=9, arrowprops=dict(arrowstyle="->"), ha="center", bbox=dict(boxstyle="round,pad=0.25", fc="white", ec="0.5", alpha=0.92))
+    cp = np.array([wx, 70.0, 30.0 - 4]); a3.annotate("camera lens\n(M12) and hood", (cp @ r3, cp @ u3), (cxx, cyy - 25), fontsize=9, arrowprops=dict(arrowstyle="->"), ha="center", bbox=dict(boxstyle="round,pad=0.25", fc="white", ec="0.5", alpha=0.92))
+    gp = np.array([wx - 13.0 * 0.7, 70.0, 30.0 + 13.0 * 0.7]); a3.annotate("cover glass\n(26 mm)", (gp @ r3, gp @ u3), (cxx + 26, cyy + 20), fontsize=9, arrowprops=dict(arrowstyle="->"), ha="center", bbox=dict(boxstyle="round,pad=0.25", fc="white", ec="0.5", alpha=0.92))
     f3.savefig(HW.parent / "docs" / "images" / "rover-concept-window.png", dpi=110, facecolor=f3.get_facecolor())
     out = HW.parent / "docs" / "images" / "rover-concept.png"
     fig.savefig(out, dpi=80, facecolor=fig.get_facecolor())

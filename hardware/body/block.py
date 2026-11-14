@@ -94,15 +94,12 @@ for n, (m, bb, note, _c) in LY.comps.items():
     elif n.startswith("comms patch"):
         add("comms antenna", bx(*bb), area_box(*bb))
     else:
-        add("camera, beamsplitter and lamp", bx(*bb), area_box(*bb))
+        add("camera, LED ring and ranging window", bx(*bb), area_box(*bb))
 
 # connections and views
 r_win = 13.0                                                              # 26 mm window aperture, through the +y wall
-add("camera, beamsplitter and lamp", cyl("y", LY.WIN_X, LY.WIN_Z, r_win, 60.0, 70.0), area_cyl(r_win, 10.0))
-frustum_len = 69.0 - 46.5                                                 # lens front to the window plane
-cone = Cone(0.5, r_win, frustum_len, align=(Align.CENTER, Align.CENTER, Align.MIN)).rotate(Axis.X, -90).moved(Location((LY.WIN_X, 46.5, LY.WIN_Z)))
-add("camera, beamsplitter and lamp", cone, math.pi * (0.5 + r_win) * math.hypot(r_win - 0.5, frustum_len))     # the view: 60 degree full angle at 26 mm
-add("camera, beamsplitter and lamp", cyl("x", 57.0, LY.WIN_Z, 6.0, 28.0, LY.WIN_X), area_cyl(6.0, LY.WIN_X - 28.0))   # lamp beam to the plate
+add("camera, LED ring and ranging window", cyl("y", LY.WIN_X, LY.WIN_Z, r_win, 60.0, 70.0), area_cyl(r_win, 10.0))
+# (no frustum and no lamp beam: the camera sits 1.5 mm behind the glass, with its LED ring round the lens)
 w = (LY.ANT_X - LY.ANT_WIN_HALF, LY.ANT_X + LY.ANT_WIN_HALF, -70.0, -67.5, LY.ANT_Z - LY.ANT_WIN_HALF, LY.ANT_Z + LY.ANT_WIN_HALF)
 add("comms antenna", bx(*w), area_box(*w))   # 27 mm square RF-transparent window through the -y wall, flush with the face
 
@@ -132,9 +129,6 @@ for n, bm in LY.placed.items():
 # add the window, frustum, lamp beam and antenna window holes to the voxel copy
 X, Y, Z = LY.X, LY.Y, LY.Z
 solid &= ~((Y >= 60) & ((X - LY.WIN_X) ** 2 + (Z - LY.WIN_Z) ** 2 <= r_win ** 2))
-tt = np.clip((Y - 46.5) / frustum_len, 0, 1)
-solid &= ~((Y >= 46.5) & (Y <= 69) & ((X - LY.WIN_X) ** 2 + (Z - LY.WIN_Z) ** 2 <= (0.5 + tt * (r_win - 0.5)) ** 2))
-solid &= ~((X >= 28) & (X <= LY.WIN_X) & ((Y - 57.0) ** 2 + (Z - LY.WIN_Z) ** 2 <= 36.0))
 solid &= ~((Y >= 60) & ((X - LY.WIN_X) ** 2 + (Z - LY.WIN_Z) ** 2 <= LY.WIN_R_GLASS ** 2))
 solid &= ~((Y <= -67.5) & (np.abs(X - LY.ANT_X) <= LY.ANT_WIN_HALF) & (np.abs(Z - LY.ANT_Z) <= LY.ANT_WIN_HALF))
 pad = np.pad(solid, 1, constant_values=False)

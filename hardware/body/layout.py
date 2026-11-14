@@ -105,7 +105,7 @@ for n, (x0, x1, y0, y1, z0, z1) in bays.items():
 
 # ---------------- components (PLACEHOLDERS: sizes and masses are assumptions, no parts chosen) ----------------
 # Owner's decisions (2026-11-11): top and bottom faces are identical lids carrying cells; the body is kept symmetric about the transverse (z = 30) plane;
-# one window shared by camera and lamp through a beamsplitter; the comms antenna on the opposite end face at the diagonally opposite position (a 180 degree turn about z carries
+# one window for the camera, its LED ring and the ranging sensor (the beamsplitter was dropped on 2026-11-14); the comms antenna on the opposite end face at the diagonally opposite position (a 180 degree turn about z carries
 # the camera's position onto the antenna's).
 # Antenna (owner, 2026-11-13, supersedes the gravity-oriented whip with a counterweight): the radio is 2.4 GHz. The comms antenna is a 2.4 GHz ceramic patch polarised along z behind an
 # RF-transparent 26 mm window in the -y wall (the identical-look circle); upright and inverted are a 180 degree turn about y, which keeps the polarisation vertical, so nothing has to
@@ -120,23 +120,20 @@ END_GAP = (140.0 - END_HOLE_D - END_POCKET_W) / 3
 WIN_X, WIN_Z = 70.0 - (END_GAP + END_HOLE_D / 2), 30.0
 ANT_X, ANT_Z = -WIN_X, 30.0
 ANT_WIN_HALF = 13.5     # the -y end face's RF-transparent window is a 27 mm SQUARE (owner, 2026-11-13), flush with the face, so the 25 x 25 mm patch sees its whole area
-# Ranging sensor (VL53L5CX, docs/hardware-spec.md section 5): BEHIND THE CAMERA WINDOW (owner, 2026-11-13: a bigger window is allowed, but it stays a circle on the same centre).
-# The camera's real field is a rectangle, 54 x 41.5 degrees (sim/src/constants.ts, the M12 3.6 mm lens on a 1/4 inch sensor), so at the glass (22.5 mm from the lens plane) it needs only
-# +-11.5 mm across and +-8.5 mm up and down, not the 26 mm circle; the lamp beam is 12 mm across. The circle's top segment (more than 8.5 mm above the axis) is unused, and the
-# slanted beamsplitter plate (y = x + 9) leaves the space in front of it free at the sensor's x. The sensor sits there, long axis horizontal (6.4 x 3.0 mm), centre 11.2 mm above the
-# axis (z = 41.2), 1.4 mm clear of the camera's view and 0.9 mm inside the circle's edge, in a 28 mm opening (radius 14: the 26 mm circle's edge was only 0.1 mm clear); the sensor
-# looks +y, tilted down 22 degrees as in the sim by a small wedge (not modelled), which also keeps its field below the opening's upper edge. WIN_R_GLASS = 14 on the old centre.
-WIN_R_GLASS = 14.0
-RNG_X, RNG_Z = WIN_X, WIN_Z + 11.2
+# LED ring instead of the beamsplitter (owner idea, 2026-11-14): the camera and its lamp no longer share the window through a 45 degree plate. The camera moves forward until its lens is 1.5 mm
+# behind the cover glass (hood and black mask ring against the glass), and a ring of white LEDs on a thin board sits round the lens behind the same glass: the 26 mm window is back to the
+# original size (WIN_R_GLASS = 13), one circle on the same centre. Ranging sensor (VL53L5CX, docs/hardware-spec.md section 5): in the ring's top slot, long axis horizontal (6.4 x 3.0 mm),
+# centre 10.5 mm above the axis (z = 40.5; top edge 12.0 mm, 0.6 mm inside the circle at the sensor's width), looking +y, tilted down 22 degrees as in the sim by a small wedge (not modelled).
+WIN_R_GLASS = 13.0
+RNG_X, RNG_Z = WIN_X, WIN_Z + 10.5
 END_CELL_X = 70.0 - (2 * END_GAP + END_HOLE_D + END_POCKET_W / 2)   # body x of the end pocket's centre on the +y face (-17.47); on the -y face it is +17.47
 comps = {  # name: (mass g, (x0, x1, y0, y1, z0, z1), note, optional (x, y, z) of the centre of mass if not the box centre)
     "processor board (lower lid module)":   (20.0, (-35, 35, -6, 62, 4, 11.6),      "70 x 68 x 7.6 mm placeholder, rides on the bottom lid", None),
     "power + motor-driver board (upper lid module)": (20.0, (-35, 35, -6, 62, 48.4, 56.0), "mirror of the lower board about z = 30, rides on the top lid", None),
     "battery (1S 1000 mAh, 25C class)":     (28.5, (-5.0, 5.0, -25.5, 25.5, 14.5, 45.5), "Overlander SKU 2809 class pouch, about 50 x 31 x 9 mm and 28 to 28.5 g (retailer listings differ), lying in the 16 mm gap between the servo pairs, thickness along x; no protection circuit assumed (it goes on the power board); docs/hardware-spec.md section 4", None),
-    "camera module":                        (12.0, (WIN_X - 12.5, WIN_X + 12.5, 36.5, 45.5, WIN_Z - 12, WIN_Z + 12), "25 x 24 x 9 mm, looking +y through the beamsplitter", None),
-    "beamsplitter plate, 45 degrees":       (3.0,  (WIN_X - 10, WIN_X + 10, 47, 67, WIN_Z - 12, WIN_Z + 12), "28 x 24 x 1.5 mm glass plate at 45 degrees; box is its bounding volume. A 25 mm cube would be about 39 g (my estimate)", None),
-    "lamp (LED and lens), shines +x onto the plate": (5.0, (14, 28, 51, 63, WIN_Z - 6, WIN_Z + 6), "on the body-centre side of the plate, which reflects it toward +y and out of the window", None),
-    "ranging sensor (VL53L5CX) on its board":    (2.0,  (RNG_X - 3.5, RNG_X + 3.5, 62.0, 67.5, RNG_Z - 2.5, RNG_Z + 2.5), "6.4 x 3.0 x 1.5 mm sensor on a small board in the top segment of the 28 mm window that the camera's rectangular view does not use, in front of the slanted beamsplitter plate and behind the shared cover glass, looking +y", None),
+    "camera module":                        (12.0, (WIN_X - 12.5, WIN_X + 12.5, 57.0, 66.0, WIN_Z - 12, WIN_Z + 12), "25 x 24 x 9 mm; its lens front is 1 mm ahead of the box (y = 67), 1.5 mm behind the cover glass's inner face, looking +y (no beamsplitter: owner idea 2026-11-14)", None),
+    "LED ring (7 white LEDs on a ring board)": (3.0,  (WIN_X - 10, WIN_X + 10, 66.0, 67.5, WIN_Z - 8.0, WIN_Z + 8.0), "ring of LEDs round the lens, behind the same cover glass, with a black mask ring and lens hood against the glass to keep their light out of the lens; the box stands for the ring zone (LEDs at about 8.5 mm radius, the top slot left for the ranging sensor); replaces the beamsplitter plate and the lamp (8 g) with about 3 g", None),
+    "ranging sensor (VL53L5CX) on its board":    (2.0,  (RNG_X - 3.5, RNG_X + 3.5, 66.0, 67.5, RNG_Z - 2.0, RNG_Z + 2.0), "6.4 x 3.0 x 1.5 mm sensor on a small board in the top slot of the LED ring, behind the shared cover glass, looking +y", None),
     "comms patch (2.4 GHz) on its ground board": (9.0, (ANT_X - 12.5, ANT_X + 12.5, -67.5, -62.0, ANT_Z - 12.5, ANT_Z + 12.5), "Taoglas WPC.25A.07.0150C: 25 x 25 x 5.5 mm incl. its own ground board, directly behind the flush 27 mm square window plug in the -y wall (mass ASM, not in the datasheet)", None),
 }
 OUT_COMPS = {}  # outside the envelope, counted for mass and balance only (the whip is gone: the antennas are inside the body behind RF windows)
@@ -158,8 +155,6 @@ ok_all = True
 placed = {}
 for n, (m, (x0, x1, y0, y1, z0, z1), note, _c) in comps.items():
     bm = box_mask(x0, x1, y0, y1, z0, z1)
-    if n.startswith("beamsplitter"):   # the plate is a thin slab at 45 degrees along y = x + (y0 - x0), not its whole bounding box (1.6 mm band: the plate's 1.5 mm plus a voxel)
-        bm &= np.abs((Y - X) - (y0 - x0)) <= 1.6
     bad_keep = (bm & ~keep_in).sum()
     bad_occ = (bm & occ).sum()
     placed[n] = bm
