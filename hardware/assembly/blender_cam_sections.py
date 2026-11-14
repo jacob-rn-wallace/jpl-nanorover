@@ -76,8 +76,8 @@ if VIEW == "axial":
 else:
     for state, shift in (("UNLOCKED", Vector()), ("LOCKED", SHIFT)):
         label(state, pt(Y0, 63.8, shift), 2.6)
-    label("catch head at the groove's throat,", pt(Y0, 28.4), 1.4); label("3.5 mm from the cam's axis", pt(Y0, 26.6), 1.4)
-    label("cam turned 180 degrees: the groove has drawn", pt(Y0 + 34, 28.4), 1.4); label("the head to 3.1 mm from the axis (the lid is down 0.4 mm)", pt(Y0 + 34, 26.6), 1.4)
+    label("catch head at the groove's throat,", pt(Y0, 28.4), 1.4); label("3.4 mm from the cam's axis", pt(Y0, 26.6), 1.4)
+    label("cam turned 180 degrees: the groove has drawn", pt(Y0 + 34, 28.4), 1.4); label("the head to 3.0 mm from the axis (the lid is down 0.4 mm)", pt(Y0 + 34, 26.6), 1.4)
     label('colours as in the axial view: lid blue, body grey, cam orange, catch steel', pt(Y0 + 17, 59.5 + 3.4), 1.2)
 
 # ---- world, lights, camera ----

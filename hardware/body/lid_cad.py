@@ -43,9 +43,9 @@ def joint_features():
     for zc, zear in ((CAM_Z, EAR_Z0), (60 - CAM_Z, 60 - EAR_Z0)):                 # the top lid's cams and the bottom lid's (mirror images about z = 30)
         for sx in (1, -1):
             for y0 in EAR_Y:
-                bore = Cylinder(4.1, 16.1).rotate(Axis.Y, 90).moved(Location((sx * 62.05, y0, zc)))                       # the cam's bore, x 54 to 70.1
-                cbore = Cylinder(5.7, 2.1).rotate(Axis.Y, 90).moved(Location((sx * 69.05, y0, zc)))                        # the counterbore for the cam's flange and its gasket, x 68 to 70.1
-                hole = Cylinder(2.1, abs(zear - zc)).moved(Location((sx * 60.0, y0, (zear + zc) / 2)))                      # the catch's hole up to the ear pocket
+                bore = Cylinder(5.1, 16.1).rotate(Axis.Y, 90).moved(Location((sx * 62.05, y0, zc)))                       # the cam's bore, x 54 to 70.1
+                cbore = Cylinder(6.7, 2.1).rotate(Axis.Y, 90).moved(Location((sx * 69.05, y0, zc)))                        # the counterbore for the cam's flange and its gasket, x 68 to 70.1
+                hole = Cylinder(1.7, abs(zear - zc)).moved(Location((sx * 60.0, y0, (zear + zc) / 2)))                      # the catch's hole up to the ear pocket
                 holes += [bore, cbore, hole]
     grooves = []
     for z0 in (60 - D_RIM - 0.8, D_RIM):
