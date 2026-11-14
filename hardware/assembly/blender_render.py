@@ -2,7 +2,7 @@
 
 Run from the repository root, after hardware/assembly/blender_export.py:
     VIEW=hero ~/tools/blender-4.5.9-linux-x64/blender -b -P hardware/assembly/blender_render.py
-VIEW is one of hero, rear, top, detail (default hero); SAMPLES (default 96), RES (default 1600x1000) are optional.  Output: docs/images/rover-<view>.png.
+VIEW is one of hero, rear, top, detail, cells, window (default hero); SAMPLES (default 96), RES (default 1600x1000) are optional.  Output: docs/images/rover-<view>.png.
 1 Blender unit = 1 mm.  The body is a 140 x 140 x 60 mm block with 0.8 mm edges, NOT the real shell (hardware/body/block.py is only the cavity volume);
 the cells, panes and windows are laid on its faces from the same numbers as layout.py, cell_pocket.py and cell_endface.py.  Not modelled: lid screws and
 seals, hub studs and rings, the lamp, the beamsplitter, anything inside.  The forged-carbon pattern is procedural (chips of random orientation, each with
@@ -130,6 +130,13 @@ MAT = {
     "film": principled("laminate margin", (0.009, 0.010, 0.013), metallic=0.0, rough=0.42),     # photos show no pale border: the part is black edge to edge
     "glass": principled("camera pane", (0.0, 0.0, 0.0), metallic=0.0, rough=0.04, Coat_Weight=0.5, Coat_Roughness=0.02),
     "bezel": principled("bezel", (0.18, 0.18, 0.2), metallic=1.0, rough=0.28),
+    "hood": principled("lens hood and mask ring", (0.004, 0.004, 0.005), metallic=0.0, rough=0.55),
+    "lens": principled("M12 lens front", (0.0, 0.0, 0.0), metallic=0.0, rough=0.10, Coat_Weight=0.25, Coat_Roughness=0.12),
+    "iris": principled("lens inner element", (0.004, 0.006, 0.022), metallic=0.0, rough=0.12, Coat_Weight=0.3, Coat_Roughness=0.08),
+    "film": principled("laminate margin", (0.009, 0.010, 0.013), metallic=0.0, rough=0.42),
+    "smoked": principled("smoked dead-front film", (0.010, 0.0095, 0.008), metallic=0.0, rough=0.12, Coat_Weight=0.4, Coat_Roughness=0.05),
+    "led": principled("LED behind the film (off)", (0.0145, 0.0135, 0.0105), metallic=0.0, rough=0.14),
+    "irink": principled("infrared-passing ink over the ranging sensor", (0.006, 0.0025, 0.0025), metallic=0.0, rough=0.3, Coat_Weight=0.2, Coat_Roughness=0.12),
     "plug": principled("RF window plug", (0.025, 0.032, 0.03), metallic=0.0, rough=0.45),
     "strut": principled("strut", (0.88, 0.89, 0.91), metallic=1.0, rough=0.34, Anisotropic=0.5),    # bare machined 6061 (docs/strut-spec.md)
     "wheel": principled("wheel", (0.88, 0.89, 0.91), metallic=1.0, rough=0.30, Anisotropic=0.6),
@@ -216,6 +223,16 @@ cells()
 wx = 70 - (GAP + 13)
 cylinder_y("bezel", wx, 30, 14.6, 70.0, 70.0 + T, "bezel")
 cylinder_y("pane", wx, 30, 13.0, 70.0, 70.0 + T + 0.25, "glass")
+# behind the cover glass (drawn just in front of the pane, which is dark glass): the smoked dead-front annulus over the LED ring, 7 LEDs (off), the lens hood, the lens, the ranging sensor's IR ink
+y0 = 70.0 + T + 0.25
+cylinder_y("film ring", wx, 30, 11.8, y0, y0 + 0.08, "smoked")
+for k in range(1, 8):
+    ang = math.radians(90 + 45 * k)
+    cylinder_y(f"led{k}", wx + 8.5 * math.cos(ang), 30 + 8.5 * math.sin(ang), 1.3, y0 + 0.08, y0 + 0.14, "led", verts=24)
+cylinder_y("hood", wx, 30, 8.2, y0 + 0.08, y0 + 0.2, "hood")
+cylinder_y("lens", wx, 30, 6.3, y0 + 0.2, y0 + 0.3, "lens")
+cylinder_y("lens inner", wx, 30, 3.4, y0 + 0.3, y0 + 0.4, "iris")
+bm = bmesh.new(); add_box(bm, wx - 3.2, wx + 3.2, y0 + 0.08, y0 + 0.2, 40.5 - 1.5, 40.5 + 1.5); make("ranging sensor", bm, "irink")
 bm = bmesh.new(); add_box(bm, -wx - 13.5, -wx + 13.5, -70 - T, -70, 16.5, 43.5); make("RF plug", bm, "plug")
 import_stl("struts", "strut"); import_stl("wheels", "wheel")
 bm = bmesh.new(); add_box(bm, -3000, 3000, -3000, 3000, GROUND_Z - 1, GROUND_Z); make("ground", bm, "ground")
@@ -260,6 +277,8 @@ elif VIEW == "rear": camera(orbit(218, 20, 640), (0, 0, 8), 55)
 elif VIEW == "top": camera((0, 0, 1400), (0, 0, 0), 55, ortho=330); scene.camera.rotation_euler = (0, 0, 0)         # image up = +y, the camera end
 elif VIEW == "detail":
     tgt = (45, 70, 38); loc = orbit(32, 18, 230, tgt); camera(loc, tgt, 85, dof=(loc - Vector(tgt)).length)
+elif VIEW == "window":
+    tgt = (wx, 70, 33); loc = orbit(90, 10, 150, tgt); camera(loc, tgt, 100, dof=(loc - Vector(tgt)).length)
 elif VIEW == "cells":
     tgt = (20, 30, 60); loc = orbit(24, 24, 190, tgt); camera(loc, tgt, 100, dof=(loc - Vector(tgt)).length)
 else: raise SystemExit(f"unknown VIEW {VIEW}")
