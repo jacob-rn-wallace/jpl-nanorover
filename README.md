@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/images/rover-hero.png" alt="A render of the interpreted JPL nanorover: a 140 x 140 x 60 mm forged-carbon body with near-black solar cells on the lids and end faces, a round camera window on the end face, and four aluminium cleated wheels on 70 mm struts" width="100%">
+</p>
+
 # jpl-nanorover
 
 Research toward an open replica of the JPL nanorover, the small four-wheeled asteroid rover designed for the Japanese MUSES-C (Hayabusa) sample-return mission and cancelled by NASA in November 2000.
@@ -7,8 +11,6 @@ The replica aims to match the original's appearance and dimensions and to perfor
 > **Status: research plus a first-pass 1:1 CAD model.** Sourced dimensions are in the bibliography. The CAD (build123d) has the body, lid and seals, thread
 > inserts, hub studs, four struts and four wheels, with checks that the parts fit and clear each other. Scale, materials, manufacturing method and how the
 > struts are actuated are undecided; wheel proportions, the strut layout and several other details are labelled assumptions or photo estimates, not published figures.
-
-![preview](docs/images/rover-preview.png)
 
 ## Target
 The reference units are the two built JPL prototypes in the photographs and videos: a silver-bodied unit (a round imaging window and a sealed-beam headlamp on one end face) and a black-bodied unit (a square camera window), which share their struts and wheels. Measured against a quarter in one photo, the black unit is about
