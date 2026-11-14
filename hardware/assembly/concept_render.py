@@ -137,7 +137,7 @@ def main():
     bezel = fine(disc("+y", wx, 30, 14.6)); bezel.apply_translation((0, -0.12, 0))
     hood = fine(disc("+y", wx, 30, 8.2))                                      # black mask ring and lens hood against the glass
     lens = fine(disc("+y", wx, 30, 6.3))                                      # the M12 lens front
-    leds = fine(trimesh.util.concatenate([disc("+y", wx + 8.5 * np.cos(np.radians(90 + 45 * k)), 30 + 8.5 * np.sin(np.radians(90 + 45 * k)), 1.3) for k in range(1, 8)]))   # 7 white LEDs, top slot left free
+    leds = fine(trimesh.util.concatenate([disc("+y", wx + 10.0 * np.cos(np.radians(d)), 30 + 10.0 * np.sin(np.radians(d)), 1.5) for d in (0, 45, 135, 180, 225, 315)]))   # 6 white LEDs, top slot and bottom free
     tof = fine(slab("+y", wx - 3.2, wx + 3.2, 40.5 - 1.5, 40.5 + 1.5))      # the ranging sensor (6.4 x 3.0 mm) in the ring's top slot
     plug = fine(slab("-y", -(70 - (GAP + 13)) - 13.5, -(70 - (GAP + 13)) + 13.5, 30 - 13.5, 30 + 13.5))
     parts = [(Path("body.step"), "#34383e", 0), (Path("struts.step"), "#b9b4aa", 0), (Path("wheels.step"), "#cdd1d6", 0),

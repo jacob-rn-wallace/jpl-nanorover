@@ -136,7 +136,7 @@ MAT = {
     "film": principled("laminate margin", (0.009, 0.010, 0.013), metallic=0.0, rough=0.42),
     "smoked": principled("smoked dead-front film", (0.010, 0.0095, 0.008), metallic=0.0, rough=0.12, Coat_Weight=0.4, Coat_Roughness=0.05),
     "led": principled("LED lit through the film", (1.0, 0.86, 0.62), metallic=0.0, rough=0.3, Emission_Color=(1.0, 0.86, 0.62, 1.0), Emission_Strength=6.0),
-    "irink": principled("infrared-passing ink over the ranging sensor", (0.006, 0.0025, 0.0025), metallic=0.0, rough=0.3, Coat_Weight=0.2, Coat_Roughness=0.12),
+    "irink": principled("ranging sensor package behind clear glass", (0.012, 0.012, 0.015), metallic=0.0, rough=0.35),
     "plug": principled("RF window plug", (0.025, 0.032, 0.03), metallic=0.0, rough=0.45),
     "strut": principled("strut", (0.88, 0.89, 0.91), metallic=1.0, rough=0.34, Anisotropic=0.5),    # bare machined 6061 (docs/strut-spec.md)
     "wheel": principled("wheel", (0.88, 0.89, 0.91), metallic=1.0, rough=0.30, Anisotropic=0.6),
@@ -228,9 +228,9 @@ y0 = 70.0 + T + 0.25
 cylinder_y("film ring", wx, 30, 11.8, y0, y0 + 0.08, "smoked")
 # LED=off (default): the LEDs do not appear at all, as behind a real dead-front film; LED=on draws them lit (warm white, emissive) for a photograph-with-lamp view
 if os.environ.get("LED", "off").lower() == "on":
-    for k in range(1, 8):
-        ang = math.radians(90 + 45 * k)
-        cylinder_y(f"led{k}", wx + 8.5 * math.cos(ang), 30 + 8.5 * math.sin(ang), 1.3, y0 + 0.08, y0 + 0.14, "led", verts=24)
+    for deg in (0, 45, 135, 180, 225, 315):        # six LEDs at 10 mm radius; the top slot is the ranging sensor's, the bottom is empty
+        ang = math.radians(deg)
+        cylinder_y(f"led{deg}", wx + 10.0 * math.cos(ang), 30 + 10.0 * math.sin(ang), 1.5, y0 + 0.08, y0 + 0.14, "led", verts=24)
 cylinder_y("hood", wx, 30, 8.2, y0 + 0.08, y0 + 0.2, "hood")
 cylinder_y("lens", wx, 30, 6.3, y0 + 0.2, y0 + 0.3, "lens")
 cylinder_y("lens inner", wx, 30, 3.4, y0 + 0.3, y0 + 0.4, "iris")

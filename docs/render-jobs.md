@@ -19,13 +19,13 @@ When a change to the CAD, the layout, the materials or the camera alters what a 
 
 | Id | Image (`docs/images/`) | Settings | Expected | Why (last change) | Status | Notes |
 |---|---|---|---|---|---|---|
-| R1 | `rover-hero.png` | `VIEW=hero`, 1600x1000, 96 samples | camera end three-quarter view: carbon body, near-black cells, aluminium struts and wheels, the 26 mm window with the lens visible | window redesigned 2026-11-14 (LED ring, lens, sensor; no beamsplitter); LEDs no longer drawn when off | done 2026-11-14 | M2 Metal GPU: 36 s. |
+| R1 | `rover-hero.png` | `VIEW=hero`, 1600x1000, 96 samples | camera end three-quarter view: carbon body, near-black cells, aluminium struts and wheels, the 26 mm window with the lens visible | six mid-power LEDs at 10 mm radius (0, 45, 135, 180, 225, 315 degrees), sensor package behind clear glass (2026-11-14); was: window redesigned 2026-11-14 (LED ring, lens, sensor; no beamsplitter); LEDs no longer drawn when off | pending | M2 Metal GPU: 36 s. |
 | R2 | `rover-rear.png` | `VIEW=rear`, 1600x1000, 96 | the comms end: the square RF window plug | unchanged since 2026-11-13; re-render only to refresh | done 2026-11-14 | M2 Metal GPU: 36 s. |
 | R3 | `rover-top.png` | `VIEW=top`, 1600x1000, 96 | top lid cells, camera end up | unchanged since 2026-11-13 | done 2026-11-14 | M2 Metal GPU: 36 s. |
-| R4 | `rover-detail.png` | `VIEW=detail`, 1500x940, 96 | the camera-end corner: the window with lens, hood, dead-front ring (no visible LED outlines now), sensor patch above the lens, four end-face cells | LED outlines removed (they showed as raised discs) | done 2026-11-14 | M2 Metal GPU: 49 s. |
+| R4 | `rover-detail.png` | `VIEW=detail`, 1500x940, 96 | the camera-end corner: the window with lens, hood, dead-front ring (no visible LED outlines now), sensor patch above the lens, four end-face cells | six mid-power LEDs at 10 mm radius (0, 45, 135, 180, 225, 315 degrees), sensor package behind clear glass (2026-11-14); was: LED outlines removed (they showed as raised discs) | pending | M2 Metal GPU: 49 s. |
 | R5 | `rover-cells.png` | `VIEW=cells`, 1500x940, 96 | raking close-up of the top-lid cells | unchanged since 2026-11-13 | done 2026-11-14 | M2 Metal GPU: 22 s. |
-| R6 | `rover-window.png` | `VIEW=window`, 1500x940, 96 | straight-on close-up: glass, hood, lens, a smooth dark ring with no LED outlines, the small dark sensor patch at the top | LED outlines removed | done 2026-11-14 | M2 Metal GPU: 81 s. |
-| R7 | `rover-window-lit.png` | `VIEW=window LED=on SUFFIX=-lit`, 1500x940, 96 | the same view with the seven white LEDs lit (the lamp on during a photograph) | new variant, 2026-11-14 | done 2026-11-14 | M2 Metal GPU: 58 s. |
+| R6 | `rover-window.png` | `VIEW=window`, 1500x940, 96 | straight-on close-up: glass, hood, lens, a smooth dark ring with no LED outlines, the small dark sensor patch at the top | six mid-power LEDs at 10 mm radius (0, 45, 135, 180, 225, 315 degrees), sensor package behind clear glass (2026-11-14); was: LED outlines removed | pending | M2 Metal GPU: 81 s. |
+| R7 | `rover-window-lit.png` | `VIEW=window LED=on SUFFIX=-lit`, 1500x940, 96 | the same view with the seven white LEDs lit (the lamp on during a photograph) | six mid-power LEDs at 10 mm radius (0, 45, 135, 180, 225, 315 degrees), sensor package behind clear glass (2026-11-14); was: new variant, 2026-11-14 | pending | M2 Metal GPU: 58 s. |
 
 ## Notes from the render session
 
