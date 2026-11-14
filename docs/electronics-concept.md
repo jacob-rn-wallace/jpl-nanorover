@@ -69,7 +69,7 @@ Sources for frame sizes are rough (SRC, by search): a tutorial puts QVGA at 10 t
 - **OpenMV:** the smart one (JPEG on board, serial out, can even own the radio); heavier, more power, one retailer lists the H7 Plus as retired.
 - Sensors are 1/4 inch class, so **a 3.6 to 4.5 mm M12 lens passes the 26 mm window and the polarising plate with no loss** (54 x 41.5 degrees at 3.6 mm, 49 x 38 at 4.0, 44 x 34 at 4.5; `optics.py`, section 3 of its output history, or the table in `docs/body-redesign.md`). The analog 1/3 inch route needed 6 mm.
 
-**Architecture that follows (mine):** a PIC32 as the only controller; a camera module with JPEG output; one modest digital radio (a certified 900 MHz or 2.4 GHz module) carrying slow-scan video, commands and telemetry; the operator's station a PC with the matching radio. No Linux board, no video transmitter, no second radio.
+**Architecture that follows (mine; camera link settled 2026-11-14 as SPI with a frame buffer, see item 3 below):** a PIC32 as the only controller; a camera module with JPEG output; one modest digital radio (a certified 900 MHz or 2.4 GHz module) carrying slow-scan video, commands and telemetry; the operator's station a PC with the matching radio. No Linux board, no video transmitter, no second radio.
 
 ## Refinement: at least 15 frames per second (owner, 2026-11-12) **(WITHDRAWN the same day when the owner chose the map-and-stills view below; kept as the record of what was found)**
 
@@ -160,7 +160,7 @@ Settled 2026-11-12: the operator's console does the SLAM and shows a 3D model; t
 
 1. **Onboard reflexes:** whether the rover also avoids hazards by itself (a small local hazard map and simple reflexes, as Sojourner did) or is driven by the operator through the model alone.
 2. **Sensors for the model:** a multizone time-of-flight ranging sensor (the VL53L5CX is the candidate found; how many, and where, since a 63 to 65 degree field and the 140 mm body limit them), an inertial sensor, wheel encoders (the wheel motors have none in the docs), the strut angles from the servos.
-3. **The camera module and the image size:** with the mapping on the console the rover only needs stills, so a simple JPEG camera (Arducam SPI, a serial JPEG camera) is enough and the OpenMV is optional; image size and the time per image at the chosen radio rate (the table above).
+3. **The camera module and the image size:** with the mapping on the console the rover only needs stills, so a simple JPEG camera is enough and the OpenMV is optional. **Decided (owner, 2026-11-14): an SPI JPEG camera with its own frame buffer (Arducam Mini class; SPI plus I2C on the shared sensor bus), not a UART module,** because the PIC32MX250 has only two UARTs (XBee and servo bus) and `docs/hardware-spec.md` section 6 (pin table) shows a third, bit-banged one is fragile next to the 1 Mbaud bus; image size and the time per image at the chosen radio rate (the table above).
 4. **The radio:** the part, the serial rate, the antenna, the current draw (not found for the XBee-PRO 900HP), and the operator-side modem.
 5. **The console software:** the SLAM and the 3D view on the operator's PC (not designed), and the protocol between rover and console.
 6. The battery and voltage rails, and the power switching.
