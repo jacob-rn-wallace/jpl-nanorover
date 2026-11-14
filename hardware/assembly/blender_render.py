@@ -2,7 +2,7 @@
 
 Run from the repository root, after hardware/assembly/blender_export.py:
     VIEW=hero ~/tools/blender-4.5.9-linux-x64/blender -b -P hardware/assembly/blender_render.py
-VIEW is one of hero, rear, top, detail, cells, window (default hero); SAMPLES (default 96), RES (default 1600x1000) and DEVICE (cpu, the default, or gpu: Metal on a Mac) LED (off, the default, or on), BEZEL (bare, the default, black or gunmetal) and SUFFIX (a name suffix for the output, for example -lit) are optional.  Output: docs/images/rover-<view>.png.
+VIEW is one of hero, rear, top, detail, cells, window (default hero); SAMPLES (default 96), RES (default 1600x1000) and DEVICE (cpu, the default, or gpu: Metal on a Mac) LED (off, the default, or on), BEZEL (gunmetal, the default and the chosen finish, bare or black) and SUFFIX (a name suffix for the output, for example -lit) are optional.  Output: docs/images/rover-<view>.png.
 1 Blender unit = 1 mm.  The body is a 140 x 140 x 60 mm block with 0.8 mm edges, NOT the real shell (hardware/body/block.py is only the cavity volume);
 the cells, panes and windows are laid on its faces from the same numbers as layout.py, cell_pocket.py and cell_endface.py.  Not modelled: lid screws and
 seals, hub studs and rings, the lamp, the beamsplitter, anything inside.  The forged-carbon pattern is procedural (chips of random orientation, each with
@@ -255,7 +255,7 @@ wx = 70 - (GAP + 13)
 # the window bezel (owner's taste, 2026-11-14: a metal frame with visible screws, like a viewport; flush with the carbon face, screws flush with the ring): a bare machined aluminium ring,
 # r = 13 to 18 mm, 1.5 mm thick (y 68.5 to 70.0, flush with the face), clamping the 28 mm sapphire disc (y 68.0 to 68.5, in a seat in the carbon) with a 1 mm overlap; six countersunk M1.6 screws
 # (flat heads, 3 mm across) on a 15.5 mm radius at 30, 90, 150, 210, 270 and 330 degrees, flush with the ring; docs/hardware-spec.md section 5.
-BEZEL = os.environ.get("BEZEL", "bare").lower()      # bare (default): machined aluminium and stainless; black: black oxide (black anodise on the aluminium ring in practice); gunmetal: dark grey anodised ring and dark stainless screws
+BEZEL = os.environ.get("BEZEL", "gunmetal").lower()      # gunmetal (default, the chosen finish, owner 2026-11-14): dark grey anodised ring and dark stainless screws; bare: machined aluminium and stainless; black: black oxide (black anodise on the aluminium ring in practice)
 RING_MAT, SCREW_MAT = {"bare": ("strut", "screw"), "black": ("blackring", "blackscrew"), "gunmetal": ("gunring", "gunscrew")}[BEZEL]
 ring_y("bezel ring", wx, 30, 18.0, 13.0, 68.5, 70.0, RING_MAT)
 for deg in (30, 90, 150, 210, 270, 330):

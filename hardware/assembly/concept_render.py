@@ -144,8 +144,8 @@ def main():
     tof = fine(slab("+y", wx - 3.2, wx + 3.2, 40.5 - 1.5, 40.5 + 1.5))      # the ranging sensor (6.4 x 3.0 mm) in the ring's top slot
     plug = fine(slab("-y", -(70 - (GAP + 13)) - 13.5, -(70 - (GAP + 13)) + 13.5, 30 - 13.5, 30 + 13.5))
     parts = [(Path("body.step"), "#34383e", 0), (Path("struts.step"), "#b9b4aa", 0), (Path("wheels.step"), "#cdd1d6", 0),
-             (Path("cells.step"), "#161a22", 0), (Path("bezel.step"), "#c7cbd1", 0), (Path("glass.step"), "#0b0e13", 0), (Path("plug.step"), "#3f4a46", 0),
-             (Path("screws.step"), "#9aa0a6", 0), (Path("hood.step"), "#0d0f13", 0), (Path("lens.step"), "#010203", 0), (Path("leds.step"), "#17150f", 0), (Path("tof.step"), "#4a5262", 0)]
+             (Path("cells.step"), "#161a22", 0), (Path("bezel.step"), "#4a4e56", 0), (Path("glass.step"), "#0b0e13", 0), (Path("plug.step"), "#3f4a46", 0),
+             (Path("screws.step"), "#6d727b", 0), (Path("hood.step"), "#0d0f13", 0), (Path("lens.step"), "#010203", 0), (Path("leds.step"), "#17150f", 0), (Path("tof.step"), "#4a5262", 0)]
     pv.PARTS = parts
     meshes = [body, struts, wheels, cells, bezel, glass, plug, screws, hood, lens, leds, tof]
     TEX["body"] = forged_texture(body)
