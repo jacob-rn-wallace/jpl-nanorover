@@ -17,6 +17,7 @@ with contextlib.redirect_stdout(io.StringIO()):
 D_RIM = 7.0                       # lid depth at the rim (lid_split.py's 6.5 mm rule rounds to 7.0 on the 1 mm grid); the end-face cells stop at z = 52.3, so 53 leaves 0.7 mm
 board = LY.comps["power + motor-driver board (upper lid module)"][1]        # x0, x1, y0, y1, z0, z1 of the upper board
 MARGIN = 2.0                                                              # platform margin round the board
+CAM_Z = 38.5                                                              # the cams' axis height on the top lid (the catch's head sits 3.1 to 3.5 mm above it)
 EAR_Z0, EAR_Y = 60 - D_RIM - 8.0, (40.0, -40.0)                          # lid ears for the side-entry screws: 8 mm deep below the rim plane, two per hub face at y = +-40 (inboard of the gasket groove)
 Z_FLOOR = board[4] - 2.0                                                  # platform floor 2 mm below the board's lower face
 
@@ -36,15 +37,16 @@ def lid_spaces():
 
 def joint_features():
     """The fastening details that the lids' design spaces need (stand-in design, docs/mechanical-spec.md item 8): returns (screw_holes, grooves) as lists of solids for both lids.
-    Screw holes: along x from each hub face (|x| = 70) inward into a lid ear: 2.0 mm hole, 3.8 mm head recess at the face; four per lid (two per hub face).
+    Cam bores (replacing the side-entry screws of the first version, 2026-11-14): along x from each hub face (|x| = 70) inward, with a counterbore for the cam's flange and gasket and a vertical hole for the lid ear's catch (hardware/body/lid_cams.py); four per lid, two per hub face at y = +-40.
     Grooves: a gasket groove 2 mm wide and 0.8 mm deep in the body's rim face, a rectangular loop 3 to 5 mm in from the outer faces, one at each lid joint."""
     holes = []
-    for zc in (EAR_Z0 + 4.0, 60 - (EAR_Z0 + 4.0)):
+    for zc, zear in ((CAM_Z, EAR_Z0), (60 - CAM_Z, 60 - EAR_Z0)):                 # the top lid's cams and the bottom lid's (mirror images about z = 30)
         for sx in (1, -1):
             for y0 in EAR_Y:
-                shaft = Cylinder(1.0, 8.0, align=(Align.CENTER, Align.CENTER, Align.CENTER)).rotate(Axis.Y, 90).moved(Location((sx * (62.0 + 4.0 + 0.1), y0, zc)))
-                head = Cylinder(1.9, 1.2, align=(Align.CENTER, Align.CENTER, Align.CENTER)).rotate(Axis.Y, 90).moved(Location((sx * 69.6, y0, zc)))
-                holes += [shaft, head]
+                bore = Cylinder(4.1, 16.1).rotate(Axis.Y, 90).moved(Location((sx * 62.05, y0, zc)))                       # the cam's bore, x 54 to 70.1
+                cbore = Cylinder(5.7, 2.1).rotate(Axis.Y, 90).moved(Location((sx * 69.05, y0, zc)))                        # the counterbore for the cam's flange and its gasket, x 68 to 70.1
+                hole = Cylinder(2.1, abs(zear - zc)).moved(Location((sx * 60.0, y0, (zear + zc) / 2)))                      # the catch's hole up to the ear pocket
+                holes += [bore, cbore, hole]
     grooves = []
     for z0 in (60 - D_RIM - 0.8, D_RIM):
         grooves.append(box(-67, 67, -67, 67, z0, z0 + 0.8) - box(-65, 65, -65, 65, z0 - 0.1, z0 + 0.9))
