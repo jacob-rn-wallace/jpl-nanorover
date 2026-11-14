@@ -67,6 +67,7 @@ BARREL_END = 124.5                     # |x| where the barrel ends (the wheel's 
 # so the tip boss gets a COLLAR_IN mm collar on its inboard side (toward the body wall at |x| = 70), the tube starts as far inboard, a 0.6 mm slit runs from the bore through the
 # tip's outer wall, and an M2 clamp screw crosses the slit (2.0 mm hole, 3.9 mm counterbore for the head on the +y side in the strut's local frame).
 COLLAR_IN, SLIT_W = 4.0, 0.6
+WIRE_W, WIRE_DEPTH = 1.5, 1.0               # the wire groove on strut B's plate and the notch through the collar (two 0.6 mm silicone wires side by side fit)
 SCREW_X = TIP_D / 2 - 1.2                 # local x offset of the screw axis from the tip centre, in the 2.45 mm wall between the bore and the outer edge
 COUPLER_D, COUPLER_L = 8.0, 7.5        # ASSUMED small flexible 3 mm coupling, 0.5 mm from the motor's front face and 0.5 mm short of the cap (tight: real couplings are usually longer)
 # Each strut's support starts flush with the inboard face of ITS OWN plate (A: 77.25, B: 81.25), so nothing sticks out behind the plate.
@@ -163,6 +164,13 @@ def strut(boss_range, plate_range, wheel_inner, direction):
         hole = Cylinder(1.0, TIP_D, align=(Align.CENTER, Align.CENTER, Align.CENTER)).rotate(Axis.X, 90)
         cbore = Cylinder(1.95, 5.0, align=(Align.CENTER, Align.CENTER, Align.MIN)).rotate(Axis.X, -90).moved(Location((0, 2.7, 0)))
         s = s - on_axle((hole + cbore).moved(Location((STRUT_L + SCREW_X, 0, zc))), plate_range[0])
+    if TIP_MODE != "axle":   # the motor's wires (docs/mechanical-spec.md item 6): a notch through the collar's pivot side lets them out of the tube's tail; strut B (the outer strut) also gets a groove
+        # on its plate's inboard face, all the way across its boss to the bore, where the hub's hollow shaft takes the wires in through a cross hole (hub.py, X_WIRE_B); strut A's wires run free in the channel between its plate and the body wall
+        notch = Box(3.8, WIRE_W, COLLAR_IN + 0.1, align=(Align.MIN, Align.CENTER, Align.MIN)).moved(Location((STRUT_L - TIP_D / 2 - 0.5, 0, 0)))
+        s = s - on_axle(notch, plate_range[0] - COLLAR_IN - 0.1)
+        if boss_range == B_BOSS:
+            groove = Box(STRUT_L - TIP_D / 2 + 0.5, WIRE_W, WIRE_DEPTH, align=(Align.MIN, Align.CENTER, Align.MIN))
+            s = s - on_axle(groove, plate_range[0] - 0.01)
     bore_d = BORE_D if HUB_MODE == "stud" else (15.05 if boss_range == A_BOSS else 5.05)
     s = s - on_axle(Cylinder(bore_d / 2, 20, align=(Align.CENTER, Align.CENTER, Align.MIN)), boss_range[0] - 1)
     s = s.moved(Location((0, 0, E.HUB_Z)))
