@@ -18,8 +18,8 @@ export const ROVER = {
   dropOk: 0.035,                              // m, a drop up to this is driven off ASM
   dropFall: 0.10,                             // m, a drop beyond this is a fall that ends the run ASM
   rightTime: 3.0,                             // s SRC docs/chassis-simulation.md (righting in about 3 s)
-  mountFwd: 0.07, mountH: 0.052,              // m, the ranging sensor high on the front face (a rock taller than the sensor cannot be measured, only seen as a wall) ASM
-  tofPitch: deg(22),                          // sensor tilted down ASM (a flat floor then fills every row, the top row at about 1.3 m)
+  mountFwd: 0.07, mountH: 0.0516,             // m, the ranging sensor on the front face, in the camera window's ring, bottom slot (SRC CAD, 2026-11-14: z = 19.5 mm in the body, on a body floor 32.1 mm above the ground at the 25 degree stance; the top slot would be 0.0726 and fails the pit check, see docs/hardware-spec.md section 5; a rock taller than the sensor cannot be measured, only seen as a wall)
+  tofPitch: deg(typeof process !== "undefined" && process.env && process.env.TOFTILT ? Number(process.env.TOFTILT) : 22),   // the TOFTILT environment variable (degrees) overrides it in the Node tests                          // sensor tilted down ASM (a flat floor then fills every row, the top row at about 1.3 m)
 };
 
 export const TOF = {                          // VL53L5CX class (ST datasheet via docs/electronics-concept.md): 8 x 8 zones, 45 x 45 degrees, 60 Hz

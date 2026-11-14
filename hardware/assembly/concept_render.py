@@ -141,7 +141,7 @@ def main():
     hood = fine(disc("+y", wx, 30, 8.2))                                      # black mask ring and lens hood against the glass
     lens = fine(disc("+y", wx, 30, 6.3))                                      # the M12 lens front
     leds = fine(trimesh.util.concatenate([disc("+y", wx + 10.0 * np.cos(np.radians(d)), 30 + 10.0 * np.sin(np.radians(d)), 1.5) for d in (0, 45, 135, 180, 225, 315)]))   # 6 white LEDs, top slot and bottom free
-    tof = fine(slab("+y", wx - 3.2, wx + 3.2, 40.5 - 1.5, 40.5 + 1.5))      # the ranging sensor (6.4 x 3.0 mm) in the ring's top slot
+    tof = fine(slab("+y", wx - 3.2, wx + 3.2, 19.5 - 1.5, 19.5 + 1.5))      # the ranging sensor (6.4 x 3.0 mm) in the ring's top slot
     plug = fine(slab("-y", -(70 - (GAP + 13)) - 13.5, -(70 - (GAP + 13)) + 13.5, 30 - 13.5, 30 + 13.5))
     parts = [(Path("body.step"), "#34383e", 0), (Path("struts.step"), "#b9b4aa", 0), (Path("wheels.step"), "#cdd1d6", 0),
              (Path("cells.step"), "#161a22", 0), (Path("bezel.step"), "#4a4e56", 0), (Path("glass.step"), "#0b0e13", 0), (Path("plug.step"), "#3f4a46", 0),
@@ -167,7 +167,7 @@ def main():
     r3, u3, d3 = pv.view(0, 90)
     wp = np.array([wx, 70.0, 30.0]); cxx, cyy = wp @ r3, wp @ u3
     render(a3, meshes, 0, 90, "camera window from +y: bezel, lens, LED ring (off), ranging sensor", lims=(cxx - 36, cxx + 36, cyy - 26, cyy + 26))
-    sp = np.array([wx, 70.0, 40.5]); a3.annotate("ranging sensor\n(VL53L5CX, 6.4 x 3 mm)", (sp @ r3, sp @ u3), (cxx - 30, cyy + 20), fontsize=9, arrowprops=dict(arrowstyle="->"), ha="center", bbox=dict(boxstyle="round,pad=0.25", fc="white", ec="0.5", alpha=0.92))
+    sp = np.array([wx, 70.0, 19.5]); a3.annotate("ranging sensor\n(VL53L5CX, 6.4 x 3 mm)", (sp @ r3, sp @ u3), (cxx - 30, cyy + 20), fontsize=9, arrowprops=dict(arrowstyle="->"), ha="center", bbox=dict(boxstyle="round,pad=0.25", fc="white", ec="0.5", alpha=0.92))
     cp = np.array([wx, 70.0, 30.0 - 4]); a3.annotate("camera lens (M12)\nand hood", (cp @ r3, cp @ u3), (cxx, cyy - 25), fontsize=9, arrowprops=dict(arrowstyle="->"), ha="center", bbox=dict(boxstyle="round,pad=0.25", fc="white", ec="0.5", alpha=0.92))
     gp = np.array([wx - 15.5 * 0.866, 70.0, 30.0 + 15.5 * 0.5]); a3.annotate("aluminium bezel,\nsix M1.6 screws", (gp @ r3, gp @ u3), (cxx + 26, cyy + 20), fontsize=9, arrowprops=dict(arrowstyle="->"), ha="center", bbox=dict(boxstyle="round,pad=0.25", fc="white", ec="0.5", alpha=0.92))
     f3.savefig(HW.parent / "docs" / "images" / "rover-concept-window.png", dpi=110, facecolor=f3.get_facecolor())

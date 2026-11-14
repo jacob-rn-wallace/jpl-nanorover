@@ -40,6 +40,14 @@ export function tofMeasure(world: World, r: Rover, rng: Rng): Float32Array {
   }
   return out;
 }
+/** where a flat floor would meet zone k's ray, given the tilt (metres along the ray; Infinity if the ray points level or upward): a missing return counts as evidence of a drop-off only if the floor
+ *  would have been within the sensor's range: a rover nose-up on a ramp sends its top rows above the horizon, and those returns are missing for no reason to do with any edge */
+export function floorRange(dirs: Float32Array, k: number, pitch: number, roll: number): number {
+  const d = rotate([dirs[3 * k], dirs[3 * k + 1], dirs[3 * k + 2]], 0, pitch, roll);
+  return d[2] < -1e-3 ? ROVER.mountH / -d[2] : Infinity;
+}
+export const FLOOR_RANGE_MARGIN = 0.85;     // a flat floor must lie within this fraction of the range limit for a missing return to count as a drop
+
 /** a zone's point in the rover's body frame, origin at the ground under the rover's centre (so a flat floor has z = 0) */
 export function bodyPoint(dirs: Float32Array, k: number, range: number): V3 {
   return [ROVER.mountFwd + dirs[3 * k] * range, dirs[3 * k + 1] * range, ROVER.mountH + dirs[3 * k + 2] * range];

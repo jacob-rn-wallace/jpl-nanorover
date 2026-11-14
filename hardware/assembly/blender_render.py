@@ -274,7 +274,7 @@ if os.environ.get("LED", "off").lower() == "on":
 cylinder_y("hood", wx, 30, 8.2, y0 + 0.08, y0 + 0.2, "hood")
 cylinder_y("lens", wx, 30, 6.3, y0 + 0.2, y0 + 0.3, "lens")
 cylinder_y("lens inner", wx, 30, 3.4, y0 + 0.3, y0 + 0.4, "iris")
-bm = bmesh.new(); add_box(bm, wx - 3.2, wx + 3.2, y0 + 0.08, y0 + 0.2, 40.5 - 1.5, 40.5 + 1.5); make("ranging sensor", bm, "irink")
+bm = bmesh.new(); add_box(bm, wx - 3.2, wx + 3.2, y0 + 0.08, y0 + 0.2, 19.5 - 1.5, 19.5 + 1.5); make("ranging sensor", bm, "irink")
 bm = bmesh.new(); add_box(bm, -wx - 13.5, -wx + 13.5, -70 - T, -70, 16.5, 43.5); make("RF plug", bm, "plug")
 # the lid cams' heads on the hub faces (docs/mechanical-spec.md item 8, lid_cams.py): eight smooth flush caps 13 mm across, two per face per lid at y = +-40 and z = 38.5 (top lid) and 21.5 (bottom lid),
 # each with a small pin-in-hex socket in the middle (no slot: nothing outside to grip); the gunmetal finish of the bezel's screws

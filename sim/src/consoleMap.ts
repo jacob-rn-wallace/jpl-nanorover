@@ -2,16 +2,18 @@
 import { TOF, ROVER } from "./constants";
 import { rotate, V3 } from "./util";
 import { Packet, TofPacket, HZ_DROP, kindsText } from "./firmware";
-import { tofDirs, bodyPoint, PoseEst, ZONES } from "./sensors";
+import { tofDirs, bodyPoint, PoseEst, ZONES, floorRange, FLOOR_RANGE_MARGIN } from "./sensors";
 
 export interface PhotoPayload {
   size: string; w: number; h: number; image: ImageData | null; lit: boolean; t: number;
   found: string[]; dists: Record<string, number>; pose: PoseEst; bytes: number;
 }
+export const MAPDEBUG = { on: false, log: [] as { k: number; j: number; fr: number; pitch: number; roll: number; x: number; y: number; theta: number; cx: number; cy: number; truthPitch: number }[] };
 export class ConsoleMap {
   res = 0.02; x0 = -0.9; y0 = -0.7; cols = 90; rows = 70;
   z = new Float32Array(90 * 70); n = new Uint16Array(90 * 70); haz = new Uint8Array(90 * 70);
-  hs = new Float32Array(90 * 70); hk = new Uint8Array(90 * 70);       // evidence score and kind bits per cell; haz is what is shown (score >= 1, gaps filled)
+  hs = new Float32Array(90 * 70); hk = new Uint8Array(90 * 70);
+  dropSrc = new Uint8Array(90 * 70);                                   // debug: where a cell's drop evidence came from: 1 far-below point, 2 firmware flag on a valid return, 4 missing-return projection       // evidence score and kind bits per cell; haz is what is shown (score >= 1, gaps filled)
   version = 0;
   pose: PoseEst | null = null; battery = 1; mode = "pilot"; risk = 1; nav = "idle"; frames = 0; lastFrameT = -1;
   trail: { x: number; y: number }[] = [];
@@ -45,11 +47,11 @@ export class ConsoleMap {
       const r = p.ranges[k];
       if (r > 0) {
         const w = world(bodyPoint(dirs, k, r)), c = this.idx(w[0], w[1]);
-        if (c >= 0 && w[2] < -0.12) { this.mark(c, HZ_DROP); this.z[c] = -0.04; this.n[c] = Math.max(this.n[c], 1); }       // the void beyond an edge: an edge marker, not a deep cell
+        if (c >= 0 && w[2] < -0.12) { this.dropSrc[c] |= 1; this.mark(c, HZ_DROP); this.z[c] = -0.04; this.n[c] = Math.max(this.n[c], 1); }       // the void beyond an edge: an edge marker, not a deep cell
         else if (c >= 0) {
           this.n[c] = Math.min(this.n[c] + 1, 60000);
           this.z[c] += (Math.max(-0.12, Math.min(0.2, w[2])) - this.z[c]) / Math.min(this.n[c], 6);       // far-below points (beyond an edge) are drawn at a limited depth
-          if (p.haz[k]) this.mark(c, p.haz[k]);
+          if (p.haz[k]) { if (p.haz[k] & HZ_DROP) this.dropSrc[c] |= 2; this.mark(c, p.haz[k]); }
           else if (Math.abs(w[2]) < 0.015) this.hs[c] = Math.max(0, this.hs[c] - 0.34);     // clear floor seen again: forget slowly
         }
         kinds |= p.haz[k];
@@ -60,12 +62,13 @@ export class ConsoleMap {
         const k = j * n + i;
         if (p.ranges[k] === -1) {
           const dz = dirs[3 * k + 2];
-          if (dz < -1e-3) {
+          if (dz < -1e-3 && floorRange(dirs, k, p.imu.pitch, p.imu.roll) <= FLOOR_RANGE_MARGIN * TOF.maxR) {   // only if a flat floor would have been within range given the tilt
             const rf = ROVER.mountH / -dz;
-            const w = world([ROVER.mountFwd + dirs[3 * k] * rf, dirs[3 * k + 1] * rf, 0]), c = this.idx(w[0], w[1]);
-            if (c >= 0) { this.mark(c, HZ_DROP); this.z[c] = w[2] - 0.04; this.n[c] = Math.max(this.n[c], 1); }
+            const w = world([ROVER.mountFwd + dirs[3 * k] * rf, dirs[3 * k + 1] * rf, 0]), c = this.idx(w[0], w[1]);      // tried 2026-11-14: marking the middle between the last returned point and this one gave recall +8, precision -5 points (no net gain), so the single projection stays
+            if (MAPDEBUG.on && c >= 0) MAPDEBUG.log.push({ k, j, fr: rf, pitch: p.imu.pitch, roll: p.imu.roll, x: e.x, y: e.y, theta: e.theta, cx: w[0], cy: w[1], truthPitch: 0 });
+            if (c >= 0) { this.dropSrc[c] |= 4; this.mark(c, HZ_DROP); this.z[c] = w[2] - 0.04; this.n[c] = Math.max(this.n[c], 1); }
           }
-          kinds |= HZ_DROP;
+          if (floorRange(dirs, k, p.imu.pitch, p.imu.roll) <= FLOOR_RANGE_MARGIN * TOF.maxR) kinds |= HZ_DROP;
           break;
         }
       }

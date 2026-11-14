@@ -3,7 +3,7 @@
 // adjacent zones (a rock or a hole), a large height spread (a steep slope); while moving, tilt, stall and a flat battery. Thresholds are a table keyed to a risk level.
 import { ROVER, TOF, RISK, LINK } from "./constants";
 import { clamp, wrap } from "./util";
-import { ZONES, NO_TARGET, tofDirs, bodyPoint, PoseEst, Imu } from "./sensors";
+import { ZONES, NO_TARGET, tofDirs, bodyPoint, PoseEst, Imu, floorRange, FLOOR_RANGE_MARGIN } from "./sensors";
 
 export type Mode = "pilot" | "mission";
 export const HZ_DROP = 1, HZ_ROCK = 2, HZ_SLOPE = 4;
@@ -46,7 +46,7 @@ function groundPlane(valid: Uint8Array, xf: Float32Array, yl: Float32Array, zb: 
 
 /** Sojourner's three proximity conditions on an 8 x 8 range frame, with the thresholds of a risk level (0 to 2). Heights are measured from the ground plane
  *  under the rover's nose, so a rover that is tilted by a step does not see the flat floor ahead as a wall. */
-export function analyze(ranges: Float32Array, risk: number, look: number): Hazard {
+export function analyze(ranges: Float32Array, risk: number, look: number, pitch = 0, roll = 0): Hazard {
   const th = RISK[risk], dirs = tofDirs(), n = TOF.n;
   const valid = new Uint8Array(ZONES), xf = new Float32Array(ZONES), yl = new Float32Array(ZONES), zb = new Float32Array(ZONES);
   for (let k = 0; k < ZONES; k++) if (ranges[k] > 0) { const p = bodyPoint(dirs, k, ranges[k]); valid[k] = 1; xf[k] = p[0]; yl[k] = p[1]; zb[k] = p[2]; }
@@ -55,7 +55,7 @@ export function analyze(ranges: Float32Array, risk: number, look: number): Hazar
   const near = new Uint8Array(ZONES);                           // heights are judged only within 0.5 m (beyond that the plane's error grows and the rover decides nothing)
   for (let k = 0; k < ZONES; k++) near[k] = valid[k] && xf[k] <= 0.5 ? 1 : 0;
   const flags = new Uint8Array(ZONES);
-  for (let k = 0; k < ZONES; k++) if (ranges[k] === NO_TARGET || (near[k] && zb[k] < -th.drop) || (valid[k] && !near[k] && zb[k] < -0.3)) flags[k] |= HZ_DROP;   // missing data or far below: a drop-off
+  for (let k = 0; k < ZONES; k++) if ((ranges[k] === NO_TARGET && floorRange(dirs, k, pitch, roll) <= FLOOR_RANGE_MARGIN * TOF.maxR) || (near[k] && zb[k] < -th.drop) || (valid[k] && !near[k] && zb[k] < -0.3)) flags[k] |= HZ_DROP;   // missing data or far below: a drop-off
   for (let k = 0; k < ZONES; k++) if (near[k] && zb[k] > th.rock) flags[k] |= HZ_ROCK;      // a surface above the ground by more than the risk level allows: a rock, seen as a wall
   for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) {
     const k = j * n + i;
@@ -132,7 +132,7 @@ export class Firmware {
     const out: FwOut = { v: 0, w: 0, lamp: this.lampCmd, right: false, packets: [] };
     if (inp.tof) {
       const look = this.mode === "pilot" ? LOOK_PILOT : LOOK_MISSION;
-      this.frame = { t: inp.t, ranges: inp.tof, hazard: analyze(inp.tof, this.risk, look) };
+      this.frame = { t: inp.t, ranges: inp.tof, hazard: analyze(inp.tof, this.risk, look, inp.imu.pitch, inp.imu.roll) };
       this.conf = this.prevAhead ? confirmAhead(this.frame.hazard.ahead, this.prevAhead) : { ...this.frame.hazard.ahead, left: false, center: false, right: false, any: false, kinds: 0 };
       this.prevAhead = this.frame.hazard.ahead;
     }
