@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Add labels to a structure render: .venv/bin/python hardware/assembly/annotate_structure.py docs/images/structure-n48_m120_p5-iso.png
 The label anchors are pixel positions for the 1500 x 1000 iso view of blender_structure.py (read off the picture); they are for that view only."""
+import re
 import sys
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
@@ -31,7 +32,9 @@ for text, (ax, ay), (tx, ty), col in L:
     d.rectangle([tx - 8, ty - 6, tx + w + 8, ty + hgt + 2], fill=(20, 22, 28))
     for i, t in enumerate(lines):
         d.text((tx, ty + 28 * i), t, fill=col, font=small)
-d.text((40, 30), "Body middle with the optimised structure (120 g added, 2.9 mm grid, penalty 5)", fill=(255, 255, 255), font=font)
+mm = re.search(r"n(\d+)_m(\d+)(?:_p(\d))?", src.stem)           # the title from the file name: grid, added mass, penalty
+n_, m_, p_ = (mm.group(1), mm.group(2), mm.group(3) or "3") if mm else ("?", "?", "?")
+d.text((40, 30), f"Body middle with the optimised structure ({m_} g added, {138 / int(n_):.1f} mm grid, penalty {p_})" if mm else "Body middle with the optimised structure", fill=(255, 255, 255), font=font)
 d.text((40, 66), "The 140 x 140 x 60 mm envelope is the thin frame; the lids are not shown; walls and skin are a faint ghost", fill=(200, 205, 215), font=small)
 out = src.with_name(src.stem + "-labelled.png")
 im.save(out); print("wrote", out)
