@@ -11,3 +11,4 @@ venv/
 hardware/**/out/*.stl
 hardware/body/out/body_hammond.step
 hardware/assembly/out/
+.venv-to/

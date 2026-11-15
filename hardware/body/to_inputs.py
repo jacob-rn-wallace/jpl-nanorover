@@ -29,6 +29,7 @@ with contextlib.redirect_stdout(io.StringIO()):
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--res", type=int, default=2, help="cell size in mm (a divisor of 2: 2 or 4)")
+ap.add_argument("--grid", type=int, default=0, help="n: also write the optimiser grid, n x n x n/3 cells over x, y +-69 mm and z 7 to 53 mm (n = 36 gives 3.83 mm cells, n = 48 gives 2.875 mm), as cell fractions per class and per loaded region, to out/to_grid_n<n>.npz")
 args = ap.parse_args()
 R = args.res
 H = LY.H
@@ -120,3 +121,45 @@ meta = {"res_mm": R, "z_range_mm": [Z0, Z1], "origin_mm": [-70.0, -70.0, Z0], "s
         "material": {"E_GPa": 35.5, "nu": 0.3, "density_g_cm3": 1.55, "allowable_MPa": 113.7}}
 (out / f"to_inputs_r{R}.json").write_text(json.dumps(meta, indent=1))
 print("wrote", out / f"to_inputs_r{R}.npz", "and .json")
+
+# ---------------- the optimiser grid (for hardware/body/to_run.py, which runs in .venv-to and cannot import layout.py) ----------------
+if args.grid:
+    n = args.grid; nz = n // 3; hh = 138.0 / n
+    assert abs(nz * hh - 46.0) < 1e-6 and nz % 2 == 0, "n must make 46 mm an even number of cells (36, 48, 72 ...)"
+    ix = np.floor((LY.X + 69.0) / hh).astype(int); iy = np.floor((LY.Y + 69.0) / hh).astype(int); iz = np.floor((LY.Z - 7.0) / hh).astype(int)
+    ok = (ix >= 0) & (ix < n) & (iy >= 0) & (iy < n) & (iz >= 0) & (iz < nz)
+    cid = np.where(ok, (ix * n + iy) * nz + iz, -1)
+    count = np.bincount(cid[ok], minlength=n * n * nz).astype(float)
+
+    def frac(mask):
+        m = ok & mask
+        return (np.bincount(cid[m], minlength=n * n * nz) / np.maximum(count, 1)).reshape(n, n, nz)
+
+    out_g = {"n": n, "nz": nz, "h_mm": hh}
+    out_g["void"] = frac(void)
+    out_g["keep_in"] = frac(LY.keep_in)
+    out_g["skin"] = frac(skin)
+    nonskin = np.zeros_like(void)
+    for k, v in regions.items():
+        if not k.startswith("outer skin"):
+            nonskin |= v
+    out_g["solid_other"] = frac(nonskin & ~void)
+    # loaded regions, separated
+    out_g["ring_p"] = frac(ring & (LY.X > 0)); out_g["ring_n"] = frac(ring & (LY.X < 0))
+    for (tag, side), sv in LY.servos.items():
+        sa, sb = sorted((side * sv["xf"], side * (sv["xf"] + 3.1 + 2.0)))
+        big = LY.box_mask(sa, sb, sv["y0"] - 2.2, sv["y1"] + 2.2, HZ - LY.SV_Z - 2.2, HZ + LY.SV_Z + 2.2)
+        small = LY.box_mask(sa, sb, sv["y0"] - 0.2, sv["y1"] + 0.2, HZ - LY.SV_Z - 0.2, HZ + LY.SV_Z + 0.2)
+        out_g[f"seat_{tag}{'p' if side > 0 else 'n'}"] = frac((big & ~small) & ~void)
+        out_g[f"seatpos_{tag}{'p' if side > 0 else 'n'}"] = np.array([sv["y_shaft"], HZ])
+    out_g["cam_top"] = frac(cam & (LY.Z > HZ)); out_g["cam_bot"] = frac(cam & (LY.Z < HZ))
+    out_g["rim_top"] = frac(rim & (LY.Z > HZ)); out_g["rim_bot"] = frac(rim & (LY.Z < HZ))
+    out_g["window"] = frac(win)
+    for nm, key in (("battery", "battery"), ("camera", "camera"), ("comms patch", "antenna"), ("XBee", "xbee")):
+        mm = np.zeros_like(void)
+        for pn, pm in LY.placed.items():
+            if pn.startswith(nm):
+                mm |= pm
+        out_g["void_" + key] = frac(mm)
+    np.savez_compressed(out / f"to_grid_n{n}.npz", **out_g)
+    print(f"optimiser grid {n} x {n} x {nz} (cell {hh:.3f} mm, {n * n * nz} cells) written to out/to_grid_n{n}.npz")
