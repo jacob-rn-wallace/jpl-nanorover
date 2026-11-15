@@ -71,6 +71,16 @@ for (tag, side), s in LY.servos.items():
     xb0 = side * (s["xf"] - H.SV_H - 4.1) - side * CLR
     xb1 = side * (s["xf"] - H.SV_H)
     add("4 servo pockets", cyl("x", s["y_shaft"], HZ, r, min(xb0, xb1), max(xb0, xb1)), area_cyl(r, 4.1 + CLR))
+    # the seat for the servo's mounting plate (servo_mounts.py, docs/servo-mounts.md): the plate (1.5 mm, the servo's footprint) sits on the output face; the seat is the footprint plus 0.2 mm all round and 1.7 mm deep, so the
+    # plate's edges bear on the seat's walls (the torque reaction) and its outer face on the seat's floor (a shoulder at |x| = x_face + 1.7)
+    sa, sb = sorted((side * s["xf"], side * (s["xf"] + 1.7)))
+    seat = (sa, sb, s["y0"] - 0.2, s["y1"] + 0.2, HZ - LY.SV_Z - 0.2, HZ + LY.SV_Z + 0.2)
+    add("servo plate seats", bx(*seat), area_box(*seat))
+    ldir = +1 if tag == "B" else -1
+    for al in LY.MOUNT_ALONG:                                   # pockets for the four screw heads, which stand 1.2 mm outboard of the plate: seat floor to 1.4 mm deeper, 0.6 mm wider than the head
+        for dz in (+LY.MOUNT_ACROSS, -LY.MOUNT_ACROSS):
+            h0, h1 = sorted((side * (s["xf"] + 1.7), side * (s["xf"] + 1.7 + LY.MOUNT_HEAD_H + 0.2)))
+            add("servo plate seats", cyl("x", s["y_shaft"] + ldir * al, HZ + dz, LY.MOUNT_HEAD_D / 2 + 0.3, h0, h1), area_cyl(LY.MOUNT_HEAD_D / 2 + 0.3, LY.MOUNT_HEAD_H + 0.2))
 
 # hub: housing tube through each hub wall, gears, hollow shaft, horn adapter (1 mm clearance)
 for side in (+1, -1):

@@ -149,6 +149,13 @@ for (tag, side), sv in servos.items():
     comps[f"servo {tag} ({'+' if side > 0 else '-'}x) connector plug zone"] = (0.0, (xa, xb, ya, yb, HZ - 10.5, HZ + 10.5), f"keep-out for the two 3-pin plugs on the servo's back face and their wires: {PLUG_D:.0f} mm deep (ESTIMATE, range 6 to 12), y {ya:.0f} to {yb:.0f}, z 19.5 to 40.5; the plugs open toward the body's centre plane", None)
 
 OUT_COMPS = {}  # outside the envelope, counted for mass and balance only (the whip is gone: the antennas are inside the body behind RF windows)
+# Servo mounting plates (2026-11-15, hardware/body/servo_mounts.py, docs/servo-mounts.md): each servo is screwed to its own 1.5 mm 6061 plate (45.23 x 24.73 mm, an 11 mm bore, four 2.2 mm holes: 4.1 g) on its output face;
+# counted here for mass and balance only (the plate sits against the servo's face, inside the 1 mm clearance shell, so it is not a separate placed box)
+PLATE_G = 4.1
+MOUNT_ALONG, MOUNT_ACROSS = (8.4, 28.9), 10.4        # mm: the servo's four mounting holes from the output axis toward the long end, and either side of the centre line (read from the Feetech drawing by servo_mounts.py; ASM that they are the mounting holes)
+MOUNT_HEAD_D, MOUNT_HEAD_H = 3.8, 1.2                # mm: the pan heads of the 2.0 mm self-tapping screws (ASM)
+for (tag, side), sv in servos.items():
+    OUT_COMPS[f"servo mounting plate {tag} ({'+' if side > 0 else '-'}x)"] = (PLATE_G, (side * (sv["xf"] + 0.75), (sv["y0"] + sv["y1"]) / 2, HZ))
 extra_mass = {"wiring, connectors, board-to-board links": (15.0, (0.0, 0.0, HZ))}
 # cells (owner, 2026-11-12): Anysolar IXOLAR SolarMD parts; top and bottom faces identical (6 x SM940K09L 44.5 x 21.5, 2 x SM401K08TF 90 x 40, 1 x SM531K08TFS 89 x 52 in one pocket),
 # both end faces 4 x SM940K09L standing; none on the hub faces (the struts are there). Masses: SM940K09L 3.3 g and SM531K08TFS 9.4 g from their datasheets (Rev. 2025/2026,

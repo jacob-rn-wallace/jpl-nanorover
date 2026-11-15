@@ -86,3 +86,5 @@ Over every allowed pair of strut angles on a 5 degree grid and every stable rest
 
 **Not changed.** The strut, wheel, hub and servo masses; the planar model (side-to-side tipping, friction and dynamics are still out of scope); the x offset of +1 mm is ignored (the model is planar). The numbers in the tables above use the 1.0 kg design mass unless the case says 440 g.
 
+**Later the same day (2026-11-15): the servo mounting plates** (`docs/servo-mounts.md`) add 16 g, so the contents are 456.1 g with the centre of mass at y +5.65 mm; rerun (`--body-y 5.65 --body-mass 456.1`, total 1070 g): COM y -0.3 mm at the 25 degree stance, hold at 25 degrees 0.123 / 0.125 N.m, tip-over 49.5 / 49.2 degrees, **worst-case hold 0.172 N.m (0.169 before the plates), righting peak 0.136 N.m (0.134), fewest-moves sequence 23 moves at 0.138**. Nothing changes qualitatively.
+
