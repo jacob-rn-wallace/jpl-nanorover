@@ -294,6 +294,7 @@ for sx in (1, -1):
         for zc in (38.5, 21.5):
             cam_head(sx, y0, zc)
 import_stl("struts", "strut"); import_stl("wheels", "wheel")
+import_stl("spindles", "strut"); import_stl("bearings", "gunscrew"); import_stl("motors", "gunscrew")     # the wheel drive that joins each strut tip to its wheel (spindle tube, bearings, gearmotor and shaft)
 bm = bmesh.new(); add_box(bm, -3000, 3000, -3000, 3000, GROUND_Z - 1, GROUND_Z); make("ground", bm, "ground")
 
 # ---------------------------------------------------------------- scale fiducial (owner, 2026-11-14): a US quarter next to the rover, as in JPL's own photographs (docs/photo-measurements.md)
