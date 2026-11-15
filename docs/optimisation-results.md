@@ -86,3 +86,20 @@ So **the displacements agree to within about 15% across the two grids** (the lar
 
 **My recommendation (the owner chooses): refine the 120 g layout** at 2.9 mm with penalty continuation (the refinement is started from it): it has all the stiffness (every displacement at or under 0.044 mm in the drop, 0.12 mm in the corner impact) with a total of 576 g of contents, a rover of about 1.19 kg, and 310 g of the budget still free. The 200 g layout is the robust alternative if the owner prefers a heavier, sturdier-looking frame; 80 g is enough if mass matters more than margin (the owner said it does not).
 
+## Update: the 120 g layout refined (2.9 mm, penalty 3 then 4 then 5; `docs/images/to-n48_m120.png`, `_p4.png`, `_p5.png`)
+
+36,864 cells of 2.875 mm, started from the 3.8 mm 120 g result: 60 iterations at penalty 3 (22 minutes), then 45 at 4 and 45 at 5, in checkpointed chunks of 15 (the first attempt at a continuation was lost when a background process died, so each chunk saves, commits and pushes; MMA restarts at each chunk).
+
+| Stage | Grey cells | Cells above 0.8 | Hub ring, drop (mm) | Anywhere, drop (mm) | Hub ring, corner (mm) | Hub faces / end walls / interior |
+|---|---|---|---|---|---|---|
+| 3.8 mm, p = 3 | 26% | 3.5% | 0.019 | 0.044 | 0.054 | 48 / 36 / 16% |
+| 2.9 mm, p = 3 | 19% | 6.1% | 0.018 | 0.052 | 0.055 | 51 / 33 / 16% |
+| 2.9 mm, p = 4 | 16% | 7.9% | 0.019 | 0.055 | 0.061 | 51 / 33 / 16% |
+| **2.9 mm, p = 5** | **14%** | **9.1%** | **0.020** | **0.059** | **0.065** | 51 / 32 / 16% |
+
+**Findings.** (1) **The grid does not matter** (3.8 mm against 2.9 mm: the same layout and displacements to within about 6%). (2) **Sharpening costs little stiffness**: from p = 3 to 5 the drop at the ring goes from 0.018 to 0.020 mm and the corner impact from 0.055 to 0.065 mm (about 10 to 20%), for 5 points fewer grey cells; every case is far inside the 0.05 mm target (the drop 0.020 mm, the servo stall 0.003 mm, the battery 0.004 to 0.010 mm, all the others at or under 0.065 mm at the ring and 0.151 mm anywhere). (3) **The final layout** (`to-n48_m120_p5.png`): a **zig-zag (Warren) truss between the cradle's front wall and the camera-end wall** (the triangles are the new feature of the sharpening: at 3.8 mm it was a diffuse band), a **narrow spine along y from the cradle's back wall to the rear wall, branching into an arch at the rear**, **posts at both hub faces** between the servo seats, the hub rings and the cam bosses (x about +-60, y -30 to +25), and a thin beam along the rear wall; the interior carries 16%. (4) **Still not a 0/1 design**: 14% of the design cells are grey and 77% empty, 9% solid; more continuation (p = 6 and 8, then a projection) would finish it; the members are 3 to 6 mm wide, so the 1.5 mm forged rib minimum is not the limit at this size.
+
+**What this is and is not.** It is a good first layout of the structure with the right topology, and a stiffness target met by a factor of about 2.5 in the operating cases (drop at the ring 0.020 mm against 0.05) with 120 g of added structure (body contents 576 g, a rover of about 1.19 kg). It is not yet a part: no stress constraint, first-pass loads, no draft, fillets or wire clips, and the fixed-region sizes are my first cuts.
+
+**Next (none needs the owner).** (1) A stress check of the final design against the 113.7 / 2 MPa allowable, with a solve of each load case and the von Mises stress (`to_run.py` reports only compliance and displacement). (2) A last continuation to a 0/1 design (p = 6 to 8 with a projection). (3) **Turn the density field into geometry**: threshold at 0.5, smooth, export as a STEP to put in the CAD block beside the fixed regions (the refinement step, 6 of the owner's process, which also adds draft, fillets, wire clips and the 1.5 mm rib minimum). **Needs the owner:** the choice of 120 g (against 80 or 200 g), and a look at the pictures.
+
