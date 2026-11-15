@@ -194,7 +194,11 @@ print(f"  cells: top and bottom {FACE_TB:.1f} cm2 each ({CELL_MASS_TB:.1f} g), e
 print(f"  window at x = {WIN_X:+.2f}, antenna at x = {ANT_X:+.2f} (end gaps {END_GAP:.3f} mm), RF-window square {2 * ANT_WIN_HALF:.0f} mm")
 
 # ---------------- mass and centre of mass ----------------
-print("\nmass of the body contents (grams) against the 386 g left of 1.0 kg:")
+# Mass budget (owner, 2026-11-15): 1.5 kg total budget, 2.0 kg hard ceiling (docs/mass-headroom.md); the drivetrain (servos, hub, struts, wheels, wheel supports) is 614 g, so the body contents may be
+# 886 g (budget) or 1386 g (ceiling). The old budget was 1.0 kg, which left 386 g.
+DRIVETRAIN_G = 614.0
+BUDGET_G, CEILING_G = 1500.0 - DRIVETRAIN_G, 2000.0 - DRIVETRAIN_G
+print(f"\nmass of the body contents (grams) against the {BUDGET_G:.0f} g left of the 1.5 kg budget ({CEILING_G:.0f} g at the 2.0 kg ceiling; it was 386 g left of 1.0 kg):")
 SHELL = {"forged, 1.5 mm": 164.0}                                              # forged shell, budget table in docs/body-redesign.md (the plates option, 141 g with keys, is dropped)
 ALLOW = 4 * 6.0 + 4 * 2.0                                                      # bore rings, screws and inserts
 SEAL = 15.0
@@ -203,7 +207,7 @@ for shell_name, shell_g in SHELL.items():
     for cg in CELL_G_PER_CM2:
         cells = CELL_AREA_CM2 * cg
         total = shell_g + ALLOW + SEAL + elec + cells
-        print(f"  {shell_name:22s} cells {cg:.2f} g/cm2 ({cells:3.0f} g): shell {shell_g:3.0f} + rings/screws {ALLOW:2.0f} + seal {SEAL:.0f} + electronics etc {elec:3.0f} + cells {cells:3.0f} = {total:4.0f} g  ({'over by' if total > 386 else 'under by'} {abs(total - 386):.0f} g)")
+        print(f"  {shell_name:22s} cells {cg:.2f} g/cm2 ({cells:3.0f} g): shell {shell_g:3.0f} + rings/screws {ALLOW:2.0f} + seal {SEAL:.0f} + electronics etc {elec:3.0f} + cells {cells:3.0f} = {total:4.0f} g  ({'over' if total > BUDGET_G else 'under'} the budget by {abs(total - BUDGET_G):.0f} g; {CEILING_G - total:.0f} g below the ceiling; against the old 386 g: {total - 386:+.0f} g)")
 
 lumps = []   # (mass, x, y, z)
 shell_g = SHELL["forged, 1.5 mm"]

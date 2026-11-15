@@ -199,7 +199,7 @@ for g, items in groups.items():
     tot_a += a
     print(f"  {g:34s} {a:9.0f} {a * 0.1 * 1.55:15.0f} {a * 0.15 * 1.45:16.0f}")
 print(f"  {'all groups':34s} {tot_a:9.0f} {tot_a * 0.1 * 1.55:15.0f} {tot_a * 0.15 * 1.45:16.0f}")
-print(f"\nbudget for the whole body contents is 386 g; the forged shell is 164 g (1.5 mm), the electronics etc {LY.elec:.0f} g and the cells {LY.CELL_MASS_G:.0f} g (IXOLAR parts, layout.py).")
+print(f"\nbudget for the whole body contents is {LY.BUDGET_G:.0f} g (1.5 kg total; {LY.CEILING_G:.0f} g at the 2.0 kg ceiling; it was 386 g at 1.0 kg); the forged shell is 164 g (1.5 mm), the electronics etc {LY.elec:.0f} g and the cells {LY.CELL_MASS_G:.0f} g (IXOLAR parts, layout.py).")
 
 # which cavities come within a skin of the outside (share the outside's skin) and which are far from it
 print("\ngap from each cavity group's bounding box to the nearest outer face (mm; a gap under 2 mm means it shares the outer skin or breaches it):")
