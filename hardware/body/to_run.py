@@ -12,7 +12,7 @@ WHAT IT SOLVES (first pass: a layout of load paths, NOT a manufacturable design;
   * Fixed: voids (servo pockets, components, plug zones, wire channels, plate seats, contact pockets), solids (the outer skin, hub bore rings, seat walls, cam bosses, window ring, lid seat rims).
   * Material: isotropic forged carbon, E 35.5 GPa, nu 0.3, SIMP p = 3; the skin cells carry a stiffness weight (skin thickness 1.5 mm over the cell size) instead of 1.
   * Load cases (N, mm; equilibrated: each applied force set has its reaction in the same set, so three isostatic supports at the hub rings take only the residual): the 0.3 m drop (100 g), a corner
-    impact (310 N), the lid clamp (330 N per cam), the 2.9 N.m stall of each servo (its reaction couple on the hub ring), and handling (30 N). Inertial loads are placed on the masses' attachment regions.
+    impact (310 N), the lid clamp (330 N per cam), the 1.9 N.m stall of each servo (the 7.4 V rail) (its reaction couple on the hub ring), and handling (30 N). Inertial loads are placed on the masses' attachment regions.
   * Objective: the mean over the load cases of compliance / its value at the starting design. Constraint: added structure mass (upper-half design cells x 2 x 1.55 g/cm3) <= --mass grams.
   * Solver: CG with geometric multigrid (pyMOTO).  Optimiser: MMA.
 Not included: the self-weight of the optimised material, stress constraints, the hub-bore deflection target, draft, the lids (separate parts).
@@ -106,20 +106,23 @@ for tag in ("Bp", "Ap", "Bn", "An"):
 items.append(("hub parts", 74.0, attach((g["ring_p"] >= 0.2) | (g["ring_n"] >= 0.2))))
 items.append(("lid top", 65.0, attach((g["rim_top"] >= 0.2) | (g["cam_top"] >= 0.2))))
 items.append(("lid bottom", 65.0, attach((g["rim_bot"] >= 0.2) | (g["cam_bot"] >= 0.2))))
-items.append(("battery + protection", 30.0, attach(dil(g["void_battery"] >= 0.5))))
+cradle = attach(g["cradle"] >= 0.2)                                   # the battery cradle walls (to_inputs.py), fixed solids
+items.append(("battery + protection", 30.0, cradle))
 items.append(("camera, ring, sensor", 18.0, attach((g["window"] >= 0.2) | dil(g["void_camera"] >= 0.5))))
 items.append(("XBee + patch", 12.0, attach(dil(g["void_antenna"] >= 0.5) | dil(g["void_xbee"] >= 0.5))))
 shell_g = 164.0 + 47.0 + 26.4 + 15.0                         # skin, rings/screws/seal, end-face cells, wiring: spread on all fixed solids
 items.append(("shell and the rest", shell_g, attach(solid)))
+# in the drop (vertical) case the battery is held by the lids' foam pads, not by the cradle: its 30 g bears on the bottom lid's rim and cam cells (the lid it rests on)
+items_drop = [(n_, m_, attach((g["rim_bot"] >= 0.2) | (g["cam_bot"] >= 0.2)) if n_.startswith("battery") else k_) for n_, m_, k_ in items]
 M_G = sum(m for _, m, _ in items)
 print(f"mass items: {M_G:.0f} g in {len(items)} groups")
 
 
-def inertial(F, accel_ms2, direction):
+def inertial(F, accel_ms2, direction, lst=None):
     """Inertial forces on all items for an acceleration of the body (the load that the inertia exerts: -m a in `direction`... applied as -direction * m * a)."""
     tot = np.zeros(3)
     d = np.asarray(direction, dtype=float); d /= np.linalg.norm(d)
-    for _, m, mask in items:
+    for _, m, mask in (items if lst is None else lst):
         f = -d * (m * 1e-3) * accel_ms2
         add_force(F, mask, f); tot += f
     return tot
@@ -128,7 +131,7 @@ def inertial(F, accel_ms2, direction):
 ring_p, ring_n = attach(g["ring_p"] >= 0.2), attach(g["ring_n"] >= 0.2)
 nf = domain.nnodes * ndof
 # LC drop 0.3 m: the body decelerates at 100 g; the rings push up with the sum of the inertial forces
-F = np.zeros(nf); tot = inertial(F, 100 * 9.81, (0, 0, -1))      # body accelerating up at 100 g: inertial load down (-z)... see sign below
+F = np.zeros(nf); tot = inertial(F, 100 * 9.81, (0, 0, -1), items_drop)      # body accelerating up at 100 g: inertial load down (-z)... see sign below
 # an upward acceleration a gives inertial forces -m a (downward); the rings carry +sum upward
 add_force(F, ring_p, -tot / 2); add_force(F, ring_n, -tot / 2)
 F_cases.append(F); names.append("drop 0.3 m, 100 g")
@@ -145,7 +148,7 @@ add_force(F, attach(g["cam_top"] >= 0.2), (0, 0, 4 * 330.0)); add_force(F, attac
 add_force(F, attach(g["cam_bot"] >= 0.2), (0, 0, -4 * 330.0)); add_force(F, attach(g["rim_bot"] >= 0.2), (0, 0, 4 * 330.0))
 F_cases.append(F); names.append("lid clamp 330 N per cam")
 # LC servo stall: couple T about x on the servo's seat walls, the reaction couple on the hub ring of that side
-T_STALL = 2900.0                                                    # N.mm
+T_STALL = 1910.0                                                    # N.mm: the STS3215's stall at the 7.4 V rail (19.5 kg.cm, Feetech spec page 3); the first runs used 2900 (the 12 V figure)
 
 
 def couple(F, mask, y0, z0, T):
@@ -164,14 +167,22 @@ for tag, ring in (("Bp", ring_p), ("Ap", ring_p), ("Bn", ring_n), ("An", ring_n)
     ys, zs = float(g[f"seatpos_{tag}"][0]), float(g[f"seatpos_{tag}"][1])
     F = np.zeros(nf)
     couple(F, attach(g[f"seat_{tag}"] >= 0.2), ys, zs, T_STALL); couple(F, ring, 0.0, 30.0, -T_STALL)
-    F_cases.append(F); names.append(f"servo {tag} stall 2.9 N.m")
+    F_cases.append(F); names.append(f"servo {tag} stall 1.9 N.m")
 # LC component retention under the 0.3 m drop (100 g): each light component on its own, so that a component hanging on no structure counts as much as a stiff servo seat (found 2026-11-15: without these
 # the battery's 29 N carried no weight in the mean of the normalised compliances and the optimiser left it hanging, 35 mm in the drop)
 for nm_i, m_i, mask_i in items:
-    if nm_i.startswith(("battery", "camera", "XBee")):
+    if nm_i.startswith(("camera", "XBee")):
         F = np.zeros(nf); f_i = np.array([0.0, 0.0, -(m_i * 1e-3) * 100 * 9.81])
         add_force(F, mask_i, f_i); add_force(F, ring_p, -f_i / 2); add_force(F, ring_n, -f_i / 2)
         F_cases.append(F); names.append(f"{nm_i.split(' ')[0].split(',')[0]} 100 g")
+# LC battery, sideways, 100 g (29 N) on the cradle walls in each of the four horizontal directions (the walls hold it sideways; the lids' foam holds it vertically, see the drop case)
+f_bat = 30.0e-3 * 100 * 9.81
+cradle_walls = {"+x": cradle & (CX >= 33.0), "-x": cradle & (CX <= -24.0),
+                "+y": cradle & (CY >= 47.5) & (CX > -24.0) & (CX < 33.0), "-y": cradle & (CY <= 38.5) & (CX > -24.0) & (CX < 33.0)}
+for k_, d_ in (("+x", (1, 0, 0)), ("-x", (-1, 0, 0)), ("+y", (0, 1, 0)), ("-y", (0, -1, 0))):
+    F = np.zeros(nf); f_i = f_bat * np.array(d_, dtype=float)
+    add_force(F, attach(cradle_walls[k_]), f_i); add_force(F, ring_p, -f_i / 2); add_force(F, ring_n, -f_i / 2)
+    F_cases.append(F); names.append(f"battery {k_} 100 g")
 # LC handling: 30 N squeeze across the hub faces
 F = np.zeros(nf)
 pad_p = attach((CX > 69 - 1.5 * h) & (np.abs(CY) < 20) & (np.abs(CZ - 30) < 15) & solidish); pad_n = attach((CX < -69 + 1.5 * h) & (np.abs(CY) < 20) & (np.abs(CZ - 30) < 15) & solidish)

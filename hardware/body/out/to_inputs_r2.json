@@ -20,7 +20,8 @@
   "servo plate seat walls (2 mm; LC2)": 810,
   "cam bore bosses (r 5.1 to 8, |x| 54 to 70; LC5)": 2140,
   "window boss ring (r 14 to 22, y 60 to 70)": 914,
-  "lid seat rims (8 mm wide, 2 mm tall at each joint; LC5)": 4133
+  "lid seat rims (8 mm wide, 2 mm tall at each joint; LC5)": 4133,
+  "battery cradle walls (1.5 mm, z 14 to 46; the battery's sideways loads)": 1784
  },
  "load_cases": "docs/load-cases.md, hardware/body/load_cases.py (LC1 static on the hub bore rings, LC2 servo torque on the seat walls, LC3 drop on the hub bore rings, LC4 corner impact on the skin, LC5 lid clamp on the cam bosses and the lid rims, LC6 handling on the skin)",
  "material": {

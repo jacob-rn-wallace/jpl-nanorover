@@ -83,6 +83,13 @@ regions["window boss ring (r 14 to 22, y 60 to 70)"] = win
 rim = ((LY.Z >= 51.0) & (LY.Z <= 53.0)) | ((LY.Z >= 7.0) & (LY.Z <= 9.0))
 rim = rim & ((np.abs(LY.X) >= 62.0) | (np.abs(LY.Y) >= 62.0))
 regions["lid seat rims (8 mm wide, 2 mm tall at each joint; LC5)"] = rim
+# the battery cradle (2026-11-15, docs/optimisation-results.md): three walls of 1.5 mm round the battery bay, vertical (parallel to the z draw), z 14 to 46 (the battery's height with a margin): an end wall at each end
+# (the +x one beyond the protection board), a back wall against the servo pockets' front faces and a front wall; open top and bottom (the battery drops in along z and the lids' foam pads hold it vertically).
+# The wire channels (fixed voids) cut notches in them where the cells' wires pass.
+cradle = np.zeros_like(void)
+for (cx0, cx1, cy0, cy1) in ((-28.0, -26.5, 36.0, 50.5), (35.5, 37.0, 36.0, 50.5), (-28.0, 37.0, 36.0, 37.5), (-28.0, 37.0, 49.0, 50.5)):
+    cradle |= LY.box_mask(cx0, cx1, cy0, cy1, 14.0, 46.0)
+regions["battery cradle walls (1.5 mm, z 14 to 46; the battery's sideways loads)"] = cradle
 
 # ---------------- the domain and the cell classes ----------------
 Z0, Z1 = 6.0, 54.0
@@ -155,6 +162,7 @@ if args.grid:
     out_g["cam_top"] = frac(cam & (LY.Z > HZ)); out_g["cam_bot"] = frac(cam & (LY.Z < HZ))
     out_g["rim_top"] = frac(rim & (LY.Z > HZ)); out_g["rim_bot"] = frac(rim & (LY.Z < HZ))
     out_g["window"] = frac(win)
+    out_g["cradle"] = frac(cradle & ~void)
     for nm, key in (("battery", "battery"), ("camera", "camera"), ("comms patch", "antenna"), ("XBee", "xbee")):
         mm = np.zeros_like(void)
         for pn, pm in LY.placed.items():
