@@ -50,3 +50,15 @@ pyMOTO 2.0.1 (MIT; installed with the owner's permission in `.venv-to`) was set 
 2. Penalty continuation (p from 3 to 4 or 5) and a projection to get a 0/1 design; then the hub-bore deflection as a constraint.
 3. A stress check (a p-norm of the von Mises stress, or a post-run solve) against the 113.7 / 2 MPa allowable.
 4. **Needs the owner:** a battery mount (a cradle fixed to a wall or an explicit rib set), and whether to accept the 1.11 to 1.15 kg outlook.
+
+## Update: the same problem on a finer grid (2.9 mm, `--n 48`, started from the 3.8 mm 80 g result)
+
+36,864 cells (2.875 mm), 9,813 unknowns in the upper half, 80 iterations in 34 minutes (about 25 s per iteration here against 8 s at 3.8 mm); `docs/images/to-n48_m80.png`. **The layout does not change with the grid**: the same spine with its Y and T, the same hub-face posts and end-wall bracing; the mass split is 53% at the hub faces, 33% in the end walls and 15% in the interior (48, 35 and 17% at 3.8 mm).
+
+| 80 g | Hub ring, drop (mm) | Hub ring, corner (mm) | Servo seats, drop (mm) | Battery, drop (mm) | Grey cells | Cells above 0.8 |
+|---|---|---|---|---|---|---|
+| 3.8 mm | 0.028 | 0.094 | 0.033 to 0.047 | 1.04 | 19% | 1.2% |
+| 2.9 mm | 0.027 | 0.099 | 0.037 to 0.063 | 1.20 | 15% | 2.1% |
+
+So **the displacements agree to within about 15% across the two grids** (the largest difference is the battery, 1.04 against 1.20 mm), which is as much grid independence as this first pass can show. The result is slightly crisper (grey 15%, maximum density 1.00). Penalty continuation (p = 4, then 5) is running from this result; its pictures are `to-n48_m80_p4.png` and `to-n48_m80_p5.png` if it finished, and the numbers are in `to_result_n48_m80_p*.npz` (each result file holds the compliances, the ring and overall displacements and the density).
+
