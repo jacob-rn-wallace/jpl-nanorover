@@ -34,13 +34,14 @@ ap.add_argument("--mass", type=float, default=40.0, help="added structure, g (up
 ap.add_argument("--maxit", type=int, default=60)
 ap.add_argument("--radius", type=float, default=1.5, help="density filter radius in cells")
 ap.add_argument("--check", action="store_true", help="build, solve once at the starting design, report equilibrium and compliances, and stop")
-ap.add_argument("--start", default=None, help="a result .npz from an earlier run to start from")
+ap.add_argument("--start", default=None, help="a result .npz from an earlier run to start from (resampled if its grid is coarser or finer)")
+ap.add_argument("--p", type=float, default=3.0, help="SIMP penalty (3 first; 4 and 5 in continuation runs started from the previous result)")
 args = ap.parse_args()
 
 g = np.load(HERE / "out" / f"to_grid_n{args.n}.npz")
 n, nz, h = int(g["n"]), int(g["nz"]), float(g["h_mm"])
 nzh = nz // 2
-E0, NU, EMIN, P_SIMP, RHO = 35500.0, 0.3, 1e-9, 3.0, 1.55e-3      # MPa, -, -, -, g/mm3
+E0, NU, EMIN, P_SIMP, RHO = 35500.0, 0.3, 1e-9, args.p, 1.55e-3      # MPa, -, -, -, g/mm3
 print(f"grid {n} x {n} x {nz}, cell {h:.3f} mm, {n * n * nz} cells")
 
 
@@ -210,6 +211,9 @@ print(f"added structure {args.mass:g} g = {V_T / 1000:.1f} cm3 of the {Vd / 1000
 x0 = np.where(design_h, volfrac, 0.0)
 if args.start:
     x0 = np.load(args.start)["rho_h"].astype(float)
+    if x0.shape != design_h.shape:                                   # a result from another grid: resample (linear), keep inside the design cells
+        x0 = ndi.zoom(x0, np.array(design_h.shape) / np.array(x0.shape), order=1)
+    x0 = np.where(design_h, np.clip(x0, 0.0, 1.0), 0.0)
 sx = pym.Signal("x", state=to_vec(dom_h, x0))
 void_idx = dom_h.elements[void[:, :, nzh:]].ravel()
 solid_idx = dom_h.elements[solid[:, :, nzh:]].ravel()
@@ -296,6 +300,6 @@ u_all = np.array([np.linalg.norm(U[:, k].reshape(-1, 3), axis=1).max() for k in 
 print("largest nodal displacement (mm): ring nodes / anywhere: " + "; ".join(f"{nm}: {a:.3f} / {b:.3f}" for nm, a, b in zip(names, u_ring, u_all)))
 group_displacements("final design")
 out = HERE / "out"
-tag = f"n{n}_m{args.mass:g}"
+tag = f"n{n}_m{args.mass:g}" + ("" if args.p == 3.0 else f"_p{args.p:g}")
 np.savez_compressed(out / f"to_result_{tag}.npz", rho_h=rho_h, design_h=design_h, solid_h=solid[:, :, nzh:], void_h=void[:, :, nzh:], h=h, mass_g=mass_added, names=np.array(names), c0=c0, c=np.array(sc.state), u_ring=u_ring, u_all=u_all)
 print("wrote", out / f"to_result_{tag}.npz")
