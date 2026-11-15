@@ -111,3 +111,15 @@ The density plots above are hard to read, so the result is also turned into geom
 
 **Regenerating it:** `.venv/bin/python hardware/body/to_geometry.py hardware/body/out/to_result_n48_m120_p5.npz` (writes the meshes to `hardware/body/out/geom/`), then `STEM=n48_m120_p5 VIEW=iso EXPORT=on ~/tools/blender-4.5.9-linux-x64/blender -b -P hardware/assembly/blender_structure.py` (VIEW is iso, isorear, top, end or side; about 1 to 2 minutes each on the CPU) and `.venv/bin/python hardware/assembly/annotate_structure.py docs/images/structure-n48_m120_p5-iso.png` for the labels (the label positions are for that one view). The same works for any result file (`STEM=n48_m200_p5` when the 200 g run finishes). Two things found along the way, for anyone editing `blender_structure.py`: the wireframe modifier works in the object's own units (apply the scale first, or "0.5" is 70 mm), and the bevel modifier makes artefacts on the voxel surface (non-manifold where cells touch along an edge).
 
+## The 200 g layout (the owner's request), refined to 2.9 mm and penalty 5 (chunk 1 of 3)
+
+Run with `to_refine.sh`'s recipe (2.9 mm at penalty 3, then three chunks at 4, then chunk 1 of 3 at 5; the job was stopped there on purpose when the session paused; `COMMIT=1 hardware/body/to_refine.sh 200 5` redoes the penalty-5 stage). Pictures: `docs/images/structure-n48_m200_p5-iso-labelled.png`, `-iso.png`, `-top.png`; `hardware/body/out/geom/structure-n48_m200_p5.glb`; slice plots `to-n48_m200*.png`.
+
+| Stage (200 g, 2.9 mm) | Grey cells | Cells above 0.8 | Hub ring, drop (mm) | Anywhere, drop (mm) | Hub ring, corner (mm) | Anywhere, corner (mm) | Hub faces / end walls / interior |
+|---|---|---|---|---|---|---|---|
+| p = 3 | 21% | 17.4% | 0.012 | 0.045 | 0.045 | 0.099 | 46 / 40 / 15% |
+| p = 4 | 16% | 20.4% | 0.012 | 0.048 | 0.048 | 0.106 | 46 / 39 / 15% |
+| **p = 5 (chunk 1)** | **15%** | **21.5%** | **0.013** | **0.052** | **0.051** | **0.112** | 47 / 39 / 14% |
+
+**Against the 120 g design** (0.020 mm, 0.059 mm anywhere, 0.065 mm corner; 14% grey, 9.1% solid): the hub ring in the drop moves 35% less and the corner impact 22% less, and the design is **more than twice as crisp** (21.5% of the design cells solid against 9.1%). **The layout differs in character:** at 120 g the camera end is a Warren truss; at 200 g **the camera-end wall becomes a continuous orange panel with lightening holes** (the 38 to 40% of the added mass in the end walls), the spine along y is thicker (the tree of the 120 g top view becomes a stout column with a hole in it at the rear), and the posts at the hub faces and the rear Y are heavier. It reads as a conventional forged shell with ribs and webs, which is simpler to press than a truss. **Totals:** body contents 656 g (456 g plus 200 g), a rover of about 1.27 kg, inside the 1.5 kg budget with 230 g to spare. **My recommendation (the owner chooses): 200 g**, for the generous budget, the crispness and the simpler moulding; 120 g is the lighter alternative (every case already meets the 0.05 mm target from 40 g, so neither is needed for stiffness).
+
