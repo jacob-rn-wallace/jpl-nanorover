@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Planar quasi-static simulation of the four-strut chassis: stances, tipping margins, the torque each strut needs, and self-righting.
 
-    .venv/bin/python hardware/drivetrain/chassis_sim.py [--figure PATH]
+    .venv/bin/python hardware/drivetrain/chassis_sim.py [--figure PATH] [--body-y MM] [--body-mass G]
+    (the real body contents from layout.py: --body-y 6.3 --body-mass 439.7; defaults are the original 386 g lump at y = 0)
 
 MODEL (everything here is an assumption or a simplification; see docs/chassis-simulation.md)
   * The two sides move together, so the rover is treated in the y-z plane (looking along the hub axis): a 140 x 60 mm body (y from -70 to 70, z from 0 to 60) with the hub
@@ -36,6 +37,7 @@ MIN_ARC = 60.0                              # degrees between the struts (wheels
 M_SERVO, M_HUB, M_STRUT, M_WHEEL, M_SUPPORT = 4 * 0.055, 0.074, 0.094, 0.133, 0.093
 M_BODY = M_TOTAL - (M_SERVO + M_HUB + M_STRUT + M_WHEEL + M_SUPPORT)
 SERVO_B_Y, SERVO_A_Y = (-0.0107 + 0.03453) / 2.0, (-0.0575 - 0.0123) / 2.0   # body-frame y of the servo bodies' centres (hub.py)
+BODY_Y = 0.0                                # body-frame y of the body lump, m (--body-y; the real contents' centre of mass is +6.3 mm from layout.py, 2026-11-14)
 
 
 def tip(phi_deg):
@@ -49,7 +51,7 @@ class Shape:
     def __init__(self, phiA, phiB):
         self.phiA, self.phiB = phiA % 360.0, phiB % 360.0
         self.cA, self.cB = tip(phiA), tip(phiB)
-        lumps = [(M_BODY, np.array([0.0, 0.030])), (M_HUB, np.array([-0.005, 0.030])),
+        lumps = [(M_BODY, np.array([BODY_Y, 0.030])), (M_HUB, np.array([-0.005, 0.030])),
                  (2 * 0.055, np.array([SERVO_B_Y, 0.030])), (2 * 0.055, np.array([SERVO_A_Y, 0.030]))]
         self.strut_m = {"A": M_STRUT / 2 + M_WHEEL / 2 + M_SUPPORT / 2, "B": M_STRUT / 2 + M_WHEEL / 2 + M_SUPPORT / 2}
         self.parts = {}
@@ -326,7 +328,13 @@ def envelope():
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--figure")
+    ap.add_argument("--body-y", type=float, default=0.0, help="y of the body lump in mm (default 0, the original assumption)")
+    ap.add_argument("--body-mass", type=float, default=None, help="mass of the body lump in g (default: what is left of the 1 kg budget, 386 g)")
     args = ap.parse_args()
+    global BODY_Y, M_BODY
+    BODY_Y = args.body_y / 1000.0
+    if args.body_mass is not None:
+        M_BODY = args.body_mass / 1000.0
     print(f"masses: body lump {M_BODY * 1000:.0f} g + servos {M_SERVO * 1000:.0f} + hub {M_HUB * 1000:.0f} + struts {M_STRUT * 1000:.0f} + wheels {M_WHEEL * 1000:.0f} + wheel supports {M_SUPPORT * 1000:.0f} = {M_TOTAL * 1000:.0f} g")
     sh = Shape(-25, 205)
     print(f"COM at the 25 degree stance (body frame, mm): y {sh.com[0] * 1000:.1f}, z {sh.com[1] * 1000:.1f} (hub at 0, 30); servo A and B on opposite sides of the hub axis shift it toward -y\n")

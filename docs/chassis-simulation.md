@@ -8,7 +8,7 @@ Record for `hardware/drivetrain/chassis_sim.py` (run with `.venv/bin/python hard
 - With the struts locked, body, struts and wheels are one rigid shape. It rests on the ground in an orientation that is a local minimum of its centre-of-mass height; the ground is frictionless, so contact forces are vertical. When a strut moves, the shape changes and the assembly rolls downhill in centre-of-mass height from its old orientation to the nearest minimum (overdamped, no momentum).
 - Strut torque is what that strut's servo must hold: the moment about the hub of the ground reaction on its wheel plus the weight of the strut, wheel and wheel support, per strut (half the planar value, since two sides share the load). Reactions come from force and moment balance on the one or two touching features.
 - The struts cannot pass each other: the wheels collide when the two struts are less than about 60 degrees apart (`strut.py` found contact up to about 55 degrees), so both arcs between them must stay at least 60 degrees. The wheels sit outboard of the body, so they never meet it.
-- **Masses (1.0 kg, planar totals for both sides):** a body lump of 386 g at the centre (what is left of the 1 kg budget after everything else; the redesigned body is not designed), servos 4 x 55 g at their positions in `hub.py` (servo B on the axis with its long side toward +y, servo A offset 23 mm toward -y), hub parts 74 g, struts 94 g, wheels 133 g, wheel supports 93 g. The centre of mass at the 25 degree stance is 2.9 mm toward -y of the hub axis and 21.9 mm above the body floor (the hub is at 30), because the two servos of a side sit on opposite sides of the axis.
+- **Masses (1.0 kg, planar totals for both sides):** a body lump of 386 g at the centre (what is left of the 1 kg budget after everything else; the redesigned body is not designed), servos 4 x 55 g at their positions in `hub.py` (servo B on the axis with its long side toward +y, servo A offset 23 mm toward -y), hub parts 74 g, struts 94 g, wheels 133 g, wheel supports 93 g. The centre of mass at the 25 degree stance is 2.9 mm toward -y of the hub axis and 21.9 mm above the body floor (the hub is at 30), because the two servos of a side sit on opposite sides of the axis. **(That assumed the body lump at y = 0; see "Update 2026-11-14" below for the real contents.)**
 
 ## Results
 
@@ -64,3 +64,25 @@ Over every allowed pair of strut angles on a 5 degree grid and every stable rest
 - The body lump is a guess at 386 g centred in the box; a redesigned body with a different mass distribution changes the centre of mass and every number.
 - The planar torque assumes both sides share the load equally.
 - **Not simulated:** step climbing, slopes with friction, hopping (JPL's 10 cm/s, an energy-storage question), wheel torques, and the stance on uneven ground.
+
+## Update 2026-11-14: the real body contents (centre of mass and mass)
+
+**Why.** The first runs put a 386 g body lump (what is left of the 1 kg budget) at y = 0. The layout (`hardware/body/layout.py`) now places everything, so the contents' own centre of mass and mass are known: **439.7 g with the centre of mass at y = +6.3 mm** (the camera, LED ring, battery in the front bay, the end-face cells and the boards are toward +y; the antenna, XBee and patch toward -y), x +1.0, z 30. The battery moved into the front bay on 2026-11-14 (the servo connectors need the centre gap, `docs/hardware-spec.md` last section), which is most of that +6.3.
+
+**What was run.** `chassis_sim.py` has two new options (defaults unchanged, so the earlier results reproduce exactly): `--body-y MM` and `--body-mass G`. Four cases, everything else as before:
+
+| Case | COM y at the 25 degree stance | Hold torque at 25 deg, A / B (N.m) | Tip-over slope at 25 deg, forward / backward (deg) | Righting, lowest peak: moves, peak (N.m) | Envelope maximum (N.m) |
+|---|---|---|---|---|---|
+| Baseline: 386 g at y 0 (the earlier model) | -2.9 mm | 0.106 / 0.120 | 50.9 / 48.3 | 25, 0.118 | 0.166 |
+| 386 g at y +3.5 (battery still in the centre gap) | -1.5 mm | 0.109 / 0.117 | 50.3 / 48.9 | 25, 0.121 | 0.163 |
+| 386 g at y +6.3 (battery in the front bay, design mass kept) | -0.5 mm | 0.112 / 0.114 | 49.8 / 49.4 | 25, 0.124 | 0.160 |
+| **440 g at y +6.3 (the real contents, 1054 g in all)** | **-0.1 mm** | **0.121 / 0.122** | **49.4 / 49.3** | **25, 0.134** | **0.169** |
+
+**Findings.**
+1. **The whole-rover centre of mass is now on the hub axis** (-0.1 mm with the real contents; `layout.py` says -0.13 mm, the same to the precision of the two models' servo positions), instead of 2.9 mm toward -y. That removes the front-back asymmetry: the two struts carry nearly the same hold torque (0.121 and 0.122 N.m at 25 degrees, against 0.106 and 0.120), and the forward and backward tip-over slopes are equal (49.4 and 49.3 degrees, against 50.9 and 48.3).
+2. **The worst-case hold barely moves: 0.160 N.m at the design mass, 0.169 at the real mass, against 0.166 before** (+2% at the real mass). The servo's margin stays about 5.8 times its rated 0.98 N.m; with the usual margin of 2 the design value is 0.34 N.m, as before.
+3. **The real mass is what costs something**, not the position: 54 g over the budget (total 1054 g) raises the self-righting peak from 0.118 to 0.134 N.m (+14%, the lowest-peak sequence; the fewest-moves sequence goes from 0.134 to 0.136 and takes 23 moves, not 22) and the 25 degree hold by about 10%. Everything still sits far inside the servo's rating. The mass overage is deferred (owner), so this is the number to expect if nothing is saved.
+4. Nothing changes qualitatively: the same 25-move righting sequence works, the strut stops (`stop_window_check.py`) were chosen on geometry alone and do not depend on these torques.
+
+**Not changed.** The strut, wheel, hub and servo masses; the planar model (side-to-side tipping, friction and dynamics are still out of scope); the x offset of +1 mm is ignored (the model is planar). The numbers in the tables above use the 1.0 kg design mass unless the case says 440 g.
+
