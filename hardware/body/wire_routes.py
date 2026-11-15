@@ -136,11 +136,11 @@ SOLAR_ENDS = ((-17.47, 66.0, 30.0), (17.47, -66.0, 30.0))   # the end-face cell 
 S30, S28 = 30, 28
 bundles = [
     ("camera end (lower + pocket to the camera board)", pocket("lower", +1), CAM_END, [(10, S30)], "SCK, MOSI, MISO, CS, SDA, SCL, INT, LED enable, 3V3, GND"),
-    ("LED ring supply (upper + pocket to the ring board)", pocket("upper", +1), LED_END, [(2, S28)], "V7.4 and GND for the three LED pairs (0.6 W while on)"),
+    ("LED ring supply (upper + pocket to the ring board)", pocket("upper", +1), LED_END, [(2, S30)], "V7.4 and GND for the three LED pairs (0.6 W while on)"),
     ("link signals (lower + pocket to upper + pocket)", pocket("lower", +1), pocket("upper", +1), [(3, S30)], "boost enable, charger status, battery current sense (moved to the + side of the upper lid: they were on its - side, across the body)"),
-    ("battery (protection board to upper + pocket)", BATT_END, pocket("upper", +1), [(12, S28)], "VBAT 6 and GND 6 (the battery path, 3.5 A peak)"),
+    ("battery (protection board to upper + pocket)", BATT_END, pocket("upper", +1), [(2, 22)], "VBAT and GND, one 22 AWG wire each (3.5 A peak): the pocket tab board's copper pour parallels the six contacts of each net"),
     ("antenna end (lower - pocket to the XBee carrier board)", pocket("lower", -1), ANT_END, [(5, S30)], "XBee TX, RX, sleep, 3V3, GND (to the XBee carrier board beside the patch)"),
-    ("power across (upper + pocket to lower - pocket)", pocket("upper", +1), pocket("lower", -1), [(8, S28)], "V7.4 in 3, GND return 3, VBAT in 2 (wheel drivers, 3.3 V converter)"),
+    ("power across (upper + pocket to lower - pocket)", pocket("upper", +1), pocket("lower", -1), [(2, 24), (1, S28)], "V7.4 and GND, 24 AWG each (2 A worst), and VBAT for the 3.3 V converter, 28 AWG (0.3 A); pours on the tab boards parallel the contacts"),
     ("solar: end face at the camera end (to upper - pocket)", SOLAR_ENDS[0], pocket("upper", -1), [(2, S30)], "one cell string: + and -"),
     ("solar: end face at the antenna end (to upper - pocket)", SOLAR_ENDS[1], pocket("upper", -1), [(2, S30)], "one cell string: + and -"),
     ("solar: bottom lid cells (to upper - pocket)", SOLAR_BOTTOM, pocket("upper", -1), [(2, S30)], "one cell string: + and -"),
@@ -149,10 +149,16 @@ bundles = [
 # the data wire's feed from the lower - pocket is not routed separately (ASM: it joins the chain at the B node)
 chain = [("servo chain: upper + pocket to the B servos' plugs", pocket("upper", +1), SERVO["B"]), ("servo chain: B servos to the A servos' plugs", SERVO["B"], SERVO["A"])]
 for nm, a, b in chain:
-    bundles.append((nm, a, b, [(3, S30)], "V7.4, GND, bus data; plus short jumpers across the gap at each node (2 x 8 mm per servo pair, ASM)"))
+    bundles.append((nm, a, b, [(2, 24), (1, S30)], "V7.4 and GND 24 AWG (four servos, 1.3 A at most when all move), bus data 30 AWG; plus short jumpers across the gap at each node (2 x 8 mm per servo pair, ASM)"))
 
-OD = {30: 0.6, 28: 0.8}                                   # mm over the insulation (ASM)
-G_PER_M = {30: 0.75, 28: 1.1}                             # g per metre, copper plus a 0.2 mm silicone wall (ASM)
+import math as _m
+def _cu_d(awg): return 0.127 * 92 ** ((36 - awg) / 39)                      # mm, bare copper diameter (the AWG definition)
+def _od(awg): return _cu_d(awg) + 2 * (0.17 if awg >= 30 else 0.24 if awg >= 28 else 0.30)     # mm over a silicone wall (ASM: 0.17 / 0.24 / 0.30 mm)
+def _gpm(awg): a = _m.pi / 4 * _cu_d(awg) ** 2; return a * 8.96 + (_m.pi / 4 * (_od(awg) ** 2 - _cu_d(awg) ** 2)) * 1.2     # g per metre: copper 8.96 g/cm3 + silicone 1.2 g/cm3
+def _rpm(awg): return 1.72e-8 / (_m.pi / 4 * (_cu_d(awg) * 1e-3) ** 2)       # ohm per metre at 20 C
+RATING = {22: 7.0, 24: 3.5, 28: 1.4, 30: 0.86}                              # A, the usual chassis-wiring chart (ESTIMATE, remembered; a rating for a bundle in a closed channel should be derated)
+OD = {a: _od(a) for a in (22, 24, 28, 30)}
+G_PER_M = {a: _gpm(a) for a in (22, 24, 28, 30)}
 END_TAIL, SLACK = 6.0, 1.10
 
 rows, out, total_len, total_mass = [], {}, 0.0, 0.0
@@ -193,6 +199,11 @@ for nm, r in rows:
     union |= m_all
     print(f"  {nm:58s} channel {side:3.1f} mm: {bad} obstacle voxels" + ("" if bad == 0 else "   <-- CONFLICT"))
 print(f"  all channels together (overlaps counted once): {union.sum() * LY.vox:.1f} cm3 of the block")
+# ---- wire current and drop (ESTIMATE ratings; currents from contact_estimate.py and hardware-spec.md) ----
+print("\nper-wire check (one wire per net; the contacts of a net are paralleled by a copper pour on the pocket's tab board):")
+for nm_, awg_, amps_ in (("battery VBAT, GND", 22, 3.5), ("7.4 V rail V7.4, GND to the lower board", 24, 2.0), ("VBAT to the 3.3 V converter", 28, 0.3), ("servo chain V7.4, GND", 24, 1.3), ("LED ring V7.4, GND", 30, 0.08)):
+    L_ = {"battery VBAT, GND": 0.100, "7.4 V rail V7.4, GND to the lower board": 0.202, "VBAT to the 3.3 V converter": 0.202, "servo chain V7.4, GND": 0.250, "LED ring V7.4, GND": 0.121}[nm_]
+    print(f"  {nm_:42s} {awg_} AWG, {amps_:4.2f} A of {RATING[awg_]:.2f} A rated (x{RATING[awg_] / amps_:.1f}); out and back over {L_ * 1000:.0f} mm drops {2 * amps_ * _rpm(awg_) * L_ * 1000:.0f} mV")
 print(f"\ntotal route length {total_len:.0f} mm; wire mass {total_mass:.1f} g (layout.py allows 15 g for wiring, connectors and board links; the strut-motor wires and the camera-end boards' own wiring are not in this list)")
 out_dir = HERE / "out"; out_dir.mkdir(exist_ok=True)
 (out_dir / "wire_routes.json").write_text(json.dumps(out, indent=1))

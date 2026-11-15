@@ -144,8 +144,8 @@
    ]
   ],
   "length_mm": 80.3,
-  "wires": 12,
-  "channel_side_mm": 3.9
+  "wires": 2,
+  "channel_side_mm": 3.0
  },
  "antenna end (lower - pocket to the XBee carrier board)": {
   "points": [
@@ -228,8 +228,8 @@
    ]
   ],
   "length_mm": 172.60000000000002,
-  "wires": 8,
-  "channel_side_mm": 3.2
+  "wires": 3,
+  "channel_side_mm": 3.0
  },
  "solar: end face at the camera end (to upper - pocket)": {
   "points": [
