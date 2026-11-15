@@ -164,6 +164,13 @@ for tag, ring in (("Bp", ring_p), ("Ap", ring_p), ("Bn", ring_n), ("An", ring_n)
     F = np.zeros(nf)
     couple(F, attach(g[f"seat_{tag}"] >= 0.2), ys, zs, T_STALL); couple(F, ring, 0.0, 30.0, -T_STALL)
     F_cases.append(F); names.append(f"servo {tag} stall 2.9 N.m")
+# LC component retention under the 0.3 m drop (100 g): each light component on its own, so that a component hanging on no structure counts as much as a stiff servo seat (found 2026-11-15: without these
+# the battery's 29 N carried no weight in the mean of the normalised compliances and the optimiser left it hanging, 35 mm in the drop)
+for nm_i, m_i, mask_i in items:
+    if nm_i.startswith(("battery", "camera", "XBee")):
+        F = np.zeros(nf); f_i = np.array([0.0, 0.0, -(m_i * 1e-3) * 100 * 9.81])
+        add_force(F, mask_i, f_i); add_force(F, ring_p, -f_i / 2); add_force(F, ring_n, -f_i / 2)
+        F_cases.append(F); names.append(f"{nm_i.split(' ')[0].split(',')[0]} 100 g")
 # LC handling: 30 N squeeze across the hub faces
 F = np.zeros(nf)
 pad_p = attach((CX > 69 - 1.5 * h) & (np.abs(CY) < 20) & (np.abs(CZ - 30) < 15) & solidish); pad_n = attach((CX < -69 + 1.5 * h) & (np.abs(CY) < 20) & (np.abs(CZ - 30) < 15) & solidish)
@@ -259,7 +266,16 @@ print(f"first solve, all {nLC} load cases: {time.time() - t0:.1f} s")
 sw.state = 1.0 / (nLC * c0)
 for nm, c in zip(names, c0):
     print(f"  starting compliance {nm:28s} {c:12.4g} N.mm")
+def group_displacements(label):
+    U = np.asarray(su.state)[:, 0].reshape(-1, 3)                 # the drop case
+    print(f"largest nodal displacement per mass group, {names[0]} ({label}):")
+    for nm, m_, mask in items:
+        nodes = np.unique(domain.conn[domain.elements[mask]].ravel())
+        print(f"  {nm:24s} {m_:6.1f} g  {np.linalg.norm(U[nodes], axis=1).max():8.3f} mm")
+
+
 if args.check:
+    group_displacements("starting design")
     print("equilibrium: the resultants above are the supports' share (N); they should be small against the applied totals")
     sys.exit(0)
 
@@ -278,6 +294,7 @@ ring_nodes = np.unique(domain.conn[domain.elements[ring_p | ring_n]].ravel())
 u_ring = np.array([np.linalg.norm(U[:, k].reshape(-1, 3)[ring_nodes], axis=1).max() for k in range(nLC)])
 u_all = np.array([np.linalg.norm(U[:, k].reshape(-1, 3), axis=1).max() for k in range(nLC)])
 print("largest nodal displacement (mm): ring nodes / anywhere: " + "; ".join(f"{nm}: {a:.3f} / {b:.3f}" for nm, a, b in zip(names, u_ring, u_all)))
+group_displacements("final design")
 out = HERE / "out"
 tag = f"n{n}_m{args.mass:g}"
 np.savez_compressed(out / f"to_result_{tag}.npz", rho_h=rho_h, design_h=design_h, solid_h=solid[:, :, nzh:], void_h=void[:, :, nzh:], h=h, mass_g=mass_added, names=np.array(names), c0=c0, c=np.array(sc.state), u_ring=u_ring, u_all=u_all)
