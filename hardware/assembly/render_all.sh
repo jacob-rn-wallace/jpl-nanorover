@@ -22,6 +22,7 @@ JOBS=(
   "R9|detail|BEZEL=black SUFFIX=-black|1500x940|96"
   "R10|window|BEZEL=bare SUFFIX=-bare|1500x940|96"
   "R12|hub||1500x940|96"
+  "R13|social|FIDUCIAL=cube QX=-5 QY=170 TX=20 TY=40 AZ=36 EL=17 DIST=780|1280x640|96"
 )
 want=("$@")
 for job in "${JOBS[@]}"; do

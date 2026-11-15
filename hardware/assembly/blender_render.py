@@ -2,7 +2,7 @@
 
 Run from the repository root, after hardware/assembly/blender_export.py:
     VIEW=hero ~/tools/blender-4.5.9-linux-x64/blender -b -P hardware/assembly/blender_render.py
-VIEW is one of hero, rear, top, detail, cells, window, hub (default hero); SAMPLES (default 96), RES (default 1600x1000) and DEVICE (cpu, the default, or gpu: Metal on a Mac) LED (off, the default, or on), BEZEL (gunmetal, the default and the chosen finish, bare or black) and SUFFIX (a name suffix for the output, for example -lit) are optional.  Output: docs/images/rover-<view>.png.
+VIEW is one of hero, rear, top, detail, cells, window, hub, social (GitHub's 2:1 preview; TX, TY, AZ, EL, DIST tune the camera) (default hero); SAMPLES (default 96), RES (default 1600x1000) and DEVICE (cpu, the default, or gpu: Metal on a Mac) LED (off, the default, or on), BEZEL (gunmetal, the default and the chosen finish, bare or black) and SUFFIX (a name suffix for the output, for example -lit) are optional.  Output: docs/images/rover-<view>.png.
 1 Blender unit = 1 mm.  The body is a 140 x 140 x 60 mm block with 0.8 mm edges, NOT the real shell (hardware/body/block.py is only the cavity volume);
 the cells, panes and windows are laid on its faces from the same numbers as layout.py, cell_pocket.py and cell_endface.py.  Not modelled: lid screws and
 seals, hub studs and rings, the lamp, the beamsplitter, anything inside.  The forged-carbon pattern is procedural (chips of random orientation, each with
@@ -420,6 +420,8 @@ elif VIEW == "window":
     tgt = (wx, 70, 33); loc = orbit(90, 10, 178, tgt); camera(loc, tgt, 100, dof=(loc - Vector(tgt)).length)
 elif VIEW == "cells":
     tgt = (20, 30, 60); loc = orbit(24, 24, 190, tgt); camera(loc, tgt, 100, dof=(loc - Vector(tgt)).length)
+elif VIEW == "social":                                    # GitHub's social preview, 2:1 (1280 x 640): the rover and the Rubik's cube side by side, camera end toward the viewer
+    tgt = (float(os.environ.get("TX", "20")), float(os.environ.get("TY", "40")), 4); camera(orbit(float(os.environ.get("AZ", "36")), float(os.environ.get("EL", "17")), float(os.environ.get("DIST", "780")), tgt), tgt, 55)
 else: raise SystemExit(f"unknown VIEW {VIEW}")
 
 # ---------------------------------------------------------------- render
@@ -447,5 +449,7 @@ scene.render.resolution_x, scene.render.resolution_y = RES; scene.render.resolut
 scene.view_settings.view_transform = "AgX"; scene.view_settings.look = "AgX - Medium High Contrast"
 out = ROOT / "docs" / "images" / f"rover-{VIEW}{os.environ.get('SUFFIX', '')}.png"     # SUFFIX (for example -lit) keeps variants of a view apart
 scene.render.filepath = str(out); scene.render.image_settings.file_format = "PNG"
+if VIEW == "social":                                      # GitHub accepts under 1 MB: no alpha channel and the strongest PNG compression keep the file well under
+    scene.render.image_settings.color_mode = "RGB"; scene.render.image_settings.compression = 100
 bpy.ops.render.render(write_still=True)
 print("wrote", out)
