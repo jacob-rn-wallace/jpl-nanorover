@@ -10,7 +10,7 @@ Method (2026-11-14; ASM = my assumption):
   * the nets and their lids and sides come from harness.py; the pocket's wire pads are at its inner end (|x| = 50), at the pocket's middle in y (the real wires fan out along the pocket's 24.6 mm).
   * wire: 30 AWG silicone (0.6 mm over the insulation: the size cable_check.py uses for the strut wires) for signals; 28 AWG silicone (0.8 mm) where a net carries power.  Masses per metre: ASM from copper
     density and a 0.2 mm silicone wall.  Each wire gets 6 mm at each end for the pad tail and a 10% slack allowance.
-  * ends that the layout does not place (the servo connectors, the cells' wire exits) are my assumptions and are marked ASM in the table.
+  * ends that the layout does not place (the cells' wire exits, the servo plugs' depth) are my assumptions and are marked ASM in the table.
 Not done: the wires' fan-out along the pocket, the bundle's twisting and the connector bodies; the real shell's draft and ribs (the block is a design volume, `block.py`).
 """
 import contextlib
@@ -124,8 +124,11 @@ def pocket(lid, side):                                  # the wire-pad end of a 
 CAM_END = (48.0, 60.0, 12.0)            # under the camera board's lower edge (the board's box is y 57 to 66, z 13 to 47)
 LED_END = (61.0, 66.7, 25.0)            # beside the LED ring board's outboard edge (the ring board is x 39.2 to 59.9, y 66 to 67.5)
 ANT_END = (-12.0, -61.0, 30.0)          # behind the XBee carrier board's -x end (layout.py: x -11 to 11, y -67 to -64, z 22 to 38), in the rear bay's centre
-BATT_END = (0.0, 40.0, 29.5)            # the protection board's +y end (box y 27 to 39, z 28 to 31)
-SERVO = {"B+": (29.0, 36.5, 30.0), "B-": (-29.0, 36.5, 30.0), "A+": (33.5, -59.0, 30.0), "A-": (-33.5, -59.0, 30.0)}   # ASM: each servo's connector at the end opposite its output shaft
+BATT_END = (30.0, 44.0, 30.0)           # the protection board's +y face (layout.py: x 26.5 to 34.5, y 39 to 42, z 24 to 36), at the battery's +x end in the front bay
+# Servo connectors (Feetech STS3215 specification, page 6; layout.py "plug zone"): two 3-pin terminals per servo on its back face, facing the centre gap; the wires leave the plugs' rear ends into the gap.
+# Two nodes in the gap: B at the mouth of the gap between the two B servos' plug zones (y 11 to 18; reached from the +y side), A between the two A servos' (y -34 to -41; reached from the +y side, now that the battery is out of the gap).
+# The two servos of a pair are joined by a short jumper across the gap at the node (about 8 mm each: in the lengths below as 2 x 8 mm).
+SERVO = {"B": (0.0, 23.0, 30.0), "A": (0.0, -31.5, 30.0)}
 SOLAR_BOTTOM = (-40.0, 4.0, 5.0)        # ASM: the bottom lid cells' wires leave the lid at its -x edge (just outside the board, x = -40) at y = 4 (the cells' tabs: layout of the cell pocket not done)
 SOLAR_ENDS = ((-17.47, 66.0, 30.0), (17.47, -66.0, 30.0))   # the end-face cell pockets' centres (cell_endface.py), wires leave at the pocket's middle
 
@@ -142,11 +145,11 @@ bundles = [
     ("solar: end face at the antenna end (to upper - pocket)", SOLAR_ENDS[1], pocket("upper", -1), [(2, S30)], "one cell string: + and -"),
     ("solar: bottom lid cells (to upper - pocket)", SOLAR_BOTTOM, pocket("upper", -1), [(2, S30)], "one cell string: + and -"),
 ]
-# the servo chain: power (V7.4, GND) and the bus's data wire visiting four connectors, fed from the upper + pocket (power) and the lower - pocket (data)
-chain = [("servo chain power: upper + pocket to B+", pocket("upper", +1), SERVO["B+"]), ("B+ to B-", SERVO["B+"], SERVO["B-"]),
-         ("B- to A- ", SERVO["B-"], SERVO["A-"]), ("A- to A+", SERVO["A-"], SERVO["A+"])]
+# the servo chain: power (V7.4, GND) and the bus's data wire visiting the four servos' connectors (each servo has two in parallel, so the chain passes through), fed from the upper + pocket (power);
+# the data wire's feed from the lower - pocket is not routed separately (ASM: it joins the chain at the B node)
+chain = [("servo chain: upper + pocket to the B servos' plugs", pocket("upper", +1), SERVO["B"]), ("servo chain: B servos to the A servos' plugs", SERVO["B"], SERVO["A"])]
 for nm, a, b in chain:
-    bundles.append((nm, a, b, [(3, S30)], "V7.4, GND, bus data (ASM: three wires through the chain; the data wire's feed from the lower - pocket is not routed separately)"))
+    bundles.append((nm, a, b, [(3, S30)], "V7.4, GND, bus data; plus short jumpers across the gap at each node (2 x 8 mm per servo pair, ASM)"))
 
 OD = {30: 0.6, 28: 0.8}                                   # mm over the insulation (ASM)
 G_PER_M = {30: 0.75, 28: 1.1}                             # g per metre, copper plus a 0.2 mm silicone wall (ASM)
