@@ -88,3 +88,5 @@ Over every allowed pair of strut angles on a 5 degree grid and every stable rest
 
 **Later the same day (2026-11-15): the servo mounting plates** (`docs/servo-mounts.md`) add 16 g, so the contents are 456.1 g with the centre of mass at y +5.65 mm; rerun (`--body-y 5.65 --body-mass 456.1`, total 1070 g): COM y -0.3 mm at the 25 degree stance, hold at 25 degrees 0.123 / 0.125 N.m, tip-over 49.5 / 49.2 degrees, **worst-case hold 0.172 N.m (0.169 before the plates), righting peak 0.136 N.m (0.134), fewest-moves sequence 23 moves at 0.138**. Nothing changes qualitatively.
 
+**Correction (2026-11-15, later): the servo margins quoted above use the 12 V figures.** At the 7.4 V rail the project runs, the STS3215's rated torque is 0.49 N.m and its stall 1.91 N.m (Feetech specification page 3), so the maximum hold of 0.17 N.m is **2.9 times** the rated torque, not 5.9 (0.169 N.m with the real mass: 2.9; 0.186 N.m at 1.15 kg: 2.6). Everything else in this file (the stances, the holds, the righting sequences) is unaffected. The mass limits that follow from it are in `mass-headroom.md`: about 1.5 kg keeps a margin of 2.
+

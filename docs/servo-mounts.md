@@ -39,3 +39,6 @@ Non-design (fixed) regions: the four seats (floor, walls, head pockets) and the 
 3. The screw capacity (ESTIMATE, a pull-out and shear test on the servo's plastic would replace it: item 12 of `to-be-measured.md`).
 4. The plate material and thickness (1.5 mm aluminium is a guess; 1.0 mm would save 1.4 g each; forged carbon is possible but has more thickness to spare).
 5. Whether to go to the per-side hub module (alternative (c)) for the gear-mesh tolerance.
+
+**Correction (2026-11-15, later): the stall torque at 7.4 V is 1.91 N.m, not 2.9** (`mass-headroom.md`): the far screws take 26 N and the near ones 11 N at stall (not 39.7 and 17.3), a margin of about 3.8 to 9 on the assumed 100 to 240 N screw capacity (not 2.5 to 6). The servo's case is glass-filled nylon (PA+GF), which suits the 2.0 mm self-tapping screws (the capacity is still an ESTIMATE).
+

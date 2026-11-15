@@ -51,3 +51,6 @@ Combination (ASM): LC1 + LC2 at the design hold is the operating case; LC3, LC4,
 ## Not covered
 
 Thermal loads (the cells and the sun; the lamp's few kelvin), fatigue (the lid's 20-cycle life and the righting rolls), a pressure difference across the sealed seam, vibration and launch loads (spaceflight is out of scope), and the real stiffness of the thin-walled wheels (LC3's stopping distance). The optimisation also needs the servo mounts defined (gate 2), the non-design regions assembled into one set, a draw direction and a solver; see `body-redesign.md`.
+
+**Correction (2026-11-15, later): the stall torque at the 7.4 V rail is 1.91 N.m, not 2.9** (2.9 N.m is the 12 V variant at 12 V; Feetech specification page 3, `mass-headroom.md`). LC2's stall loads scale by 0.66: about 77 to 127 N in total at the screws, 26 N on the far screws and 11 N on the near ones; the rated torque is 0.49 N.m, not 0.98. The optimisation runs so far (`to_run.py`, `T_STALL = 2900 N.mm`) used 2.9 N.m, which is conservative for those cases; the next runs should use 1910 N.mm.
+
