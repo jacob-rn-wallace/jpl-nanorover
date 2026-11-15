@@ -1,0 +1,32 @@
+{
+ "res_mm": 2,
+ "z_range_mm": [
+  6.0,
+  54.0
+ ],
+ "origin_mm": [
+  -70.0,
+  -70.0,
+  6.0
+ ],
+ "shape": [
+  70,
+  70,
+  24
+ ],
+ "fixed_solid_regions": {
+  "outer skin (2.5 mm, loads LC4 and LC6 act here)": 6328,
+  "hub bore rings (r 14 to 17, |x| 60 to 70; LC1, LC3)": 920,
+  "servo plate seat walls (2 mm; LC2)": 810,
+  "cam bore bosses (r 5.1 to 8, |x| 54 to 70; LC5)": 2140,
+  "window boss ring (r 14 to 22, y 60 to 70)": 914,
+  "lid seat rims (8 mm wide, 2 mm tall at each joint; LC5)": 4133
+ },
+ "load_cases": "docs/load-cases.md, hardware/body/load_cases.py (LC1 static on the hub bore rings, LC2 servo torque on the seat walls, LC3 drop on the hub bore rings, LC4 corner impact on the skin, LC5 lid clamp on the cam bosses and the lid rims, LC6 handling on the skin)",
+ "material": {
+  "E_GPa": 35.5,
+  "nu": 0.3,
+  "density_g_cm3": 1.55,
+  "allowable_MPa": 113.7
+ }
+}

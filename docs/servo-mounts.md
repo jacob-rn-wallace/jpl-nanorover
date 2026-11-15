@@ -25,8 +25,8 @@ Torque about the output axis goes into the screws as shear, proportional to each
 ## The plate and its seat
 
 - **Plate:** 1.5 mm 6061 aluminium (ASM), the servo's footprint (45.23 x 24.73 mm), an 11 mm bore round the rotating output boss, four 2.2 mm clearance holes: **4.1 g each, 16 g for four** (counted in `layout.py`, so the body contents are now **456 g, 70 g over the 386 g budget**; the whole-rover centre of mass y moves from -0.13 to -0.30 mm).
-- **Seat (cut in `block.py`, group "servo plate seats"):** the footprint plus 0.2 mm all round, 1.7 mm deep from the servo's output face, so the plate's edges bear on the seat walls (the torque reaction: over 100 mm of edge, a few MPa) and its outer face on the seat floor (a shoulder at |x| = face + 1.7: 46.7 for B, 51.2 for A); plus four 4.4 mm pockets 1.4 mm deep for the screw heads, which stand 1.2 mm outboard of the plate.
-- **Fit:** the plate and screw heads touch nothing else (0 voxels against the components, the wire channels and the hub parts, all four servos); the pinion A plane is 0.8 mm beyond A's screw heads. The 16 pockets and four seats take 3 cm3 from the body middle (now 559.3 cm3, single solids, lids unchanged).
+- **Seat (cut in `block.py`, group "servo plate seats"):** the footprint plus 0.2 mm all round, **3.1 mm deep** from the servo's output face (changed 2026-11-15 from 1.7 mm with four head pockets: pockets along x would be undercuts for the z draw, `optimisation-setup.md`), so the plate's edges bear on the seat walls (the torque reaction: over 100 mm of edge, a few MPa) and the screw heads, which stand 1.2 mm outboard of the plate, have room under the floor (at |x| = face + 3.1: 48.1 for B, 52.6 for A; the floor is 0.4 mm clear of the heads).
+- **Fit:** the plate and screw heads touch nothing else (0 voxels against the components, the wire channels and the hub parts, all four servos); the pinion A plane is 0.8 mm beyond A's screw heads. The four seats take about 5 cm3 from the body middle (now 554.6 cm3, single solids, lids unchanged).
 
 ## What this gives the optimiser
 
