@@ -1,6 +1,6 @@
 # Setting up the topology optimisation: draw direction, core plan, solver, inputs
 
-Written 2026-11-15, after the load cases (`load-cases.md`) and the servo mounts (`servo-mounts.md`). The decisions are mine and are for the owner to confirm. Numbers: `hardware/body/draw_analysis.py` and `hardware/body/to_inputs.py` (both need the venv). Tags: SRC, ESTIMATE, ASM as elsewhere. **Not done: the solver could not be installed or run in this session (the install was refused by the session's permission check), so every statement about the solver is from its documentation and my arithmetic, not a test.**
+Written 2026-11-15, after the load cases (`load-cases.md`) and the servo mounts (`servo-mounts.md`). The decisions are mine and are for the owner to confirm. Numbers: `hardware/body/draw_analysis.py` and `hardware/body/to_inputs.py` (both need the venv). Tags: SRC, ESTIMATE, ASM as elsewhere. **Update 2026-11-15 (later): the owner chose pyMOTO and gave permission; it is installed (`.venv-to`, `requirements-to.txt`), tested on a cantilever and run on the body: results in `optimisation-results.md`. The statements below about the solver's speed and fit were written before that and are kept as written; where they differ, the results file wins (a full solve of 11 load cases takes about 1.3 s at 3.8 mm; an 80-iteration run takes 8 to 12 minutes).**
 
 ## 1. Draw direction: along z, two cores meeting at z = 30
 
