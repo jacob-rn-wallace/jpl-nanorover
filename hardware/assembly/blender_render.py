@@ -294,11 +294,11 @@ for sx in (1, -1):
         for zc in (38.5, 21.5):
             cam_head(sx, y0, zc)
 import_stl("struts", "strut"); import_stl("wheels", "wheel")
-import_stl("hubshafts", "gunscrew"); import_stl("spindles", "strut"); import_stl("bearings", "gunscrew"); import_stl("motors", "gunscrew")     # the wheel drive that joins each strut tip to its wheel (spindle tube, bearings, gearmotor and shaft)
+import_stl("hubshafts", "gunscrew"); import_stl("covers", "strut"); import_stl("coverscrews", "gunscrew"); import_stl("spindles", "strut"); import_stl("bearings", "gunscrew"); import_stl("motors", "gunscrew")     # the wheel drive that joins each strut tip to its wheel (spindle tube, bearings, gearmotor and shaft)
 bm = bmesh.new(); add_box(bm, -3000, 3000, -3000, 3000, GROUND_Z - 1, GROUND_Z); make("ground", bm, "ground")
 if os.environ.get("NOBODY", "off").lower() == "on":          # NOBODY=on: only the struts and what hangs on them (wheels, spindle tubes, bearings, gearmotors), no body
     for ob in list(bpy.data.objects):
-        if ob.type == "MESH" and ob.name.split(".")[0] not in ("struts", "wheels", "spindles", "bearings", "motors", "hubshafts", "ground"):
+        if ob.type == "MESH" and ob.name.split(".")[0] not in ("struts", "wheels", "spindles", "bearings", "motors", "hubshafts", "covers", "coverscrews", "ground"):
             bpy.data.objects.remove(ob, do_unlink=True)
     for nm in os.environ.get("HIDE", "").split(","):           # HIDE=wheels (comma list): drop these parts too, to see what is inside
         if nm and nm in bpy.data.objects:
@@ -419,6 +419,7 @@ def orbit(az, el, dist, target=(0, 0, 12)):
 
 if VIEW == "hero": camera(orbit(38, 20, 640), (0, 0, 8), 55)
 elif VIEW == "rear": camera(orbit(218, 20, 640), (0, 0, 8), 55)
+elif VIEW == "inboard": camera((-30, -330, 190), (90, 20, 15), 50)      # from inside the body gap at the +x struts' inboard faces (use with NOBODY=on: the body would hide them)
 elif VIEW == "top": camera((0, 0, 1400), (0, 0, 0), 55, ortho=330); scene.camera.rotation_euler = (0, 0, 0)         # image up = +y, the camera end
 elif VIEW == "detail":
     tgt = (45, 70, 38); loc = orbit(32, 18, 230, tgt); camera(loc, tgt, 85, dof=(loc - Vector(tgt)).length)

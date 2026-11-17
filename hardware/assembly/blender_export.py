@@ -13,7 +13,7 @@ from build123d import export_stl, import_step
 HW = Path(__file__).resolve().parents[1]
 OUT = HW / "assembly" / "out" / "blender"
 OUT.mkdir(parents=True, exist_ok=True)
-PARTS = {"struts": HW / "strut/out/struts.step", "wheels": HW / "wheel/out/wheels.step", "spindles": HW / "strut/out/wheel_spindles.step", "motors": HW / "strut/out/wheel_motors.step", "bearings": HW / "strut/out/wheel_bearings.step", "hubshafts": HW / "hub/out/hub_shafts.step"}
+PARTS = {"struts": HW / "strut/out/struts.step", "wheels": HW / "wheel/out/wheels.step", "spindles": HW / "strut/out/wheel_spindles.step", "motors": HW / "strut/out/wheel_motors.step", "bearings": HW / "strut/out/wheel_bearings.step", "hubshafts": HW / "hub/out/hub_shafts.step", "covers": HW / "strut/out/strut_covers.step", "coverscrews": HW / "strut/out/strut_cover_screws.step"}
 for name, path in PARTS.items():
     export_stl(import_step(path), str(OUT / f"{name}.stl"), tolerance=0.03, angular_tolerance=0.15)
     print("wrote", OUT / f"{name}.stl")

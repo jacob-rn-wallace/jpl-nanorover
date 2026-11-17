@@ -8,7 +8,7 @@ import math
 E = 69e3            # N/mm2, 6061-T6 (handbook)
 YIELD = 276.0       # N/mm2, 6061-T6 (handbook)
 L, R1, R2 = 70.0, 15.0, 12.0     # pivot to tip (strut.py), boss and tip radii
-T_PLATE, T_BASE, T_SKIN = 3.0, 2.0, 1.0
+T_PLATE, T_BASE, T_SKIN = 3.0, 1.8, 1.2
 CH_W, CH_D = 3.0, 1.0            # channel cut in the base from the inboard face (strut.py has 1.5 x 1.0 for two 0.6 mm wires; 3.0 gives a flat PCB rail room)
 F_SIDE = 5.0                     # N sideways at the tip: the same assumed knock as strut-spec.md (isogrid study)
 
@@ -55,12 +55,12 @@ G_D = CORD * (1 - SQUEEZE)
 fill = math.pi / 4 * CORD ** 2 / (G_W * G_D)
 print(f"  0.50 mm silicone cord, groove {G_W} wide x {G_D:.2f} deep in the base, squeeze {SQUEEZE * 100:.0f}%, groove fill {fill * 100:.0f}% (keep under 90%)")
 T_SCREW, K = 0.15, 0.2     # N.m for an M1.6 A2 screw (ESTIMATE, typical), torque coefficient
-print(f"  M1.6 clamp force about {T_SCREW / (K * 1.6e-3):.0f} N per screw at {T_SCREW} N.m (ESTIMATE); thread engagement in the 2 mm base = {T_BASE / 1.6:.2f} d (about 1 d is enough for a cover)")
+print(f"  M1.6 clamp force about {T_SCREW / (K * 1.6e-3):.0f} N per screw at {T_SCREW} N.m (ESTIMATE); thread engagement as modelled 1.4 mm = {1.4 / 1.6:.2f} d in the 1.8 mm base; stripping capacity about {0.5 * math.pi * 1.6 * 1.4 * 0.6 * 207:.0f} N (ESTIMATE: 6061-T6 shear 207 MPa), so tighten to 0.1 N.m, not {T_SCREW}")
 
 print("\n== screw count (two rows beside the groove; pitch set by the 1 mm skin bending between screws, ASM) ==")
-PITCH = 9.0
-rows = 2 * (int((L - 2 * R2 - 2) / PITCH) + 1)
-ring, pivot = 6, 3
+PITCH = 8.5
+rows = 10                      # as modelled: five positions a side (strut.py SK_SCREW_X)
+ring, pivot = 3, 0
 per = rows + ring + pivot
 print(f"  pitch {PITCH} mm: {rows} along the arm + {ring} round the tip cap + {pivot} at the pivot = about {per} per strut, {4 * per} for the rover, M1.6 x 4 about 0.12 g each = {4 * per * 0.12:.0f} g")
 

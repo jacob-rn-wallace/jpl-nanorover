@@ -69,6 +69,19 @@ BARREL_END = 124.5                     # |x| where the barrel ends (the wheel's 
 COLLAR_IN, SLIT_W = 4.0, 0.6
 WIRE_W, WIRE_DEPTH = 1.5, 1.0               # the wire groove on strut B's plate and the notch through the collar (two 0.6 mm silicone wires side by side fit)
 SCREW_X = TIP_D / 2 - 1.2                 # local x offset of the screw axis from the tip centre, in the 2.45 mm wall between the bore and the outer edge
+# Wire cover (owner, 2026-11-17, docs/strut-cover.md): the inboard SKIN_T of each arm's 3 mm plate is a separate SKIN (the plate keeps its 3 mm and its faces; the base is 3 - SKIN_T thick),
+# the wire channel is cut in the base's face under the skin, and a flat CAP on the tip collar closes the tube end flush with the collar's outline.  M1.6 screws and a cord gasket in a groove keep both
+# serviceable.  The skin starts SKIN_R0 from the pivot (clear of the pivot boss) and ends at the tip collar; inside SKIN_R0 strut B's channel is open on its inboard face, under strut A's boss (1 mm gap).
+# Not inside the 1.0 mm gap between A and B: an added skin there would hit strut A (found 2026-11-17).
+COVER = True
+SKIN_T, CAP_T2, SKIN_R0 = 1.2, 1.2, 15.5
+CH_W, CH_D = 3.0, 1.0                      # wire channel in the plate's inboard face (3.0 wide leaves room for a flat PCB rail later; two 0.6 mm wires need 1.2)
+CH_END = STRUT_L - TIP_D / 2 + 2.3         # the channel ends where the tube wall's slot begins, 0.15 mm short of the plate bore (x = 60.3)
+SK_SCREW_X = (20.0, 28.5, 37.0, 45.5, 54.0)
+SK_SCREW_EDGE = 2.6                        # screw axis this far inside the arm's edge
+CAP_SCREW_R, CAP_SCREW_DEG = 10.8, (135.0, 225.0, 270.0)
+SCREW_CB_D, SCREW_CB_H, SCREW_HOLE_D, TAP_D, TAP_DEPTH = 3.2, 0.9, 1.8, 1.35, 1.4
+GROOVE_W, GROOVE_D, GROOVE_Y = 0.65, 0.40, 2.4   # cord groove beside the channel: its inner edge at GROOVE_Y from the centre line
 COUPLER_D, COUPLER_L = 8.0, 7.5        # ASSUMED small flexible 3 mm coupling, 0.5 mm from the motor's front face and 0.5 mm short of the cap (tight: real couplings are usually longer)
 # Each strut's support starts flush with the inboard face of ITS OWN plate (A: 77.25, B: 81.25), so nothing sticks out behind the plate.
 # --------------------------------------------
@@ -135,6 +148,64 @@ def on_axle(shape, x0):
     return shape.moved(Plane.YZ.offset(x0).location)
 
 
+def _half_width(x):
+    """Half the arm's width at x along it (the hull's straight edge)."""
+    return BOSS_D / 2 + (TIP_D / 2 - BOSS_D / 2) * x / STRUT_L
+
+
+def _place(shape, plate_range, direction):
+    """Local strut frame (x along the arm, z from the plate's inboard face outward) -> world, as strut() does at its end."""
+    s = on_axle(shape, plate_range[0]).moved(Location((0, 0, E.HUB_Z)))
+    if direction < 0:
+        s = s.rotate(Axis((0, 0, E.HUB_Z), (1, 0, 0)), 180)
+    return s
+
+
+def _skin_shape():
+    """The skin's volume in the local frame: the arm outline between SKIN_R0 and the tip collar, z from 0 (the plate's inboard face) to SKIN_T, with the screw holes and counterbores."""
+    sk = extrude(plate_outline(BOSS_D / 2, TIP_D / 2, STRUT_L), amount=SKIN_T)
+    sk = sk - Cylinder(SKIN_R0, 10, align=(Align.CENTER, Align.CENTER, Align.CENTER))
+    sk = sk - Cylinder(TIP_D / 2 + 0.2, 10, align=(Align.CENTER, Align.CENTER, Align.CENTER)).moved(Location((STRUT_L, 0, 0)))
+    return sk
+
+
+def skin(plate_range, direction):
+    """The skin (the part): _skin_shape() with the screw clearance holes and counterbores (from the inboard face)."""
+    sk = _skin_shape()
+    for xs in SK_SCREW_X:
+        for sy in (1, -1):
+            ys = sy * (_half_width(xs) - SK_SCREW_EDGE)
+            sk = sk - Cylinder(SCREW_HOLE_D / 2, SKIN_T + 0.02, align=(Align.CENTER, Align.CENTER, Align.MIN)).moved(Location((xs, ys, -0.01)))
+            sk = sk - Cylinder(SCREW_CB_D / 2, SCREW_CB_H + 0.01, align=(Align.CENTER, Align.CENTER, Align.MIN)).moved(Location((xs, ys, -0.01)))
+    return _place(sk, plate_range, direction)
+
+
+def cap(plate_range, direction):
+    """The cap: a 24 mm disc, CAP_T2 thick, on the tip collar's inboard end face (z from -COLLAR_IN - CAP_T2 to -COLLAR_IN), so the collar's outline carries on flush and the tube end is closed."""
+    c = Cylinder(TIP_D / 2, CAP_T2, align=(Align.CENTER, Align.CENTER, Align.MIN)).moved(Location((STRUT_L, 0, -COLLAR_IN - CAP_T2)))
+    for deg in CAP_SCREW_DEG:
+        cx, cy = STRUT_L + CAP_SCREW_R * math.cos(math.radians(deg)), CAP_SCREW_R * math.sin(math.radians(deg))
+        c = c - Cylinder(SCREW_HOLE_D / 2, CAP_T2 + 0.02, align=(Align.CENTER, Align.CENTER, Align.MIN)).moved(Location((cx, cy, -COLLAR_IN - CAP_T2 - 0.01)))
+        c = c - Cylinder(SCREW_CB_D / 2, SCREW_CB_H + 0.01, align=(Align.CENTER, Align.CENTER, Align.MIN)).moved(Location((cx, cy, -COLLAR_IN - CAP_T2 - 0.01)))
+    return _place(c, plate_range, direction)
+
+
+def cover_screws(plate_range, direction):
+    """M1.6 pan-head screws (head 3.0 x 0.8, shank 1.6 x 1.7), a Compound of separate solids: ten for the skin, three for the cap."""
+    out = []
+    def one(x, y, z_face, depth):                 # head under the face by 0.1, shank into the tapped hole
+        h = Cylinder(1.5, 0.8, align=(Align.CENTER, Align.CENTER, Align.MIN)).moved(Location((x, y, z_face + 0.1)))
+        sh = Cylinder(0.8, 1.6, align=(Align.CENTER, Align.CENTER, Align.MIN)).moved(Location((x, y, z_face + 0.9)))
+        return h + sh
+    for xs in SK_SCREW_X:
+        for sy in (1, -1):
+            out.append(_place(one(xs, sy * (_half_width(xs) - SK_SCREW_EDGE), 0.0, 0), plate_range, direction))
+    for deg in CAP_SCREW_DEG:
+        cx, cy = STRUT_L + CAP_SCREW_R * math.cos(math.radians(deg)), CAP_SCREW_R * math.sin(math.radians(deg))
+        out.append(_place(one(cx, cy, -COLLAR_IN - CAP_T2, 0), plate_range, direction))
+    return Compound(out)
+
+
 def strut(boss_range, plate_range, wheel_inner, direction):
     """One strut at the pivot (y = 0, z = HUB_Z), arm along +y (direction = +1) or -y (-1), horizontal."""
     t_plate = plate_range[1] - plate_range[0]
@@ -166,11 +237,30 @@ def strut(boss_range, plate_range, wheel_inner, direction):
         s = s - on_axle((hole + cbore).moved(Location((STRUT_L + SCREW_X, 0, zc))), plate_range[0])
     if TIP_MODE != "axle":   # the motor's wires (docs/mechanical-spec.md item 6): a notch through the collar's pivot side lets them out of the tube's tail; strut B (the outer strut) also gets a groove
         # on its plate's inboard face, all the way across its boss to the bore, where the hub's hollow shaft takes the wires in through a cross hole (hub.py, X_WIRE_B); strut A's wires run free in the channel between its plate and the body wall
-        notch = Box(3.8, WIRE_W, COLLAR_IN + 0.1, align=(Align.MIN, Align.CENTER, Align.MIN)).moved(Location((STRUT_L - TIP_D / 2 - 0.5, 0, 0)))
-        s = s - on_axle(notch, plate_range[0] - COLLAR_IN - 0.1)
-        if boss_range == B_BOSS:
-            groove = Box(STRUT_L - TIP_D / 2 + 0.5, WIRE_W, WIRE_DEPTH, align=(Align.MIN, Align.CENTER, Align.MIN))
-            s = s - on_axle(groove, plate_range[0] - 0.01)
+        if not COVER:
+            notch = Box(3.8, WIRE_W, COLLAR_IN + 0.1, align=(Align.MIN, Align.CENTER, Align.MIN)).moved(Location((STRUT_L - TIP_D / 2 - 0.5, 0, 0)))
+            s = s - on_axle(notch, plate_range[0] - COLLAR_IN - 0.1)
+            if boss_range == B_BOSS:
+                groove = Box(STRUT_L - TIP_D / 2 + 0.5, WIRE_W, WIRE_DEPTH, align=(Align.MIN, Align.CENTER, Align.MIN))
+                s = s - on_axle(groove, plate_range[0] - 0.01)
+        else:
+            s = s - on_axle(_skin_shape(), plate_range[0])            # the skin's layer is removed from the base (the skin is a separate part)
+            x_start = 0.0 if boss_range == B_BOSS else SKIN_R0       # B's channel crosses its boss to the hub bore (open on the inboard face there, under strut A's boss); A's starts at the skin
+            ch = Box(CH_END - x_start, CH_W, CH_D + 0.01, align=(Align.MIN, Align.CENTER, Align.MIN)).moved(Location((x_start, 0, SKIN_T - 0.01)))
+            s = s - on_axle(ch, plate_range[0])
+            if boss_range == B_BOSS:
+                s = s - on_axle(Box(SKIN_R0 + 0.1, CH_W, SKIN_T + 0.02, align=(Align.MIN, Align.CENTER, Align.MIN)).moved(Location((0, 0, -0.01))), plate_range[0])
+            for sy in (1, -1):                                         # the cord groove: two arms beside the channel, ending at the collar and open at the pivot end (the wires go on to the hub there)
+                g = Box(STRUT_L - TIP_D / 2 - 1.0 - SKIN_R0 - 1.0, GROOVE_W, GROOVE_D + 0.01, align=(Align.MIN, Align.CENTER, Align.MIN)).moved(
+                    Location((SKIN_R0 + 1.0, sy * (GROOVE_Y + GROOVE_W / 2), SKIN_T - 0.01)))
+                s = s - on_axle(g, plate_range[0])
+            for xs in SK_SCREW_X:                                      # tapped holes for the skin screws (blind, from the base's face)
+                for sy in (1, -1):
+                    ys = sy * (_half_width(xs) - SK_SCREW_EDGE)
+                    s = s - on_axle(Cylinder(TAP_D / 2, TAP_DEPTH + 0.01, align=(Align.CENTER, Align.CENTER, Align.MIN)).moved(Location((xs, ys, SKIN_T - 0.01))), plate_range[0])
+            for deg in CAP_SCREW_DEG:                                  # tapped holes in the collar's end face for the cap screws
+                cx, cy = STRUT_L + CAP_SCREW_R * math.cos(math.radians(deg)), CAP_SCREW_R * math.sin(math.radians(deg))
+                s = s - on_axle(Cylinder(TAP_D / 2, 2.2 + 0.01, align=(Align.CENTER, Align.CENTER, Align.MIN)).moved(Location((cx, cy, -COLLAR_IN - 0.01))), plate_range[0])
     bore_d = BORE_D if HUB_MODE == "stud" else (15.05 if boss_range == A_BOSS else 5.05)
     s = s - on_axle(Cylinder(bore_d / 2, 20, align=(Align.CENTER, Align.CENTER, Align.MIN)), boss_range[0] - 1)
     s = s.moved(Location((0, 0, E.HUB_Z)))
@@ -212,9 +302,14 @@ def spindle(direction, tail=None):
     """Spindle tube, end cap and bearing barrel (one aluminium part): tube OD 19 / ID 16.2 from the strut plate's inboard face to the cap, then the 11 mm barrel with an 8 mm bearing bore."""
     tail = tail_for(direction) - COLLAR_IN if tail is None else tail
     tube = _cyl(SPINDLE_OD / 2, SPINDLE_ID / 2, tail, TUBE_END - CAP_T)
-    cap = _cyl(SPINDLE_OD / 2, 2.5, TUBE_END - CAP_T, TUBE_END)                 # end wall with a 5 mm hole for the shaft
+    endcap = _cyl(SPINDLE_OD / 2, 2.5, TUBE_END - CAP_T, TUBE_END)                 # end wall with a 5 mm hole for the shaft
     barrel = _cyl(BARREL_OD / 2, BRG_OD / 2, TUBE_END, BARREL_END)
-    return _at_tip(tube + cap + barrel, direction)
+    body = tube + endcap + barrel
+    if COVER:       # a 1.5 mm slot through the tube wall on the pivot side at the channel's depth (SKIN_T to SKIN_T + CH_D from the plate's inboard face): the leads run forward along the motor's pivot-side flat and leave the tube here into the channel
+        t0 = tail_for(direction)
+        slot = Box(3.0, WIRE_W, CH_D, align=(Align.MIN, Align.CENTER, Align.MIN)).moved(Location((STRUT_L - SPINDLE_OD / 2 - 0.5, 0, 0)))
+        body = body - on_axle(slot, t0 + SKIN_T)
+    return _at_tip(body, direction)
 
 
 def bearings(direction):
@@ -242,6 +337,7 @@ def posed(shape, direction, deg):
 def main():
     OUT.mkdir(exist_ok=True)
     struts, wheels, motors, spindles, brgs = [], [], [], [], []
+    covers, screws = [], []
     for side in (1, -1):
         for (bossr, platr, d) in ((A_BOSS, A_PLATE, +1), (B_BOSS, B_PLATE, -1)):
             s = posed(strut(bossr, platr, WHEEL_X[0], d), d, POSE_DEG)
@@ -250,6 +346,13 @@ def main():
             if side < 0:
                 s, w = s.mirror(Plane.YZ), w.mirror(Plane.YZ)
                 parts = [q.mirror(Plane.YZ) for q in parts] if parts else None
+            if COVER and TIP_MODE == "motor":
+                cv = [posed(skin(platr, d), d, POSE_DEG), posed(cap(platr, d), d, POSE_DEG)]
+                sc = posed(cover_screws(platr, d), d, POSE_DEG)
+                if side < 0:
+                    cv, sc = [q.mirror(Plane.YZ) for q in cv], sc.mirror(Plane.YZ)
+                covers.extend(cv)
+                screws.append(sc)
             struts.append(s)
             wheels.append(w)
             if parts:
@@ -283,6 +386,8 @@ def main():
     if TIP_MODE == "motor":      # the motor is carried by its own strut; the other strut must clear it too
         m0 = motor(+1)
         sa0, sb0 = sa0 + m0, sb0 + m0
+        if COVER:      # the skins sit inside the plate's envelope; the caps stand 1.2 mm inboard of each tip collar
+            sa0, sb0 = sa0 + skin(A_PLATE, +1) + cap(A_PLATE, +1), sb0 + skin(B_PLATE, +1) + cap(B_PLATE, +1)
     axis = Axis((0, 0, E.HUB_Z), (1, 0, 0))
     STEP_DEG = 30
     angles = range(0, 360, STEP_DEG)
@@ -332,6 +437,21 @@ def main():
             export_step(grp, str(OUT / nm))
             chk = import_step(OUT / nm)
             print(f"re-imported {nm}: {len(chk.solids())} solids, volume {chk.volume / 1000:.2f} cm3 (live {grp.volume / 1000:.2f})")
+
+    if covers:
+        C = Compound(covers)
+        CS = Compound([x for g in screws for x in g.solids()])
+        print(f"cover (skin {SKIN_T} mm and tip cap {CAP_T2} mm): {len(covers)} parts, {C.volume * 2.70e-3:.1f} g in 6061; {len(CS.solids())} M1.6 screws, about {len(CS.solids()) * 0.12:.0f} g")
+        for lab, shp in (("struts", S), ("motor drive", Compound(motors)), ("spindles", Compound(spindles)),
+                         ("bearings", Compound([b for g in brgs for b in g.solids()])), ("wheels", W), ("body", body), ("hub parts", stud_hubs)):
+            for nm, grp in (("cover parts", C), ("cover screws", CS)):
+                hit = grp & shp
+                v = hit.volume if hit else 0.0
+                print(f"{nm:<12} vs {lab:<11} overlap {v:.3f} mm3 (default pose)")
+        for nm, grp in (("strut_covers.step", C), ("strut_cover_screws.step", CS)):
+            export_step(grp, str(OUT / nm))
+            chk = import_step(OUT / nm)
+            print(f"re-imported {nm}: {len(chk.solids())} solids, volume {chk.volume / 1000:.3f} cm3 (live {grp.volume / 1000:.3f})")
 
     export_step(S, str(OUT / "struts.step"))
     print("wrote", OUT / "struts.step")
