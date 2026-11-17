@@ -294,8 +294,15 @@ for sx in (1, -1):
         for zc in (38.5, 21.5):
             cam_head(sx, y0, zc)
 import_stl("struts", "strut"); import_stl("wheels", "wheel")
-import_stl("spindles", "strut"); import_stl("bearings", "gunscrew"); import_stl("motors", "gunscrew")     # the wheel drive that joins each strut tip to its wheel (spindle tube, bearings, gearmotor and shaft)
+import_stl("hubshafts", "gunscrew"); import_stl("spindles", "strut"); import_stl("bearings", "gunscrew"); import_stl("motors", "gunscrew")     # the wheel drive that joins each strut tip to its wheel (spindle tube, bearings, gearmotor and shaft)
 bm = bmesh.new(); add_box(bm, -3000, 3000, -3000, 3000, GROUND_Z - 1, GROUND_Z); make("ground", bm, "ground")
+if os.environ.get("NOBODY", "off").lower() == "on":          # NOBODY=on: only the struts and what hangs on them (wheels, spindle tubes, bearings, gearmotors), no body
+    for ob in list(bpy.data.objects):
+        if ob.type == "MESH" and ob.name.split(".")[0] not in ("struts", "wheels", "spindles", "bearings", "motors", "hubshafts", "ground"):
+            bpy.data.objects.remove(ob, do_unlink=True)
+    for nm in os.environ.get("HIDE", "").split(","):           # HIDE=wheels (comma list): drop these parts too, to see what is inside
+        if nm and nm in bpy.data.objects:
+            bpy.data.objects.remove(bpy.data.objects[nm], do_unlink=True)
 
 # ---------------------------------------------------------------- scale fiducial (owner, 2026-11-14): a US quarter next to the rover, as in JPL's own photographs (docs/photo-measurements.md)
 # FIDUCIAL=cube (the one the renders use) draws the Rubik's cube model (QX, QY, QYAW); FIDUCIAL=quarter (tried first, too hard to read: kept as an option) draws a US quarter, standing on edge and leaning back a little, face toward the camera, on the ground at (QX, QY) (mm; defaults suit the hero view); FIDUCIAL=off (default) leaves it out.
