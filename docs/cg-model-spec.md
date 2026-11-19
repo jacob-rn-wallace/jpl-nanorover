@@ -23,3 +23,6 @@ Plan: `docs/cg-model-plan.md`. Model: `hardware/reference/cg_nanorover.py` (buil
 - A rendered overlay of the finished model on the frames (plan step 5): the model is a faithful block-in, not yet verified by render overlay beyond the body.
 - The rear-face electronics (2:44), the end-face tan rectangle's size, the nub's position, the strut cross-section and the banded wheel's true width are rough; each carries 15% or more.
 - Fine texture and the terrain; colours are approximations of the video's.
+
+## In the sim (2026-11-19)
+`hardware/reference/export_cg_glb.py` writes `sim/public/rover_cg.glb` (62 kB) and `rover_cg.json`: rover frame X forward (the window face), Y left, Z up, ground at the wheels' lowest point, glTF axes as `sim/src/worldView.ts`. `WorldView` loads it in place of the placeholder box (the box stays if loading fails). Checked: `npm run check` passes, `vite build` copies the file, and a Cycles render of the GLB shows the model upright with the window forward. **Not checked in a browser** (no Playwright on this machine). The sim's photo camera sits 1 mm ahead of the window face, outside the model's 0.8 mm window and panel relief. The strut and wheel nodes are ready for posing and spinning, which `rover.ts` does not do yet.

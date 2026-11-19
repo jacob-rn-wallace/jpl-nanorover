@@ -11,7 +11,7 @@ The rover's operator view is a low-fidelity 3D map built from sensor data, with 
 | Stack | three.js, Vite, TypeScript, static site; GitHub Pages via `.github/workflows/pages.yml` | as maha-rover (assistant's choice) |
 | Physics | none in the slice: a kinematic rover on a height function with rules for steps, holes, slopes and falls (Rapier comes in a later phase, as in maha-rover) | assistant, to reach the fun test quickly |
 | Licence | code Apache-2.0 | as maha-rover (owner: "yes, let's do that") |
-| Rover model | a box with four wheels (14 x 14 x 6 cm, 6.5 cm wheels); no CAD export yet | `CLAUDE.md` |
+| Rover model | the CG nanorover of JPL's 1998 animation (`sim/public/rover_cg.glb`, from `hardware/reference/export_cg_glb.py`: glTF binary, Y up, metres; nodes chassis, strut_<L/R><F/A> and wheel_<...> with joint origins, joints in `rover_cg.json`; `docs/cg-model-spec.md`); the box with four wheels (14 x 14 x 6 cm, 6.5 cm wheels) remains as the fallback if the file does not load. The sim does not yet pose the struts or spin the wheels | `CLAUDE.md` |
 | Time | real time by default (the design speed is 40 mm/s), time warp 2, 4, 8 | `docs/drivetrain-spec.md` |
 
 ## The arena (my choice, a test of the question)

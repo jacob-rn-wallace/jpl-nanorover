@@ -1,0 +1,139 @@
+{
+ "units": "metres; glTF axes (Y up, +X forward, -Z is rover left)",
+ "source": "hardware/reference/export_cg_glb.py from cg_nanorover.py (docs/cg-model-spec.md)",
+ "bodies": {
+  "chassis": {
+   "parent": null,
+   "origin_m": [
+    0,
+    0,
+    0
+   ]
+  },
+  "strut_LA": {
+   "parent": "chassis",
+   "origin_m": [
+    -0.0,
+    0.06208327832184897,
+    -0.077
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "pose_deg_stance": 25.0,
+   "strut_length_m": 0.07
+  },
+  "wheel_LA": {
+   "parent": "strut_LA",
+   "origin_m": [
+    -0.0634415450925655,
+    -0.02958327832184897,
+    0.0
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "radius_m": 0.0325,
+   "width_m": 0.028
+  },
+  "strut_LF": {
+   "parent": "chassis",
+   "origin_m": [
+    -0.0,
+    0.06208327832184897,
+    -0.077
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "pose_deg_stance": 25.0,
+   "strut_length_m": 0.07
+  },
+  "wheel_LF": {
+   "parent": "strut_LF",
+   "origin_m": [
+    0.0634415450925655,
+    -0.02958327832184897,
+    0.0
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "radius_m": 0.0325,
+   "width_m": 0.028
+  },
+  "strut_RA": {
+   "parent": "chassis",
+   "origin_m": [
+    -0.0,
+    0.06208327832184897,
+    0.077
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "pose_deg_stance": 25.0,
+   "strut_length_m": 0.07
+  },
+  "wheel_RA": {
+   "parent": "strut_RA",
+   "origin_m": [
+    -0.0634415450925655,
+    -0.02958327832184897,
+    0.0
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "radius_m": 0.0325,
+   "width_m": 0.028
+  },
+  "strut_RF": {
+   "parent": "chassis",
+   "origin_m": [
+    -0.0,
+    0.06208327832184897,
+    0.077
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "pose_deg_stance": 25.0,
+   "strut_length_m": 0.07
+  },
+  "wheel_RF": {
+   "parent": "strut_RF",
+   "origin_m": [
+    0.0634415450925655,
+    -0.02958327832184897,
+    0.0
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "radius_m": 0.0325,
+   "width_m": 0.028
+  }
+ },
+ "window_m": [
+  0.07,
+  0.057283278321848964,
+  0.046200000000000005
+ ]
+}

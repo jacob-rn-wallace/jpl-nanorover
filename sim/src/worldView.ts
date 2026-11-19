@@ -1,6 +1,7 @@
 // The true world as a three.js scene: used for photographs (rendered from the rover's camera) and for the spectator view (key G).
 // Coordinates: simulation (x, y, z up) maps to three.js (X = x, Y = z, Z = -y); a yaw of theta is a rotation of theta about Y.
 import * as THREE from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { World } from "./world";
 import { Rover } from "./rover";
 import { ROVER, PHOTO } from "./constants";
@@ -46,17 +47,22 @@ export class WorldView {
       const g = new THREE.Group(); pole.position.y = 0.025; flag.position.set(0.018, 0.04, 0); g.add(pole, flag);
       g.position.set(mk.x, world.heightAt(mk.x, mk.y), -mk.y); s.add(g);
     }
-    // the rover
+    // the rover: the primitives below show until the CG model (hardware/reference/export_cg_glb.py, docs/cg-model-spec.md) has loaded, and stay if it cannot
+    const fallback = new THREE.Group(); fallback.name = "fallback"; this.rover.add(fallback);
     const body = new THREE.Mesh(new THREE.BoxGeometry(ROVER.body.l, ROVER.body.h, ROVER.body.w), new THREE.MeshStandardMaterial({ color: 0x23272e, roughness: 0.5, metalness: 0.3 }));
-    body.position.y = 0.0325 + 0.0; this.rover.add(body);
+    body.position.y = 0.0325 + 0.0; fallback.add(body);
     const cells = new THREE.Mesh(new THREE.BoxGeometry(0.128, 0.002, 0.128), new THREE.MeshStandardMaterial({ color: 0x14224a, roughness: 0.3, metalness: 0.5 }));
-    cells.position.y = 0.0325 + 0.031; this.rover.add(cells);
+    cells.position.y = 0.0325 + 0.031; fallback.add(cells);
     const win = new THREE.Mesh(new THREE.CircleGeometry(0.013, 20), new THREE.MeshBasicMaterial({ color: 0x000000 }));
-    win.rotation.y = Math.PI / 2; win.position.set(0.0705, 0.0325, 0); this.rover.add(win);
+    win.rotation.y = Math.PI / 2; win.position.set(0.0705, 0.0325, 0); fallback.add(win);
     for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
       const w = new THREE.Mesh(new THREE.CylinderGeometry(ROVER.wheelR, ROVER.wheelR, 0.02, 20), new THREE.MeshStandardMaterial({ color: 0x9aa3ad, roughness: 0.4, metalness: 0.8 }));
-      w.rotation.x = Math.PI / 2; w.position.set(sx * 0.05, ROVER.wheelR, sz * 0.085); this.rover.add(w);
+      w.rotation.x = Math.PI / 2; w.position.set(sx * 0.05, ROVER.wheelR, sz * 0.085); fallback.add(w);
     }
+    new GLTFLoader().loadAsync("rover_cg.glb").then((g) => {
+      g.scene.traverse((o) => { if ((o as THREE.Mesh).isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+      this.rover.add(g.scene); this.rover.remove(fallback);
+    }).catch(() => { /* keep the primitive rover (no file when served without it, or in the Node tests) */ });
     this.lamp = new THREE.SpotLight(0xffffff, 0, 1.6, 0.6, 0.5, 1.0);
     this.lamp.position.set(0.07, 0.04, 0); const tgt = new THREE.Object3D(); tgt.position.set(0.7, 0.0, 0); this.rover.add(this.lamp, tgt); this.lamp.target = tgt;
     s.add(this.rover);
