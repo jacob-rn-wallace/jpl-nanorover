@@ -44,3 +44,7 @@ Effort: steps 1 to 2 are small; 3 is the real work (about a session); 4 to 6 abo
 
 ## Recommendation
 Model **rover A** (the 1998 flight concept): it is the clearest, appears from many angles, and is the rover JPL chose to show as the future vehicle. Use 4:43 (side), 4:48 and 2:31 (top), 4:47 (the end) and 1:05 (front three-quarter) as the calibration set.
+
+
+## Update (2026-11-19, later)
+Steps 2 to 4 done in a first pass: **the CG rover's proportions turned out to match the real nanorover (140 x 140 x 60 body, 65 mm wheels), so no rescale is needed**; the earlier "about 1.7 : 1" reading above was wrong (see `docs/cg-model-spec.md`). The model is `hardware/reference/cg_nanorover.py`. Step 5 (render overlay) remains.
