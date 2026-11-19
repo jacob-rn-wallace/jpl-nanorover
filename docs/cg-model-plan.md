@@ -1,6 +1,6 @@
 # Plan: a 3D model of the JPL computer-generated nanorover (2026-11-19)
 
-Owner request: find clear frames of the CG nanorover in the JPL videos and plan a real 3D model of it. This is a reference model of the **animation's** rover (the 1998 video's flight concept), separate from our own interpretation in `hardware/`. Frames are NASA/JPL imagery of unchecked usage terms, so they are **not in this repository**; only timestamps are recorded here. Extracted at full size (640 x 480) in the session scratchpad; they belong in the private repo (`jpl-nanorover-private/analysis/cg-frames/`) if the owner wants them kept.
+Owner request: find clear frames of the CG nanorover in the JPL videos and plan a real 3D model of it. This is a reference model of the **animation's** rover (the 1998 video's flight concept), separate from our own interpretation in `hardware/`. Frames are NASA/JPL imagery of unchecked usage terms, so they are **not in this repository**; only timestamps are recorded here. Extracted at full size (640 x 480) in the session scratchpad; copied (owner, 2026-11-19) to `jpl-nanorover-private/analysis/cg-frames/` (private repo, 19 frames and a README).
 
 ## Which CG rover? There are two
 | | Video | What it shows |
@@ -32,8 +32,8 @@ Not CG: 6:20 to 6:22 of the 1998 video (blue-backdrop frame with a key for scale
 - A round pale-yellow window and a rectangular panel on one long face.
 
 ## Plan
-1. **Frame set (small).** Extract the table's frames at full size, plus 2 to 3 neighbours each, into `jpl-nanorover-private/analysis/cg-frames/`; a short `README` with timestamps. Done in the scratchpad for the list above; copying is one command.
-2. **Scale.** The CG has no scale. Candidates: assume the 140 mm length (as for the photographs), or the 65 mm wheel of the papers. Decide with the owner (the rule in CLAUDE.md for settling values); record both.
+1. **Frame set (small).** Extract the table's frames at full size, plus 2 to 3 neighbours each, into `jpl-nanorover-private/analysis/cg-frames/`; a short `README` with timestamps. Done (private repo commit 879565f).
+2. **Scale (owner, 2026-11-19: the model is for the sim, so it should be about the size of the actual rover).** Scale the CG so its wheels are the papers' 65 mm diameter, then report the body length that results; if that is far from 140 mm, keep the wheel at 65 mm (the sim's rover wheels) and say so. Record the scale factor and both lengths.
 3. **Camera calibration per frame.** The side view (4:43) is close to orthographic; the others are perspective. Recover the camera with the same method as `analysis/photo-measure` (box corners as correspondences; the cell grid and window give vanishing points). Output: body L x W x H, wheel diameter and width, strut length and angle, window and panel positions and sizes, the cell grid pitch.
 4. **Block-in.** build123d script `hardware/reference/cg_nanorover.py`: body box, cell tiles, window, panel, nub, struts, banded wheels. Dimensioned from step 3; every number tagged with its frame and uncertainty.
 5. **Overlay check.** Render the model from each recovered camera (Blender, same pipeline as `blender_render.py`) and overlay on the frame; iterate until the silhouettes agree to a few pixels.
